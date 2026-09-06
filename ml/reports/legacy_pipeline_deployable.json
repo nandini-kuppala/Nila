@@ -1,0 +1,442 @@
+{
+  "pipeline": "Why-is-my-Baby-Crying endsem.ipynb, reproduced",
+  "n_features": 456,
+  "n_rows": 1207,
+  "n_subjects": 221,
+  "augmented_rows": 750,
+  "clip_wise": {
+    "n": 242,
+    "accuracy": 0.9090909090909091,
+    "balanced_accuracy": 0.9000101891499398,
+    "macro_f1": 0.9115299619594099,
+    "weighted_f1": 0.9088184898736033,
+    "macro_auc": 0.9811563326131012,
+    "majority_baseline": 0.3181818181818182,
+    "confusion": [
+      [
+        34,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        15,
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        0,
+        50,
+        4,
+        3
+      ],
+      [
+        1,
+        0,
+        2,
+        74,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        6,
+        47
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.918918918918919,
+        "recall": 0.9714285714285714,
+        "f1-score": 0.9444444444444444,
+        "support": 35.0
+      },
+      "burping": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1-score": 0.9090909090909091,
+        "support": 18.0
+      },
+      "discomfort": {
+        "precision": 0.9615384615384616,
+        "recall": 0.847457627118644,
+        "f1-score": 0.9009009009009009,
+        "support": 59.0
+      },
+      "hungry": {
+        "precision": 0.8604651162790697,
+        "recall": 0.961038961038961,
+        "f1-score": 0.9079754601226994,
+        "support": 77.0
+      },
+      "tired": {
+        "precision": 0.9038461538461539,
+        "recall": 0.8867924528301887,
+        "f1-score": 0.8952380952380953,
+        "support": 53.0
+      },
+      "accuracy": 0.9090909090909091,
+      "macro avg": {
+        "precision": 0.9289537301165209,
+        "recall": 0.9000101891499398,
+        "f1-score": 0.9115299619594099,
+        "support": 242.0
+      },
+      "weighted avg": {
+        "precision": 0.9134404607449005,
+        "recall": 0.9090909090909091,
+        "f1-score": 0.9088184898736033,
+        "support": 242.0
+      }
+    }
+  },
+  "subject_wise_same_model": {
+    "n": 80,
+    "accuracy": 0.975,
+    "balanced_accuracy": 0.8666666666666666,
+    "macro_f1": 0.8973333333333333,
+    "weighted_f1": 0.9689166666666666,
+    "macro_auc": 0.9412542412542413,
+    "majority_baseline": 0.925,
+    "confusion": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        74,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        1
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "burping": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "discomfort": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "hungry": {
+        "precision": 0.9736842105263158,
+        "recall": 1.0,
+        "f1-score": 0.9866666666666667,
+        "support": 74.0
+      },
+      "tired": {
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1-score": 0.5,
+        "support": 3.0
+      },
+      "accuracy": 0.975,
+      "macro avg": {
+        "precision": 0.9947368421052631,
+        "recall": 0.8666666666666666,
+        "f1-score": 0.8973333333333333,
+        "support": 80.0
+      },
+      "weighted avg": {
+        "precision": 0.9756578947368422,
+        "recall": 0.975,
+        "f1-score": 0.9689166666666666,
+        "support": 80.0
+      }
+    }
+  },
+  "subject_wise_retrained": {
+    "n": 80,
+    "accuracy": 0.9125,
+    "balanced_accuracy": 0.1972972972972973,
+    "macro_f1": 0.1908496732026144,
+    "weighted_f1": 0.8826797385620916,
+    "macro_auc": 0.2535241471950333,
+    "majority_baseline": 0.925,
+    "confusion": [
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        73,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        0
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "burping": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "discomfort": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "hungry": {
+        "precision": 0.9240506329113924,
+        "recall": 0.9864864864864865,
+        "f1-score": 0.954248366013072,
+        "support": 74.0
+      },
+      "tired": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 3.0
+      },
+      "accuracy": 0.9125,
+      "macro avg": {
+        "precision": 0.1848101265822785,
+        "recall": 0.1972972972972973,
+        "f1-score": 0.1908496732026144,
+        "support": 80.0
+      },
+      "weighted avg": {
+        "precision": 0.8547468354430381,
+        "recall": 0.9125,
+        "f1-score": 0.8826797385620916,
+        "support": 80.0
+      }
+    }
+  },
+  "top_features": [
+    {
+      "name": "mel_63_std",
+      "importance": 0.012770786095551018
+    },
+    {
+      "name": "mel_62_std",
+      "importance": 0.012766804500536608
+    },
+    {
+      "name": "mel_61_std",
+      "importance": 0.011814286732365533
+    },
+    {
+      "name": "mel_60_std",
+      "importance": 0.011411219314140065
+    },
+    {
+      "name": "mel_59_std",
+      "importance": 0.010122929137895652
+    },
+    {
+      "name": "mel_58_std",
+      "importance": 0.009878237353048996
+    },
+    {
+      "name": "mfcc_15_skew",
+      "importance": 0.009807629918959563
+    },
+    {
+      "name": "mel_57_std",
+      "importance": 0.008954768352009979
+    },
+    {
+      "name": "mel_0_mean",
+      "importance": 0.008524944302273392
+    },
+    {
+      "name": "mel_4_std",
+      "importance": 0.007999755929530613
+    },
+    {
+      "name": "rms_std",
+      "importance": 0.0077525220660870945
+    },
+    {
+      "name": "mel_1_mean",
+      "importance": 0.007619834631502662
+    },
+    {
+      "name": "mel_3_std",
+      "importance": 0.007466022613545975
+    },
+    {
+      "name": "mel_12_std",
+      "importance": 0.00734994208692481
+    },
+    {
+      "name": "rms_max",
+      "importance": 0.007302293871959275
+    },
+    {
+      "name": "mel_11_std",
+      "importance": 0.006648849938914096
+    },
+    {
+      "name": "mel_2_mean",
+      "importance": 0.00635070985455255
+    },
+    {
+      "name": "mel_56_std",
+      "importance": 0.006048314378177645
+    },
+    {
+      "name": "mfcc_16_skew",
+      "importance": 0.005722843383536557
+    },
+    {
+      "name": "mel_55_std",
+      "importance": 0.005476449625040988
+    },
+    {
+      "name": "mel_53_std",
+      "importance": 0.0053918580160990486
+    },
+    {
+      "name": "rms_mean",
+      "importance": 0.005226417498535266
+    },
+    {
+      "name": "mfccdd_2_std",
+      "importance": 0.005222693963304004
+    },
+    {
+      "name": "mfccd_2_mean",
+      "importance": 0.005206036283434726
+    },
+    {
+      "name": "mfcc_12_mean",
+      "importance": 0.0051888454689631765
+    },
+    {
+      "name": "mel_40_std",
+      "importance": 0.005147025558837572
+    },
+    {
+      "name": "mel_52_std",
+      "importance": 0.005139510934937719
+    },
+    {
+      "name": "mel_10_mean",
+      "importance": 0.005070150278283584
+    },
+    {
+      "name": "mfcc_17_skew",
+      "importance": 0.005056912294721189
+    },
+    {
+      "name": "mel_19_std",
+      "importance": 0.005009793919204343
+    },
+    {
+      "name": "mel_2_std",
+      "importance": 0.0048318183395570915
+    },
+    {
+      "name": "mel_54_std",
+      "importance": 0.0048257840216788675
+    },
+    {
+      "name": "mel_3_mean",
+      "importance": 0.00462970185600753
+    },
+    {
+      "name": "mel_41_std",
+      "importance": 0.004608111649728756
+    },
+    {
+      "name": "mel_20_std",
+      "importance": 0.004459762239510349
+    },
+    {
+      "name": "mel_11_mean",
+      "importance": 0.004417913768001485
+    },
+    {
+      "name": "mfccd_1_mean",
+      "importance": 0.0043910144575118725
+    },
+    {
+      "name": "mfccdd_3_std",
+      "importance": 0.004316355408941511
+    },
+    {
+      "name": "mfcc_3_skew",
+      "importance": 0.004190318465032401
+    },
+    {
+      "name": "mel_5_std",
+      "importance": 0.0040755248961601665
+    }
+  ]
+}

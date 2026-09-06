@@ -1,0 +1,147 @@
+/Users/dev/Desktop/baby cry/paalna/.venv/lib/python3.11/site-packages/keras/src/trainers/epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
+  self.data_adapter = data_adapters.get_data_adapter(
+
+======================================================================
+TRAIN reason   classes=['belly_pain', 'burping', 'discomfort', 'hungry', 'tired']
+  train (4825, 96, 64)  val (851, 96, 64)  test (762, 96, 64)
+  params: 39,749
+Epoch 1/60
+76/76 - 4s - 48ms/step - acc: 0.3673 - auc: 0.6245 - loss: 1.4866 - val_acc: 0.3090 - val_auc: 0.5091 - val_loss: 1.5917 - learning_rate: 0.0010
+Epoch 2/60
+76/76 - 3s - 33ms/step - acc: 0.4336 - auc: 0.7289 - loss: 1.3232 - val_acc: 0.3090 - val_auc: 0.5203 - val_loss: 1.5766 - learning_rate: 0.0010
+Epoch 3/60
+76/76 - 2s - 33ms/step - acc: 0.4765 - auc: 0.7675 - loss: 1.2456 - val_acc: 0.3666 - val_auc: 0.7359 - val_loss: 1.5511 - learning_rate: 0.0010
+Epoch 4/60
+76/76 - 3s - 34ms/step - acc: 0.5204 - auc: 0.8024 - loss: 1.1740 - val_acc: 0.3231 - val_auc: 0.8163 - val_loss: 1.4786 - learning_rate: 0.0010
+Epoch 5/60
+76/76 - 3s - 33ms/step - acc: 0.5283 - auc: 0.8136 - loss: 1.1489 - val_acc: 0.3913 - val_auc: 0.8345 - val_loss: 1.3626 - learning_rate: 0.0010
+Epoch 6/60
+76/76 - 3s - 33ms/step - acc: 0.5540 - auc: 0.8359 - loss: 1.0933 - val_acc: 0.5170 - val_auc: 0.8634 - val_loss: 1.2042 - learning_rate: 0.0010
+Epoch 7/60
+76/76 - 2s - 33ms/step - acc: 0.5675 - auc: 0.8456 - loss: 1.0653 - val_acc: 0.5746 - val_auc: 0.8825 - val_loss: 1.1308 - learning_rate: 0.0010
+Epoch 8/60
+76/76 - 2s - 33ms/step - acc: 0.5778 - auc: 0.8527 - loss: 1.0490 - val_acc: 0.6369 - val_auc: 0.9060 - val_loss: 0.9950 - learning_rate: 0.0010
+Epoch 9/60
+76/76 - 3s - 34ms/step - acc: 0.5915 - auc: 0.8585 - loss: 1.0297 - val_acc: 0.6134 - val_auc: 0.8853 - val_loss: 1.0456 - learning_rate: 0.0010
+Epoch 10/60
+76/76 - 3s - 33ms/step - acc: 0.5923 - auc: 0.8636 - loss: 1.0180 - val_acc: 0.4277 - val_auc: 0.8877 - val_loss: 1.4106 - learning_rate: 0.0010
+Epoch 11/60
+76/76 - 3s - 34ms/step - acc: 0.6114 - auc: 0.8755 - loss: 0.9825 - val_acc: 0.6698 - val_auc: 0.9191 - val_loss: 0.9062 - learning_rate: 0.0010
+Epoch 12/60
+76/76 - 3s - 34ms/step - acc: 0.6187 - auc: 0.8804 - loss: 0.9687 - val_acc: 0.5300 - val_auc: 0.9073 - val_loss: 1.1995 - learning_rate: 0.0010
+Epoch 13/60
+76/76 - 3s - 33ms/step - acc: 0.6321 - auc: 0.8876 - loss: 0.9488 - val_acc: 0.4042 - val_auc: 0.9132 - val_loss: 1.3848 - learning_rate: 0.0010
+Epoch 14/60
+76/76 - 2s - 33ms/step - acc: 0.6408 - auc: 0.8922 - loss: 0.9322 - val_acc: 0.6134 - val_auc: 0.9151 - val_loss: 1.0827 - learning_rate: 0.0010
+Epoch 15/60
+76/76 - 2s - 33ms/step - acc: 0.6502 - auc: 0.8960 - loss: 0.9180 - val_acc: 0.6545 - val_auc: 0.9234 - val_loss: 0.9398 - learning_rate: 0.0010
+Epoch 16/60
+76/76 - 2s - 32ms/step - acc: 0.6616 - auc: 0.9046 - loss: 0.8922 - val_acc: 0.5558 - val_auc: 0.9280 - val_loss: 1.0792 - learning_rate: 0.0010
+Epoch 17/60
+76/76 - 3s - 34ms/step - acc: 0.6684 - auc: 0.9053 - loss: 0.8895 - val_acc: 0.6627 - val_auc: 0.9432 - val_loss: 0.9519 - learning_rate: 0.0010
+Epoch 18/60
+76/76 - 3s - 33ms/step - acc: 0.6893 - auc: 0.9121 - loss: 0.8652 - val_acc: 0.6404 - val_auc: 0.9390 - val_loss: 0.9424 - learning_rate: 0.0010
+Epoch 19/60
+76/76 - 2s - 33ms/step - acc: 0.6897 - auc: 0.9154 - loss: 0.8546 - val_acc: 0.6663 - val_auc: 0.9366 - val_loss: 0.9417 - learning_rate: 0.0010
+Epoch 20/60
+76/76 - 3s - 34ms/step - acc: 0.6902 - auc: 0.9166 - loss: 0.8527 - val_acc: 0.7427 - val_auc: 0.9483 - val_loss: 0.7782 - learning_rate: 0.0010
+Epoch 21/60
+76/76 - 2s - 33ms/step - acc: 0.6976 - auc: 0.9222 - loss: 0.8344 - val_acc: 0.7250 - val_auc: 0.9515 - val_loss: 0.7919 - learning_rate: 0.0010
+Epoch 22/60
+76/76 - 3s - 33ms/step - acc: 0.7003 - auc: 0.9220 - loss: 0.8299 - val_acc: 0.7791 - val_auc: 0.9635 - val_loss: 0.7482 - learning_rate: 0.0010
+Epoch 23/60
+76/76 - 3s - 33ms/step - acc: 0.7227 - auc: 0.9298 - loss: 0.8067 - val_acc: 0.7991 - val_auc: 0.9645 - val_loss: 0.7242 - learning_rate: 0.0010
+Epoch 24/60
+76/76 - 3s - 33ms/step - acc: 0.7105 - auc: 0.9297 - loss: 0.8050 - val_acc: 0.7004 - val_auc: 0.9579 - val_loss: 0.8323 - learning_rate: 0.0010
+Epoch 25/60
+76/76 - 2s - 31ms/step - acc: 0.7343 - auc: 0.9344 - loss: 0.7863 - val_acc: 0.7180 - val_auc: 0.9577 - val_loss: 0.8130 - learning_rate: 0.0010
+Epoch 26/60
+76/76 - 3s - 34ms/step - acc: 0.7341 - auc: 0.9376 - loss: 0.7736 - val_acc: 0.7098 - val_auc: 0.9553 - val_loss: 0.8495 - learning_rate: 0.0010
+Epoch 27/60
+76/76 - 2s - 32ms/step - acc: 0.7297 - auc: 0.9389 - loss: 0.7665 - val_acc: 0.6863 - val_auc: 0.9486 - val_loss: 0.9609 - learning_rate: 0.0010
+Epoch 28/60
+76/76 - 3s - 33ms/step - acc: 0.7540 - auc: 0.9446 - loss: 0.7409 - val_acc: 0.7967 - val_auc: 0.9705 - val_loss: 0.6711 - learning_rate: 0.0010
+Epoch 29/60
+76/76 - 2s - 33ms/step - acc: 0.7517 - auc: 0.9441 - loss: 0.7451 - val_acc: 0.8002 - val_auc: 0.9621 - val_loss: 0.6964 - learning_rate: 0.0010
+Epoch 30/60
+76/76 - 3s - 34ms/step - acc: 0.7594 - auc: 0.9483 - loss: 0.7252 - val_acc: 0.6769 - val_auc: 0.9589 - val_loss: 0.9370 - learning_rate: 0.0010
+Epoch 31/60
+76/76 - 3s - 33ms/step - acc: 0.7776 - auc: 0.9490 - loss: 0.7210 - val_acc: 0.7944 - val_auc: 0.9724 - val_loss: 0.7100 - learning_rate: 0.0010
+Epoch 32/60
+76/76 - 2s - 32ms/step - acc: 0.7778 - auc: 0.9527 - loss: 0.7052 - val_acc: 0.8343 - val_auc: 0.9774 - val_loss: 0.6253 - learning_rate: 0.0010
+Epoch 33/60
+76/76 - 3s - 34ms/step - acc: 0.7764 - auc: 0.9528 - loss: 0.7038 - val_acc: 0.8014 - val_auc: 0.9722 - val_loss: 0.6388 - learning_rate: 0.0010
+Epoch 34/60
+76/76 - 3s - 33ms/step - acc: 0.7797 - auc: 0.9540 - loss: 0.7006 - val_acc: 0.7908 - val_auc: 0.9742 - val_loss: 0.6572 - learning_rate: 0.0010
+Epoch 35/60
+76/76 - 2s - 32ms/step - acc: 0.7919 - auc: 0.9596 - loss: 0.6725 - val_acc: 0.8167 - val_auc: 0.9767 - val_loss: 0.6543 - learning_rate: 0.0010
+Epoch 36/60
+76/76 - 3s - 33ms/step - acc: 0.7969 - auc: 0.9590 - loss: 0.6753 - val_acc: 0.8508 - val_auc: 0.9795 - val_loss: 0.5948 - learning_rate: 0.0010
+Epoch 37/60
+76/76 - 2s - 32ms/step - acc: 0.7944 - auc: 0.9589 - loss: 0.6742 - val_acc: 0.7955 - val_auc: 0.9781 - val_loss: 0.6404 - learning_rate: 0.0010
+Epoch 38/60
+76/76 - 2s - 32ms/step - acc: 0.7963 - auc: 0.9600 - loss: 0.6692 - val_acc: 0.8002 - val_auc: 0.9705 - val_loss: 0.7162 - learning_rate: 0.0010
+Epoch 39/60
+76/76 - 2s - 33ms/step - acc: 0.8006 - auc: 0.9593 - loss: 0.6711 - val_acc: 0.8472 - val_auc: 0.9813 - val_loss: 0.5768 - learning_rate: 0.0010
+Epoch 40/60
+76/76 - 2s - 33ms/step - acc: 0.8044 - auc: 0.9640 - loss: 0.6510 - val_acc: 0.8308 - val_auc: 0.9828 - val_loss: 0.6287 - learning_rate: 0.0010
+Epoch 41/60
+76/76 - 3s - 34ms/step - acc: 0.8116 - auc: 0.9653 - loss: 0.6414 - val_acc: 0.7838 - val_auc: 0.9752 - val_loss: 0.7357 - learning_rate: 0.0010
+Epoch 42/60
+76/76 - 3s - 33ms/step - acc: 0.8023 - auc: 0.9659 - loss: 0.6415 - val_acc: 0.8731 - val_auc: 0.9852 - val_loss: 0.5437 - learning_rate: 0.0010
+Epoch 43/60
+76/76 - 2s - 32ms/step - acc: 0.8112 - auc: 0.9665 - loss: 0.6362 - val_acc: 0.8273 - val_auc: 0.9833 - val_loss: 0.6216 - learning_rate: 0.0010
+Epoch 44/60
+76/76 - 3s - 33ms/step - acc: 0.8141 - auc: 0.9661 - loss: 0.6360 - val_acc: 0.8625 - val_auc: 0.9851 - val_loss: 0.5465 - learning_rate: 0.0010
+Epoch 45/60
+76/76 - 3s - 33ms/step - acc: 0.8193 - auc: 0.9676 - loss: 0.6292 - val_acc: 0.8801 - val_auc: 0.9855 - val_loss: 0.5379 - learning_rate: 0.0010
+Epoch 46/60
+76/76 - 2s - 32ms/step - acc: 0.8336 - auc: 0.9695 - loss: 0.6173 - val_acc: 0.8602 - val_auc: 0.9829 - val_loss: 0.6074 - learning_rate: 0.0010
+Epoch 47/60
+76/76 - 3s - 34ms/step - acc: 0.8230 - auc: 0.9699 - loss: 0.6184 - val_acc: 0.7685 - val_auc: 0.9809 - val_loss: 0.7459 - learning_rate: 0.0010
+Epoch 48/60
+76/76 - 3s - 35ms/step - acc: 0.8301 - auc: 0.9707 - loss: 0.6110 - val_acc: 0.8884 - val_auc: 0.9845 - val_loss: 0.5431 - learning_rate: 0.0010
+Epoch 49/60
+76/76 - 3s - 34ms/step - acc: 0.8427 - auc: 0.9748 - loss: 0.5865 - val_acc: 0.8731 - val_auc: 0.9833 - val_loss: 0.5624 - learning_rate: 0.0010
+Epoch 50/60
+76/76 - 3s - 33ms/step - acc: 0.8288 - auc: 0.9714 - loss: 0.6058 - val_acc: 0.8684 - val_auc: 0.9875 - val_loss: 0.5325 - learning_rate: 0.0010
+Epoch 51/60
+76/76 - 3s - 33ms/step - acc: 0.8381 - auc: 0.9736 - loss: 0.5940 - val_acc: 0.8989 - val_auc: 0.9885 - val_loss: 0.5181 - learning_rate: 0.0010
+Epoch 52/60
+76/76 - 3s - 33ms/step - acc: 0.8404 - auc: 0.9719 - loss: 0.6043 - val_acc: 0.8484 - val_auc: 0.9857 - val_loss: 0.6021 - learning_rate: 0.0010
+Epoch 53/60
+76/76 - 2s - 32ms/step - acc: 0.8425 - auc: 0.9758 - loss: 0.5836 - val_acc: 0.8860 - val_auc: 0.9893 - val_loss: 0.5148 - learning_rate: 0.0010
+Epoch 54/60
+76/76 - 2s - 32ms/step - acc: 0.8410 - auc: 0.9752 - loss: 0.5834 - val_acc: 0.8707 - val_auc: 0.9874 - val_loss: 0.5455 - learning_rate: 0.0010
+Epoch 55/60
+76/76 - 3s - 33ms/step - acc: 0.8439 - auc: 0.9760 - loss: 0.5785 - val_acc: 0.8402 - val_auc: 0.9861 - val_loss: 0.5755 - learning_rate: 0.0010
+Epoch 56/60
+76/76 - 3s - 33ms/step - acc: 0.8549 - auc: 0.9782 - loss: 0.5640 - val_acc: 0.8613 - val_auc: 0.9879 - val_loss: 0.5476 - learning_rate: 0.0010
+Epoch 57/60
+76/76 - 2s - 32ms/step - acc: 0.8481 - auc: 0.9773 - loss: 0.5766 - val_acc: 0.8895 - val_auc: 0.9888 - val_loss: 0.5037 - learning_rate: 0.0010
+Epoch 58/60
+76/76 - 3s - 33ms/step - acc: 0.8647 - auc: 0.9797 - loss: 0.5530 - val_acc: 0.8590 - val_auc: 0.9876 - val_loss: 0.5529 - learning_rate: 0.0010
+Epoch 59/60
+
+Epoch 59: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+76/76 - 2s - 33ms/step - acc: 0.8587 - auc: 0.9794 - loss: 0.5546 - val_acc: 0.8566 - val_auc: 0.9885 - val_loss: 0.5771 - learning_rate: 0.0010
+Epoch 60/60
+76/76 - 3s - 33ms/step - acc: 0.8736 - auc: 0.9832 - loss: 0.5337 - val_acc: 0.9025 - val_auc: 0.9900 - val_loss: 0.5102 - learning_rate: 5.0000e-04
+Restoring model weights from the end of the best epoch: 60.
+  trained in 152s over 60 epochs
+
+  [val] n=851
+    accuracy        0.9025   (majority baseline 0.3090  ->  +0.5934)
+    balanced acc    0.9084
+    macro F1        0.9081
+    macro AUC       0.9897
+    per-class recall: belly_pain=0.90  burping=0.95  discomfort=0.86  hungry=0.86  tired=0.97
+
+  [test] n=762
+    accuracy        0.5827   (majority baseline 0.7559  ->  -0.1732)
+    balanced acc    0.1854
+    macro F1        0.1719
+    macro AUC       0.4437
+    per-class recall: belly_pain=0.06  burping=0.00  discomfort=0.00  hungry=0.76  tired=0.11
+
+  -> models/reason.keras   reports/reason.json

@@ -1,0 +1,30 @@
+[
+  {
+    "model": "detect_hn",
+    "quantised": true,
+    "mel": {
+      "bytes": 38392,
+      "max_drift": 0.0018916130065917969,
+      "agrees": true
+    },
+    "wave": {
+      "bytes": 65040,
+      "max_drift": 0.0024095773696899414,
+      "agrees": true
+    }
+  },
+  {
+    "model": "reason",
+    "quantised": true,
+    "mel": {
+      "bytes": 60552,
+      "max_drift": 0.014694124460220337,
+      "agrees": true
+    },
+    "wave": {
+      "bytes": 87216,
+      "max_drift": 0.005653440952301025,
+      "agrees": true
+    }
+  }
+]

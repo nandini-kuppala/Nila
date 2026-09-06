@@ -1,0 +1,966 @@
+<title>Nila Technical Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600;700&display=swap">
+<style>
+:root{
+  --paper:#F7F9F7; --surface:#FFFFFF; --sunk:#EDF1EE;
+  --ink:#101D1A; --ink-2:#3D4B47; --ink-3:#6B7772;
+  --rule:#DCE4E0; --rule-2:#C2CDC8;
+  --accent:#0F6B60; --accent-soft:#E2F1ED;
+  --ok:#26654B;      --ok-bg:#E3F0E9;
+  --partial:#8F5C0E; --partial-bg:#F9EEDB;
+  --none:#68746F;    --none-bg:#EAEEEC;
+  --fail:#A6231C;    --fail-bg:#F9E6E4;
+  --shadow:0 1px 2px rgba(16,29,26,.06);
+  --measure:68ch;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1412; --surface:#141E1B; --sunk:#101917;
+    --ink:#E6ECE9; --ink-2:#B2BFBA; --ink-3:#87938E;
+    --rule:#243230; --rule-2:#33443F;
+    --accent:#5FCDBB; --accent-soft:#122B27;
+    --ok:#7CC79F;      --ok-bg:#13291F;
+    --partial:#DFAE62; --partial-bg:#2B2114;
+    --none:#8A9691;    --none-bg:#1A2422;
+    --fail:#EE9A93;    --fail-bg:#2B1614;
+    --shadow:0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1412; --surface:#141E1B; --sunk:#101917;
+  --ink:#E6ECE9; --ink-2:#B2BFBA; --ink-3:#87938E;
+  --rule:#243230; --rule-2:#33443F;
+  --accent:#5FCDBB; --accent-soft:#122B27;
+  --ok:#7CC79F;      --ok-bg:#13291F;
+  --partial:#DFAE62; --partial-bg:#2B2114;
+  --none:#8A9691;    --none-bg:#1A2422;
+  --fail:#EE9A93;    --fail-bg:#2B1614;
+  --shadow:0 1px 2px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15.5px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif; text-wrap:balance; margin:0}
+code,kbd,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ---------------------------------------------------------------- shell */
+.shell{display:grid; grid-template-columns:236px minmax(0,1fr); gap:0; max-width:1180px; margin:0 auto}
+.rail{
+  position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  padding:36px 20px 36px 28px; border-right:1px solid var(--rule);
+}
+.rail-mark{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:22px;
+}
+.rail nav{display:flex; flex-direction:column; gap:1px}
+.rail a{
+  color:var(--ink-2); text-decoration:none; font-size:13.5px; padding:5px 9px;
+  border-radius:5px; border-left:2px solid transparent; display:block;
+}
+.rail a:hover{background:var(--sunk); color:var(--ink)}
+.rail a:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.rail .grp{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin:20px 0 6px 9px;
+}
+main{padding:0 44px 120px; min-width:0}
+section{padding-top:56px; scroll-margin-top:24px}
+section > p, section > ul, section > ol{max-width:var(--measure)}
+
+/* ------------------------------------------------------------- masthead */
+.masthead{padding:52px 0 0}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent);
+}
+h1{font-size:clamp(34px,4.4vw,46px); line-height:1.1; margin:14px 0 0; letter-spacing:-.015em}
+.standfirst{font-size:18px; color:var(--ink-2); max-width:60ch; margin:18px 0 0}
+.byline{
+  margin-top:22px; padding-top:16px; border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-3);
+  display:flex; flex-wrap:wrap; gap:6px 22px;
+}
+
+/* ------------------------------------------------------------ headings */
+h2{
+  font-size:25px; letter-spacing:-.01em; margin-bottom:6px;
+  padding-bottom:10px; border-bottom:1px solid var(--rule);
+}
+h2 .num{
+  font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--accent);
+  margin-right:12px; font-weight:500;
+}
+h3{font-size:17px; margin:34px 0 8px; letter-spacing:-.005em}
+.lede{color:var(--ink-2); margin-top:14px}
+
+/* -------------------------------------------------------------- ticker */
+.ticker{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+  background:var(--surface); margin:30px 0 0;
+}
+.ticker div{padding:14px 16px; border-right:1px solid var(--rule)}
+.ticker div:last-child{border-right:0}
+.ticker dt{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0;
+}
+.ticker dd{
+  margin:5px 0 0; font-family:"IBM Plex Mono",monospace; font-size:19px;
+  font-weight:500; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+
+/* --------------------------------------------------------------- chart */
+.chart{margin:26px 0 8px; border:1px solid var(--rule); border-radius:8px; background:var(--surface); padding:22px 24px 16px}
+.chart-title{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.bars{margin-top:18px; display:flex; flex-direction:column; gap:14px}
+.bar-row{display:grid; grid-template-columns:minmax(150px,190px) 1fr 52px; gap:14px; align-items:center}
+.bar-label{font-size:13px; color:var(--ink-2); line-height:1.3}
+.bar-track{position:relative; height:16px; background:var(--sunk); border-radius:3px}
+.bar-fill{position:absolute; inset:0 auto 0 0; border-radius:3px}
+.bar-val{
+  font-family:"IBM Plex Mono",monospace; font-size:13px; font-variant-numeric:tabular-nums;
+  text-align:right; font-weight:500;
+}
+.chance{
+  position:absolute; top:-4px; bottom:-4px; width:1px; background:var(--fail);
+}
+/* Labelled once, on the top bar. The line repeats on every row because the
+   scale does; the word only needs saying at the top of it. */
+.chance.labelled::after{
+  content:"chance"; position:absolute; top:-16px; left:-19px; font-family:"IBM Plex Mono",monospace;
+  font-size:9.5px; letter-spacing:.06em; color:var(--fail); white-space:nowrap;
+}
+.axis{
+  display:grid; grid-template-columns:minmax(150px,190px) 1fr 52px; gap:14px;
+  margin-top:16px; padding-top:8px; border-top:1px solid var(--rule);
+}
+.axis-scale{display:flex; justify-content:space-between; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3)}
+
+/* -------------------------------------------------------------- status */
+.feature{
+  display:grid; grid-template-columns:1fr auto; gap:6px 16px; align-items:start;
+  padding:14px 16px 14px 15px; border-left:3px solid var(--rule-2);
+  background:var(--surface); border-radius:0 6px 6px 0; box-shadow:var(--shadow);
+}
+.feature + .feature{margin-top:8px}
+.feature.is-ok{border-left-color:var(--ok)}
+.feature.is-partial{border-left-color:var(--partial)}
+.feature.is-none{border-left-color:var(--none)}
+.feature h4{margin:0; font-size:15px; font-weight:600; font-family:"IBM Plex Sans",sans-serif}
+.feature p{margin:4px 0 0; font-size:13.5px; color:var(--ink-2); grid-column:1/-1; max-width:66ch}
+.chip{
+  font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.09em;
+  text-transform:uppercase; padding:3px 8px; border-radius:3px; white-space:nowrap;
+  font-weight:500;
+}
+.chip.ok{background:var(--ok-bg); color:var(--ok)}
+.chip.partial{background:var(--partial-bg); color:var(--partial)}
+.chip.none{background:var(--none-bg); color:var(--none)}
+.chip.fail{background:var(--fail-bg); color:var(--fail)}
+.group-head{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin:30px 0 10px;
+}
+
+/* --------------------------------------------------------------- table */
+.tablewrap{overflow-x:auto; margin:20px 0; border:1px solid var(--rule); border-radius:8px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule)}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); font-weight:500; background:var(--sunk);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+td.name{font-weight:500}
+.dim{color:var(--ink-3)}
+
+/* ---------------------------------------------------------------- misc */
+.callout{
+  border:1px solid var(--rule); border-left:3px solid var(--accent);
+  background:var(--surface); border-radius:0 8px 8px 0; padding:16px 20px; margin:22px 0;
+  max-width:var(--measure);
+}
+.callout.warn{border-left-color:var(--partial); background:var(--partial-bg)}
+.callout.stop{border-left-color:var(--fail); background:var(--fail-bg)}
+.callout h4{
+  margin:0 0 6px; font-size:12px; font-family:"IBM Plex Mono",monospace;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+}
+.callout.warn h4{color:var(--partial)}
+.callout.stop h4{color:var(--fail)}
+.callout p{margin:0; font-size:14px; color:var(--ink-2)}
+.callout p + p{margin-top:9px}
+
+pre{
+  background:var(--sunk); border:1px solid var(--rule); border-radius:7px;
+  padding:14px 16px; overflow-x:auto; font-size:12.8px; line-height:1.6;
+  margin:14px 0; max-width:var(--measure);
+}
+pre code{color:var(--ink)}
+p code, li code, td code{
+  background:var(--sunk); padding:1px 5px; border-radius:3px; font-size:.9em;
+  border:1px solid var(--rule);
+}
+.steps{counter-reset:s; list-style:none; padding:0; margin:18px 0; max-width:var(--measure)}
+.steps li{
+  counter-increment:s; position:relative; padding-left:36px; margin-bottom:14px;
+}
+.steps li::before{
+  content:counter(s,decimal-leading-zero); position:absolute; left:0; top:1px;
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--accent);
+  font-weight:600;
+}
+.steps strong{font-weight:600}
+ul.plain{padding-left:20px}
+ul.plain li{margin-bottom:7px}
+a{color:var(--accent)}
+hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
+.footnote{font-size:13px; color:var(--ink-3); max-width:var(--measure); margin-top:12px}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static; height:auto; border-right:0; border-bottom:1px solid var(--rule); padding:24px}
+  .rail nav{flex-direction:row; flex-wrap:wrap; gap:2px}
+  main{padding:0 24px 80px}
+  .bar-row,.axis{grid-template-columns:minmax(110px,140px) 1fr 46px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="shell">
+<aside class="rail">
+  <div class="rail-mark">Nila · v1.0</div>
+  <nav>
+    <a href="#idea">What it is</a>
+    <a href="#finding">The central finding</a>
+    <div class="grp">Status</div>
+    <a href="#inventory">Feature inventory</a>
+    <div class="grp">How it works</div>
+    <a href="#audio">Cry detection</a>
+    <a href="#models">Models &amp; training</a>
+    <a href="#ladder">Escalation &amp; actions</a>
+    <a href="#assistant">Local LLM &amp; RAG</a>
+    <a href="#evaluation">How good is it</a>
+    <a href="#guardrails">Guardrails</a>
+    <a href="#ocr">OCR &amp; medicine review</a>
+    <a href="#vision">Camera watch</a>
+    <div class="grp">Running it</div>
+    <a href="#test-emulator">Test on emulator</a>
+    <a href="#test-device">Put it on a Vivo T1</a>
+    <a href="#models-download">Nothing to download</a>
+    <a href="#memory">Memory &amp; battery</a>
+    <div class="grp">Ahead</div>
+    <a href="#gaps">Not built</a>
+    <a href="#improve">How to improve it</a>
+  </nav>
+</aside>
+
+<main>
+
+<header class="masthead">
+  <div class="eyebrow">Technical record · 6 September 2026</div>
+  <h1>Nila</h1>
+  <p class="standfirst">An offline infant-care companion for Android: it listens for a cry, tries to settle the baby before it wakes anyone, and answers questions about the baby and the breastfeeding mother without a single network request.</p>
+  <div class="byline">
+    <span>120 JVM tests + 62 instrumented · 0 failures</span>
+    <span>Release APK 121 MB</span>
+    <span>Wear module 18.4 MB</span>
+    <span>Network calls: none</span>
+  </div>
+</header>
+
+<section id="idea">
+  <h2><span class="num">01</span>What it is</h2>
+  <p class="lede">Every baby monitor on the market ends at <em>notify</em>. That treats a baby who would have self-settled in forty seconds identically to one who needs a parent, and it is why monitors wake households that did not need waking.</p>
+  <p>Nila adds two rungs before that. When a cry passes twenty seconds it plays a sound — the caregiver's own recorded voice, if there is one. Thirty-five seconds later it re-reads the loudness envelope and works out whether the sound actually helped. Only then does it wake somebody, and the alert says what it tried first.</p>
+  <p>That verification step is the product. The system does not claim the sound worked; it measures whether it did, remembers the answer per sound, and lets that change what it plays next time.</p>
+  <p>Around that sit four more things a parent of a newborn actually needs at 3am, all of them local: a searchable shelf of health documents for both the baby and the mother, an assistant that answers from a curated corpus rather than from a model's imagination, a medicine-safety check for a breastfeeding mother built as a staged review, and objective cry-duration tracking against the colic criteria so a paediatrician gets a real count instead of an exhausted estimate.</p>
+
+  <dl class="ticker">
+    <div><dt>Detection AUC</dt><dd>0.992</dd></div>
+    <div><dt>Detect latency</dt><dd>0.2<span style="font-size:12px"> ms</span></dd></div>
+    <div><dt>Knowledge base</dt><dd>46<span style="font-size:12px"> docs</span></dd></div>
+    <div><dt>OCR engine</dt><dd>PP-OCRv4</dd></div>
+    <div><dt>Memory</dt><dd>206<span style="font-size:12px"> MB</span></dd></div>
+  </dl>
+</section>
+
+<section id="finding">
+  <h2><span class="num">02</span>The central finding</h2>
+  <p class="lede">Cry <strong>detection</strong> works. Cry <strong>cause</strong> does not — and the number that separates them is the most important thing in this project.</p>
+  <p>Almost every published infant-cry classifier reports 85–95% accuracy on the Donate-a-Cry corpus. Those numbers come from splitting clips at random. One infant contributes several clips, so the same baby appears in both train and test, and the model learns to recognise the <em>infant</em> rather than the reason. Split by infant instead — no baby in both halves — and the task collapses.</p>
+
+  <div class="chart">
+    <div class="chart-title">Macro AUC, held-out infants unless noted</div>
+    <div class="bars">
+      <div class="bar-row">
+        <div class="bar-label">Cry detection<br><span class="dim" style="font-size:11.5px">our CNN, subject-wise</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:99.2%; background:var(--ok)"></div><div class="chance labelled" style="left:50%"></div></div>
+        <div class="bar-val" style="color:var(--ok)">0.992</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Cry cause<br><span class="dim" style="font-size:11.5px">our CNN, subject-wise</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:44.4%; background:var(--fail)"></div><div class="chance" style="left:50%"></div></div>
+        <div class="bar-val" style="color:var(--fail)">0.444</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Cry cause<br><span class="dim" style="font-size:11.5px">same model, clips split at random</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:95.3%; background:var(--partial)"></div><div class="chance" style="left:50%"></div></div>
+        <div class="bar-val" style="color:var(--partial)">0.953</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Legacy .pkl as shipped<br><span class="dim" style="font-size:11.5px">trained on all 457 clips</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:99.0%; background:var(--partial)"></div><div class="chance" style="left:50%"></div></div>
+        <div class="bar-val" style="color:var(--partial)">0.990</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Legacy architecture<br><span class="dim" style="font-size:11.5px">461 features, retrained honestly</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:46.2%; background:var(--fail)"></div><div class="chance" style="left:50%"></div></div>
+        <div class="bar-val" style="color:var(--fail)">0.462</div>
+      </div>
+    </div>
+    <div class="axis"><div></div><div class="axis-scale"><span>0.0</span><span>0.25</span><span>0.50</span><span>0.75</span><span>1.0</span></div><div></div></div>
+  </div>
+
+  <p>Leakage alone is worth <strong>+0.51 AUC</strong> on the identical model and the identical data. The legacy Random Forest in the <code>Why-is-my-Baby-Crying</code> repository scores 0.990 on our held-out infants only because it was fitted on all 457 clips, those infants included. Retrained on the same 461 features with an honest split it lands at 0.462, with balanced accuracy of exactly 0.200 — it predicts <code>hungry</code> for everything, which is the majority class.</p>
+  <p>Two unrelated model families failing identically is not a tuning problem. Four label groupings were also tried — five-way, hungry-vs-rest, pain-vs-rest, three-way — and every one sat at chance.</p>
+
+  <div class="callout">
+    <h4>What the app does about it</h4>
+    <p>The cause estimate still runs and is still shown, because hiding it would be its own kind of dishonesty. It appears under the heading <strong>UNVALIDATED GUESS</strong>, carrying its own confidence and, when the top two classes are within 15 points, the runner-up as well. The <code>trustworthy</code> flag is wired into the Kotlin type rather than left to the UI to remember, and <code>ModelCard.kt</code> is generated from the evaluation reports so no claim on screen can drift from a measurement.</p>
+  </div>
+</section>
+
+<section id="inventory">
+  <h2><span class="num">03</span>Feature inventory</h2>
+  <p class="lede">Everything in the build, with its real state. <span class="chip ok">working</span> means exercised by a test or verified on the emulator; <span class="chip partial">partial</span> means it runs but something material is missing; <span class="chip none">not built</span> means it is not there.</p>
+
+  <div class="group-head">Audio · the core loop</div>
+  <div class="feature is-ok"><h4>Cry detection</h4><span class="chip ok">working</span>
+    <p>0.992 macro AUC on infants never heard in training, 98% recall on cry. 0.2 ms per 0.96-second window on the emulator CPU. Runs continuously in a foreground service with a wake lock.</p></div>
+  <div class="feature is-partial"><h4>Cry cause classification</h4><span class="chip partial">a guess</span>
+    <p>The RandomForest from the original project, retrained by its own pipeline and exported whole — 500 trees walked on the phone in about a millisecond. Shown as "Probably X", with a plain note that it is a guess from the sound. Section 02 has the numbers.</p></div>
+  <div class="feature is-ok"><h4>Hysteresis &amp; episode tracking</h4><span class="chip ok">working</span>
+    <p>Three of five windows above 0.62 to enter, six consecutive below 0.42 to exit. Duration, peak loudness, rising/steady/settling trend and a 1 Hz envelope, all measured. Duration counts the audio clock, not the wall clock.</p></div>
+  <div class="feature is-ok"><h4>Live microphone meter</h4><span class="chip ok">working</span>
+    <p>New. A dBFS bar and cry score that move while listening, plus an explicit warning after a minute of complete silence. Added because "Listening" alone is indistinguishable from a dead microphone.</p></div>
+  <div class="feature is-ok"><h4>Demo cry replay</h4><span class="chip ok">working</span>
+    <p>Feeds a real recorded cry through the real pipeline at 6× speed — same frontend, same models, same ladder, same notification. The whole escalation runs in about 20 seconds. Labelled on screen so it can never be mistaken for the microphone.</p></div>
+  <div class="feature is-ok"><h4>What Nila did</h4><span class="chip ok">working</span>
+    <p>A running account during an episode: heard crying → playing a sound → turned the fan down over infrared → checked whether it helped → alerted you. The escalation ladder is the product; until this it was only visible as a status line changing and changing back.</p></div>
+  <div class="feature is-ok"><h4>Self-test</h4><span class="chip ok">working</span>
+    <p>One-second end-to-end check of the audio path on the real accelerator, reporting confidence, per-window latency and which compute unit ran it.</p></div>
+
+  <div class="group-head">Actions · what it does about a cry</div>
+  <div class="feature is-ok"><h4>Escalation ladder</h4><span class="chip ok">working</span>
+    <p>Log at 12s → play a sound at 20s → judge it at 35s → escalate. Hard ceiling at 100s, early escalation at 55s if still rising after an attempt. Verified end to end on the emulator.</p></div>
+  <div class="feature is-ok"><h4>Built-in soothers</h4><span class="chip ok">working</span>
+    <p>White noise, shushing, heartbeat. Volume capped at 55% of system volume regardless of the slider — this plays a metre from an infant's ear.</p></div>
+  <div class="feature is-ok"><h4>Caregiver's own voice</h4><span class="chip ok">working</span>
+    <p>New. Record, name, preview and delete lullabies in Settings; the monitor picks them up automatically. The service always looked for these — until now nothing in the app could create one, so every episode silently fell through to white noise.</p></div>
+  <div class="feature is-ok"><h4>Which sound works, per baby</h4><span class="chip ok">working</span>
+    <p>Laplace-smoothed success rate per soother, updated from the envelope re-read after each attempt, with a 15% exploration rate so the first sound that happens to work is not played forever.</p></div>
+  <div class="feature is-partial"><h4>Infrared fan / AC control</h4><span class="chip partial">untestable here</span>
+    <p>New. NEC frame encoder, teach-in for the household's own address and command, a test transmitter in Settings, and a hook that fires once at the first soother attempt. Nothing is ever transmitted until a code is entered. No emulator has an IR emitter and no Pixel, Galaxy or iPhone flagship ships one — several iQOO and Xiaomi devices do, and it can only be confirmed on one of those.</p></div>
+  <div class="feature is-ok"><h4>Feeding &amp; nappy reminders</h4><span class="chip ok">working</span>
+    <p>New. Elapsed-time, not clock-time: counted from the last logged event, so tapping <em>Fed</em> at 2:40am silently moves the next nudge to 5:40. Four instrumented tests cover arming, cancelling, re-anchoring and interval clamping.</p></div>
+
+  <div class="group-head">Assistant · questions and medicines</div>
+  <div class="feature is-ok"><h4>Ask, for baby and mother</h4><span class="chip ok">working</span>
+    <p>Field-weighted BM25 with stemming over 46 curated documents — 18 baby-facing, 27 mother-facing, 1 both — filtered by audience and the baby's age, and gated by a relevance floor. Answers are retrieved text shown verbatim with their source; nothing is generated.</p></div>
+  <div class="feature is-ok"><h4>Query guardrails</h4><span class="chip ok">working</span>
+    <p>Routed before retrieval: 30+ emergency phrasings, caregiver distress, greetings, too-vague, dose requests, diagnosis requests, out-of-scope — plus a relevance floor for everything the router cannot enumerate. Sections 08 and 09.</p></div>
+  <div class="feature is-ok"><h4>Measured answer quality</h4><span class="chip ok">working</span>
+    <p>159 real questions across three batteries, scored against the document that should answer each. 25/41 on first contact with the hardest set, 38/41 after. Section 08.</p></div>
+  <div class="feature is-ok"><h4>PP-OCRv4 text reading</h4><span class="chip ok">working</span>
+    <p>New. Detection, angle classification and recognition, all on device via ONNX Runtime. Verified reading rotated (25°), upside-down and low-contrast-foil labels — cases ML Kit architecturally cannot handle.</p></div>
+  <div class="feature is-ok"><h4>Medicine review pipeline</h4><span class="chip ok">working</span>
+    <p>Five staged agents: history → OCR → identification → interaction → adjudication. Fuzzy matching survives OCR damage (<code>1BUPROFENA00</code> resolves). No language model anywhere in this path, deliberately.</p></div>
+  <div class="feature is-ok"><h4>Health records shelf</h4><span class="chip ok">working</span>
+    <p>Categorised documents for baby and mother, OCR'd at import so a condition on a prescription photographed weeks ago is searchable. Local database, excluded from cloud backup.</p></div>
+
+  <div class="group-head">Peripheral</div>
+  <div class="feature is-ok"><h4>Camera safety watch</h4><span class="chip ok">working</span>
+    <p>Face presence via MediaPipe BlazeFace plus frame-difference motion energy. Deliberately not pose estimation — adult-trained pose models measurably fail on infants. Ships with demo footage of a real baby crawling, replayed through the same watcher.</p></div>
+  <div class="feature is-ok"><h4>Wear OS module</h4><span class="chip ok">working</span>
+    <p>Separate 18 MB APK with live state mirroring over the Data Layer API. Any paired watch or band that mirrors notifications also buzzes with no setup at all.</p></div>
+  <div class="feature is-ok"><h4>NFC quick logging</h4><span class="chip ok">working</span>
+    <p>Tap a sticker on the changing table to log a change, from whichever screen is open.</p></div>
+  <div class="feature is-ok"><h4>Paediatrician PDF</h4><span class="chip ok">working</span>
+    <p>One page of measured crying against the three-hour colic line. The only thing in the app designed to leave the phone.</p></div>
+  <div class="feature is-ok"><h4>Laptop dashboard</h4><span class="chip ok">working</span>
+    <p>Opt-in read-only view on port 8787 over the local network. Counts and timings only — never audio, video or documents. Off unless switched on.</p></div>
+  <div class="feature is-none"><h4>Multilingual answers</h4><span class="chip none">english only</span>
+    <p>A language field exists and is passed through the whole stack, but the corpus is English. Translating it needs a human, not a model.</p></div>
+  <div class="feature is-none"><h4>Pre-roll clips &amp; cloud sync</h4><span class="chip none">not built</span>
+    <p>Pre-roll buffering exists in <code>PreRoll.kt</code> but is not wired to a UI. Cloud sync is deliberately absent and should stay that way.</p></div>
+</section>
+
+<section id="audio">
+  <h2><span class="num">04</span>How cry detection works</h2>
+  <p class="lede">One frontend, two heads, hysteresis in between.</p>
+
+  <h3>The frontend</h3>
+  <p>Audio is captured at 16 kHz mono from <code>AudioSource.UNPROCESSED</code> where the device offers it. The usual <code>VOICE_RECOGNITION</code> source applies noise suppression and automatic gain control tuned for speech, and AGC in particular flattens the loudness envelope the escalation logic reads — so it is avoided.</p>
+  <p>Every 480 ms a window covering the last 0.96 s is emitted, so consecutive windows overlap by half. The overlap matters: a cry that starts mid-window would otherwise be split across two patches and score weakly in both, which is exactly the onset the detector most needs to catch.</p>
+  <p>Each window becomes a 96 × 64 log-mel patch — 25 ms frames, 10 ms hop, 64 mel bands from 125 Hz to 7500 Hz. These are YAMNet's parameters, chosen so the representation is a known quantity rather than an invention.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Constant</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Sample rate</td><td class="num">16 000 Hz</td><td class="dim">Infant cry fundamentals sit at 300–600 Hz; harmonics that matter stay under 8 kHz</td></tr>
+      <tr><td class="name">Window / hop</td><td class="num">400 / 160</td><td class="dim">25 ms and 10 ms — YAMNet-compatible</td></tr>
+      <tr><td class="name">Mel bands</td><td class="num">64</td><td class="dim">125–7500 Hz</td></tr>
+      <tr><td class="name">Patch</td><td class="num">96 × 64</td><td class="dim">0.96 s of audio</td></tr>
+      <tr><td class="name">Analysis hop</td><td class="num">480 ms</td><td class="dim">50% window overlap</td></tr>
+      <tr><td class="name">Silence gate</td><td class="num">−55 dBFS</td><td class="dim">Below this no inference runs — most of why this survives a night on battery</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout">
+    <h4>A frontend written twice</h4>
+    <p>The log-mel transform exists in Python for training and in Kotlin for inference, and they must agree to the last bit or the model sees a different distribution on device than it was trained on. A golden-fixture test pins them together.</p>
+    <p>Chasing a 0.0022 discrepancy cost real time. The first suspect was float32 twiddle-factor accumulation in the Kotlin FFT, which was duly fixed with double precision and a precomputed table. The actual cause was the fixture generator rounding its inputs to seven decimals, while quiet frames contain samples around 1e−6.</p>
+  </div>
+
+  <h3>The detector</h3>
+  <p>A small convolutional network — four separable blocks, 21,218 parameters, 38 KB after dynamic-range quantisation to TFLite. Delegates are attempted in order NNAPI → GPU → CPU, each with a probe inference before it is trusted, because MediaPipe's GPU delegate will construct successfully and then throw <code>GL_INVALID_ENUM</code> on the first real frame.</p>
+
+  <h3>Hard-negative mining</h3>
+  <p>The first detector fired on cats in five of eight test clips. Scoring every training negative with the trained model and oversampling the hardest 18% — a set dominated by cat, laughing, sheep, rooster, crow and toilet flush — took that to zero of eight, and lifted cry F1 from 0.922 to 0.942.</p>
+</section>
+
+<section id="models">
+  <h2><span class="num">05</span>Models &amp; training</h2>
+  <p class="lede">Every model ships inside the APK. Nothing is downloaded, ever — there is no setup step at all.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Task</th><th>Size</th><th>Where</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="name">detect_mel.tflite</td><td>Cry vs not-cry</td><td class="num">38 KB</td><td class="dim">APK assets</td><td><span class="chip ok">trained</span></td></tr>
+      <tr><td class="name">reason_forest.json</td><td>Five-way cause</td><td class="num">7.6 MB</td><td class="dim">APK assets</td><td><span class="chip partial">see below</span></td></tr>
+      <tr><td class="name">blaze_face_short_range</td><td>Face presence</td><td class="num">230 KB</td><td class="dim">APK assets</td><td><span class="chip ok">pretrained</span></td></tr>
+      <tr><td class="name">ppocr_det / cls / rec</td><td>Text reading</td><td class="num">15.2 MB</td><td class="dim">APK assets</td><td><span class="chip ok">pretrained</span></td></tr>
+      <tr><td class="name">qwen2.5-0.5b-instruct.task</td><td>Phrasing answers</td><td class="num">547 MB</td><td class="dim">optional, one tap</td><td><span class="chip ok">pretrained</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Training data</h3>
+  <p>Two corpora. <strong>ESC-50 and UrbanSound8K</strong> supply negatives — 50 environmental classes including the ones that actually fool a cry detector. <strong>Donate-a-Cry</strong> supplies 457 labelled cry clips from 221 infants, whose distribution is the problem: 382 of the 457 are <code>hungry</code>, and <code>burping</code> has 8 clips across 7 infants.</p>
+
+  <h3>How the split is made</h3>
+  <p>Each subject is assigned to exactly one side by greedy iterative stratification, globally, before anything else happens. An earlier version split per class and an assertion caught four infant UUIDs on both sides — one baby can contribute clips under several labels, so per-class splitting leaks subjects even when each class looks clean.</p>
+  <p>Augmentation runs strictly <em>after</em> the split. Augmenting first would put time-stretched copies of a training clip into the test set, which is leakage wearing a different hat. A <code>--leaky</code> flag reproduces the opposite ordering deliberately, as the comparison arm in section 02.</p>
+
+  <h3>Results, held-out infants</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Run</th><th>n</th><th>Accuracy</th><th>Majority</th><th>Balanced</th><th>Macro F1</th><th>Macro AUC</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Detection</td><td class="num">2 946</td><td class="num">0.946</td><td class="num dim">0.798</td><td class="num">0.960</td><td class="num">0.922</td><td class="num">0.991</td></tr>
+      <tr><td class="name">Detection + hard negatives</td><td class="num">2 946</td><td class="num">0.961</td><td class="num dim">0.798</td><td class="num">0.965</td><td class="num">0.942</td><td class="num">0.992</td></tr>
+      <tr><td class="name">Cause, subject-wise</td><td class="num">762</td><td class="num">0.583</td><td class="num dim">0.756</td><td class="num">0.185</td><td class="num">0.172</td><td class="num">0.444</td></tr>
+      <tr><td class="name">Cause, clip-wise (leaky)</td><td class="num">2 261</td><td class="num">0.754</td><td class="num dim">0.272</td><td class="num">0.737</td><td class="num">0.743</td><td class="num">0.953</td></tr>
+    </tbody>
+  </table></div>
+  <p class="footnote">Read the cause row carefully: 0.583 accuracy is <em>below</em> the 0.756 majority baseline, and balanced accuracy of 0.185 is under the 0.200 that guessing one class every time would give. Per class, <code>burping</code> and <code>discomfort</code> get zero recall; <code>hungry</code> gets 0.760 purely by being 76% of the test set.</p>
+
+  <h3>The cause classifier is the original project's</h3>
+  <p>The five-way classifier is no longer a CNN trained here. It is the RandomForest from <code>Why-is-my-Baby-Crying</code>, retrained by that project's own pipeline — its augmentation (time-stretch, pitch-shift, noise, gain, circular shift, two picked at random per copy), its SMOTE balancing, its 500 trees at depth 20 with balanced class weights — and exported whole rather than converted. The phone walks the trees, so <code>predict_proba</code> on the phone is <code>predict_proba</code> in Python.</p>
+  <p>One change was needed to make it fit. The original computes 466 librosa features including chroma and tonnetz; those two contribute almost nothing (tonnetz is 0.004 of the top-40 importance, chroma does not appear) and are the most awkward to reimplement. The 456 features that ship are derived from the log-mel frontend that already has a bit-checked Kotlin twin, so the whole vector inherits that guarantee instead of opening a second chance for the two languages to disagree.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Split</th><th>466 librosa features</th><th>456 deployable</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Clip-wise (the original)</td><td class="num">0.938</td><td class="num">0.909</td></tr>
+      <tr><td class="name">Subject-wise, retrained</td><td class="num">0.189</td><td class="num">0.197</td></tr>
+    </tbody>
+  </table></div>
+  <p class="footnote">Balanced accuracy. The reduction costs 2.9 points on the split the original uses. The second row is balanced accuracy on infants held out of training, where chance for five classes is 0.200 — both feature sets land there, which is the same finding as section 02 reached from two other directions. The app shows the cause as "Probably X" with a plain note that it is a guess from the sound and not a diagnosis.</p>
+
+  <h3>Reproducing it</h3>
+  <pre><code>cd "baby cry/nila/ml"
+../.venv/bin/python -m src.download      # fetch ESC-50, UrbanSound8K, Donate-a-Cry
+../.venv/bin/python -m src.prepare       # split by subject, then augment
+../.venv/bin/python -m src.train detect
+../.venv/bin/python -m src.hard_negatives
+../.venv/bin/python -m src.train reason
+../.venv/bin/python -m src.ablation      # the leaky arm + four groupings
+../.venv/bin/python -m src.legacy_rf     # the shipped .pkl, contaminated vs honest
+../.venv/bin/python src/legacy_pipeline.py --deployable   # their pipeline, exported
+../.venv/bin/python -m src.export        # TFLite + ModelCard.kt</code></pre>
+  <p><code>export</code> writes <code>ModelCard.kt</code> from the evaluation reports, so every accuracy claim in the app is generated from a measurement rather than typed by hand.</p>
+</section>
+
+<section id="ladder">
+  <h2><span class="num">06</span>Escalation &amp; actions</h2>
+  <p class="lede">The rungs are timed, each one is a decision the system can explain, and every one of them is now written to the screen as it happens.</p>
+  <ol class="steps">
+    <li><strong>0–12 s — nothing.</strong> A fuss that resolves itself is not an event. Logged silently.</li>
+    <li><strong>12 s — note it.</strong> One entry in the log, no sound, no alert.</li>
+    <li><strong>20 s — play something.</strong> The caregiver's recorded voice if one exists, otherwise the built-in sound with the best measured record for this baby, with a 15% chance of exploring an alternative. Skipped entirely if a call or the parent's own music holds audio focus. If an infrared code has been taught, it fires here too, once.</li>
+    <li><strong>55 s — verify.</strong> Re-read the envelope. Settled means a settling trend or a drop of 18 dB from peak. The outcome is written to that sound's record whether it worked or not.</li>
+    <li><strong>55 s, still rising — stop trying.</strong> A cry that is building well after an attempt is not going to settle. Escalate.</li>
+    <li><strong>100 s — hard ceiling.</strong> Wake a parent regardless of trend. The notification names what was tried: <em>"Crying for 58s and getting louder. Tried 2 sounds first."</em></li>
+  </ol>
+  <div class="callout">
+    <h4>The soother cannot feed itself</h4>
+    <p>The sound plays through the same phone's speaker, a metre from the same phone's microphone, so it has to be checked: if a soother scored as a cry, the ladder would hear its own output, treat the episode as continuing, and escalate on its own noise.</p>
+    <p>Measured through the real detector: white noise <strong>0.198</strong>, heartbeat <strong>0.088</strong>, shushing <strong>0.007</strong>. The episode <em>entry</em> threshold is 0.62 and, more importantly, the <em>exit</em> threshold is 0.42 — all three sit well under both, so a running episode still ends normally while a soother plays. A test pins this, because a future soother chosen for how it sounds could easily break it.</p>
+  </div>
+
+  <p>Alerts carry distinct vibration patterns per severity so a wrist is readable without looking — which is the point of routing them to a watch, since the phone stays silent next to a sleeping baby. Safety alerts use a channel that bypasses Do Not Disturb; nothing else in the app does.</p>
+</section>
+
+<section id="assistant">
+  <h2><span class="num">07</span>The local language model</h2>
+
+  <div class="callout">
+    <h4>Retrieval, not fine-tuning — and now, not generation either</h4>
+    <p><strong>It is a RAG system, and the model is not fine-tuned at all.</strong> Answers are BM25 retrieval over a hand-curated corpus, shown verbatim with their source.</p>
+    <p>The 0.5B model used to rewrite those answers into nicer prose. It no longer does — in any health-facing path. Why is below, and it is the single most important thing on this page after the cry-cause result.</p>
+  </div>
+
+  <h3>What actually answers the question</h3>
+  <ol class="steps">
+    <li><strong>Route.</strong> Before any retrieval, <code>QueryRouter</code> decides whether this is an emergency, a greeting, too vague, a dose request, a diagnosis request, out of scope, or answerable — and whether the subject is the baby or the mother.</li>
+    <li><strong>Retrieve.</strong> BM25 over 46 documents, filtered by audience and by the baby's age in months, so newborn guidance is never returned for a nine-month-old.</li>
+    <li><strong>Answer.</strong> The retrieved text is composed into an answer with its sources and shown <em>immediately</em>. This is the answer.</li>
+    <li><strong>Show her own records, underneath.</strong> Matching documents from the health shelf are appended below the answer under their own heading — never above it. Anything quoted at the top of an answer reads as being the answer, and "what should I eat while breastfeeding" was opening with a prescription for iron and an inhaler, which mentions breastfeeding and answers nothing.</li>
+  </ol>
+
+  <div class="callout stop">
+    <h4>Why nothing is generated any more</h4>
+    <p>Asked <em>"I don't feel bonded with my baby"</em>, the model returned, among other things:</p>
+    <p><em>"The baby has not yet passed the newborn hearing screening, which is a sign of potential hearing issues."</em></p>
+    <p>No such thing had happened. It had taken a health record stating the screening was <strong>passed</strong>, inverted it, and attached a diagnosis — for a real baby, to a mother already asking about her own bonding.</p>
+    <p>The grounding check did not catch it, and <strong>no version of that check can</strong>. It measures how much of the output's vocabulary comes from the source, and every word of that sentence did. Word overlap cannot see a flipped negation or a clause reassembled into a claim the source never made.</p>
+    <p>So generation is gone from the answer path, as it was already gone from the medicine path, and for the same reason. The retrieved answer was always complete, sourced and readable — the version that replaced it was fluent and wrong. An instrumented test now asserts that every guidance answer appears verbatim in the corpus.</p>
+  </div>
+
+  <h3>The model</h3>
+  <h3>Removed, then brought back on different terms</h3>
+  <p>Qwen2.5-0.5B-Instruct runs on device through MediaPipe's <code>LlmInference</code>. It was taken out entirely after the hearing-screening incident, and it is back — doing a narrower job, under conditions chosen so that failure cannot repeat.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Before</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td class="name">What it sees</td><td>Passages, health records, care log, baby profile</td><td>Retrieved passages only</td></tr>
+      <tr><td class="name">What it does</td><td>Rewrites into nicer prose</td><td>Answers the question in one or two sentences</td></tr>
+      <tr><td class="name">Grounding check</td><td>Vocabulary overlap</td><td>Overlap, quantities, <strong>and polarity</strong></td></tr>
+      <tr><td class="name">Rejected if</td><td>&lt;45% overlap</td><td>&lt;50% overlap, or no shorter than the source</td></tr>
+      <tr><td class="name">Install</td><td>adb script, re-run after uninstall</td><td>One tap in Settings, or never</td></tr>
+    </tbody>
+  </table></div>
+  <p>The structural half is that it is <em>never shown a health record</em>. The sentence that removed the feature was assembled out of one; a model that cannot see them cannot invert one, and that is a stronger guarantee than any instruction in a prompt.</p>
+  <p>The check half is polarity. The old grounding test measured how much of the output's vocabulary came from the source and passed that sentence at 100%, because every word of it did. Each output sentence is now matched to the source sentence it most resembles, and the two have to agree about negation. Six JVM tests cover it, starting with the exact sentence that caused the removal.</p>
+
+  <h3>Measured, phrasing an answer about maternal diet</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Retrieved passages</td><td class="num">577 chars</td></tr>
+      <tr><td class="name">After phrasing</td><td class="num">245 chars</td></tr>
+      <tr><td class="name">Generation time</td><td class="num">10.2 s</td></tr>
+      <tr><td class="name">Model load</td><td class="num">1.3-8.0 s</td></tr>
+    </tbody>
+  </table></div>
+  <p>It dropped a preamble and an entire second passage about fussy babies, and kept the part that answers the question. Emulator timings; a phone is faster. None of this blocks the screen — the retrieved answer is up in milliseconds and the shorter one replaces it when it is ready, with a quiet "Shortening…" underneath in the meantime.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>What removing it cost</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Release APK</td><td class="num">99.5 MB</td><td class="num">72.9 MB</td></tr>
+      <tr><td class="name">Memory while monitoring</td><td class="num">357 MB</td><td class="num">206 MB</td></tr>
+      <tr><td class="name">Native heap</td><td class="num">210 MB</td><td class="num">48 MB</td></tr>
+      <tr><td class="name">Manual setup steps</td><td class="num">1</td><td class="num">0</td></tr>
+    </tbody>
+  </table></div>
+  <p>Which is the whole argument in one table: the feature was costing 40% of the app's memory and every byte of its manual setup, to make the answers worse.</p>
+  <p>Gemma 3n was the first choice and remains the better model. It is gated behind a licence acceptance on HuggingFace, which cannot be automated, so Qwen is what ships. On an iQOO 15 the right build is <code>Gemma3-1B-IT_q4_ekv1280_sm8850.litertlm</code> — the <code>sm8850</code> suffix is the Snapdragon 8 Elite Gen 5.</p>
+
+  <div class="callout stop">
+    <h4>Why generation is banned from the medicine path</h4>
+    <p>It was wired there and removed after watching it produce this, from a correct <em>AVOID</em> verdict for a penicillin-allergic mother:</p>
+    <p><em>"Amoxicillin … could cause asthma in some people and iron deficiency anaemia in others … it was generally safe to take Amoxicillin if you are not allergic to it."</em></p>
+    <p>It had read her <em>conditions</em> as side effects, invented causation, and then softened a do-not-take. A 0.5B model rewriting safety-critical text is not a quality trade-off, it is a hazard — and the rule-based summary it was "improving" was already correct, sourced and readable.</p>
+  </div>
+</section>
+
+
+<section id="evaluation">
+  <h2><span class="num">08</span>How good is it, measured</h2>
+  <p class="lede">Three batteries of real questions, written the way people type at 2am. The number that counts is the third one.</p>
+
+  <p>"Improve the assistant" is not actionable until you can say how good it is now. So the questions were written first, run through the real router and the real retrieval, and scored against the document that should have answered each one. Everything after that was driven by the failures.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Battery</th><th>n</th><th>First run</th><th>Now</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Tuning</td><td class="num">77</td><td class="num">54 (70%)</td><td class="num">77 (100%)</td><td class="dim">Written first; its failures drove every change</td></tr>
+      <tr><td class="name">Held out</td><td class="num">41</td><td class="num">28 (68%)</td><td class="num">41 (100%)</td><td class="dim">Written after tuning, then itself used for a second round</td></tr>
+      <tr><td class="name">Fresh</td><td class="num">41</td><td class="num">25 (61%)</td><td class="num">38 (93%)</td><td class="dim">Written last, harder, run once before any fix</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout warn">
+    <h4>Read the first-run column, not the last</h4>
+    <p>Each battery scores 100% eventually because each one was used to find bugs. That is what an evaluation set is for, and it also destroys it as a measurement — after you have looked at the failures, the set is training data.</p>
+    <p><strong>The honest figure is 25/41 on first contact with the third battery</strong>, against 54/77 on the first. The improvement between those two is real; the 93% that followed is a regression guard, not a claim.</p>
+  </div>
+
+  <h3>What was actually wrong</h3>
+  <ol class="steps">
+    <li><strong>No stemming.</strong> "Dehydrated" and "dehydration" were unrelated terms, so the question returned <em>nothing at all</em> — which the app honestly reported as knowing nothing about dehydration. A five-rule suffix stripper, plus synonyms for the irregulars ("slept", "fed", "woke") and the words people use instead ("injections", "nappy", "mum").</li>
+    <li><strong>Keywords were the title, repeated.</strong> Every document's keyword field held its own topic and title — words already in the document. They now carry the vocabulary of real questions, taken from the evaluation transcript.</li>
+    <li><strong>Every field weighed the same.</strong> Title, keywords and body were flattened into one string, so "why does my baby cry so much" ranked the red-flags page above the one titled "How much crying is normal". Title now counts four times, keywords three.</li>
+    <li><strong>Medicines were competing with guidance.</strong> A drug monograph is short and mentions ordinary words in passing, which scores well. "How can I increase my milk supply" returned domperidone — a prescription galactagogue — above the page on supply. Medicine entries are now reachable only by naming a medicine.</li>
+    <li><strong>One rare word could carry a document.</strong> "What's the score in the India match" retrieved the immunisation page at 7.3, entirely because "India" is in its title. A question of four words or more now has to overlap the winning document in at least two.</li>
+    <li><strong>Pronouns counted as content.</strong> They inflated that coverage threshold, so "she hates being on her front" looked like a four-word question when it is a two-word one. Pronouns and apostrophe-less contractions are stopwords.</li>
+  </ol>
+
+  <h3>And what the router got wrong</h3>
+  <ul class="plain">
+    <li><strong>"Can I take codeine" was refused as off-topic</strong>, because "code" is a substring of "codeine". Single words are matched as whole tokens now, phrases as phrases.</li>
+    <li><strong>"What foods are a choking risk" got an emergency refusal.</strong> Asking about a hazard is not the hazard.</li>
+    <li><strong>"My baby has turned blue" was not an emergency</strong> — the list had "turning blue" and "went blue".</li>
+    <li><strong>"Baby swallowed a coin" was answered with toy-safety advice.</strong> Batteries and magnets were listed; nothing else was.</li>
+    <li><strong>"She is limp and not responding" reached ordinary retrieval.</strong> "Floppy" and "unresponsive" were listed; "limp" was not.</li>
+    <li><strong>Dose requests slipped through when reworded.</strong> "As a nurse I need the mg per kg for paracetamol" contains no dose word and was answered with a page about feeding. Any dose word, or units with an amount, now refuses.</li>
+    <li><strong>A new route for a caregiver in distress.</strong> "I feel like I might shake the baby" retrieved the page on <em>fever</em>. It now returns the safe immediate action, normalises the feeling, and gives helpline numbers.</li>
+  </ul>
+
+  <div class="callout stop">
+    <h4>The same substring bug, twice</h4>
+    <p>Subject routing decides whether a question is about the baby or the mother, and it matched phrases with plain <code>contains</code>. First <code>"he "</code> matched inside <code>"t<strong>he </strong>birth"</code> and sent a mother's question about her own mood to the infant corpus. Then, in the fix for that, <code>"im "</code> matched inside <code>"calm h<strong>im </strong>down"</code> and made a question about settling a baby look like a question about her.</p>
+    <p>Every phrase list in the router now matches on word boundaries, with queries and phrases normalised identically so <code>"won't wake"</code> and <code>"wont wake"</code> are one entry's worth of matching.</p>
+  </div>
+</section>
+
+<section id="guardrails">
+  <h2><span class="num">09</span>Guardrails</h2>
+  <p class="lede">Seven layers, all of them local, none of them a prompt instruction.</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>Guardrail</th><th>Trigger</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Emergency interception</td><td class="dim">20+ phrases: not breathing, blue lips, unresponsive, seizure, choking, swallowed a battery, non-blanching rash, self-harm</td><td>Bypasses retrieval entirely. Says to call emergency services now.</td></tr>
+      <tr><td class="name">Dose refusal</td><td class="dim">Any request for how much to give</td><td>Refuses. A unit test greps the corpus for dose-shaped strings and fails the build if one appears.</td></tr>
+      <tr><td class="name">Diagnosis refusal</td><td class="dim">"does my baby have…", "is this…"</td><td>Declines to diagnose, points to what to observe and when to seek care.</td></tr>
+      <tr><td class="name">Age gating</td><td class="dim">Document age range vs the baby's age</td><td>Filtered out — except for forward-looking questions ("when can she…"), which bypass it.</td></tr>
+      <tr><td class="name">Audience routing</td><td class="dim">First-person mother markers weighted ×2 against baby phrases</td><td>Mother's questions reach the 28 mother-facing documents rather than infant guidance.</td></tr>
+      <tr><td class="name">Grounding check</td><td class="dim">Invented quantity-with-unit, or under 45% content-word overlap with the source</td><td>The rewrite is discarded and the retrieved answer stands.</td></tr>
+      <tr><td class="name">Caregiver distress</td><td class="dim">"shake the baby", "can't do this anymore", "scared of what I might do"</td><td>Intercepted before retrieval. Safe immediate action, then helpline numbers.</td></tr>
+      <tr><td class="name">Relevance floor</td><td class="dim">Best hit scores below 2.8, or overlaps a long question in fewer than two terms</td><td>Answers "I don't have anything reliable on that offline" rather than the nearest paragraph.</td></tr>
+      <tr><td class="name">No generation anywhere</td><td class="dim">Always</td><td>Every health answer is retrieved text shown verbatim with its source. See section 07.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Product-level constraints hold everywhere: no breathing, vitals, apnoea or SIDS monitoring — the FDA's warning letter to Owlet is the precedent — cleartext traffic is forbidden by <code>network_security_config.xml</code>, and backup is disabled in the manifest so health documents cannot leave by a cloud transport.</p>
+
+  <div class="callout warn">
+    <h4>The worst bug found, and it was a guardrail</h4>
+    <p>The allergy matcher tested containment the wrong way round. <code>"penicillin".contains("penicillin allergy")</code> is never true, so the app told a penicillin-allergic mother that amoxicillin was <em>LIKELY SAFE</em>. Fixed with a symmetric term-set intersection with stopwords; it now has its own test.</p>
+  </div>
+</section>
+
+<section id="ocr">
+  <h2><span class="num">10</span>Reading a medicine strip</h2>
+  <p class="lede">PP-OCRv4 on device, then a five-stage review with no language model in it.</p>
+
+  <h3>What changed and why</h3>
+  <p>The previous pipeline was ML Kit alone. It reads clean, upright, well-lit text very well and returns nothing at all when text is rotated or inverted — it has no rotated-box detection and no angle classifier. That is not a tuning gap; it is missing machinery.</p>
+  <p>The reference implementation (Nurture-Sync) used <code>PaddleOCR(use_angle_cls=True)</code> server-side with CrewAI on Gemini 1.5 Flash and Serper web search. Two of its advantages were real: the angle classifier, and the web search — which meant it never needed a local match, because Gemini could take half-read text and look the drug up. The web search cannot come along without breaking the offline guarantee. The OCR could.</p>
+
+  <ol class="steps">
+    <li><strong>Detection — DBNet.</strong> Segments the photo into <em>rotated</em> text boxes, so a strip shot at forty degrees is cropped along its own axis instead of through a skewed window full of background.</li>
+    <li><strong>Angle classification.</strong> Decides whether each cropped line is upside down. A blister strip has no obvious "up", and a parent holding a torn half photographs it whichever way it came out of the packet.</li>
+    <li><strong>Recognition — SVTR-LCNet + CTC.</strong> Reads each line against a 6 625-class charset.</li>
+    <li><strong>ML Kit, still.</strong> Latin and Devanagari recognisers run too, and lines from every engine are pooled. Indian packaging routinely carries the brand in Latin and the manufacturer in Devanagari, and the two engines fail on different images.</li>
+    <li><strong>Escalation.</strong> If pooled text is still thin, contrast stretch → unsharp → centre crop → 270°/90°/180° for ML Kit's benefit. A clean photo costs one pass.</li>
+  </ol>
+
+  <div class="callout">
+    <h4>How the port was done</h4>
+    <p>PaddleOCR's own runtime cannot run here, so the PP-OCRv4 weights run under ONNX Runtime instead — the same models, a different executor. Everything OpenCV did was rewritten: connected-component labelling in place of contour tracing (a minimum-area rectangle depends only on the convex hull, so a component and its traced contour give the same box, and holes never appear), Andrew's monotone chain for the hull, rotating calipers for the rectangle, and a closed-form rectangle offset for the unclip step. Nine JVM tests cover the geometry, added after the first hull implementation indexed past the start of its own chain and killed every detection with an out-of-bounds that surfaced, unhelpfully, as "couldn't read the label".</p>
+  </div>
+
+  <h3>Measured</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Case</th><th>Result</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Upright label</td><td><span class="chip ok">read</span></td><td class="dim">Baseline</td></tr>
+      <tr><td class="name">Rotated 25°</td><td><span class="chip ok">read</span></td><td class="dim">Needs rotated-box detection</td></tr>
+      <tr><td class="name">Upside down</td><td><span class="chip ok">read</span></td><td class="dim">Needs the angle classifier</td></tr>
+      <tr><td class="name">White on silver foil</td><td><span class="chip ok">read</span></td><td class="dim">Low contrast</td></tr>
+      <tr><td class="name">Watermarked stock box</td><td><span class="chip ok">resolved</span></td><td class="dim">Supplier URL filtered out of the sufficiency check</td></tr>
+      <tr><td class="name">Sideways strip</td><td><span class="chip ok">resolved</span></td><td class="dim">One pass, no escalation needed</td></tr>
+    </tbody>
+  </table></div>
+  <p class="footnote">Latency on the emulator is 2.3–5.6 s per photograph, load 0.3–0.5 s. A real phone is faster; this is a scan, not a live path.</p>
+
+  <h3>Fuzzy matching</h3>
+  <p>OCR damage is systematic, so the matcher is too: digit-to-letter normalisation (1→i, 0→o, 5→s, 8→b, 9→g, 2→z), bounded Levenshtein scaled to word length, and prefix matching for names of six characters or more — because strips print the name flush against the strength and OCR glues them into one token. <code>1BUPROFENA00</code> resolves to ibuprofen; <code>crocine</code> resolves to Crocin.</p>
+
+  <h3>The five-stage review</h3>
+  <ol class="steps">
+    <li><strong>History.</strong> Mines conditions from the mother's profile and her stored documents. Negation-aware: an EPDS screening scored below threshold produced a phantom "depression" until it was. Declared and inferred conditions are shown separately.</li>
+    <li><strong>OCR.</strong> Section above.</li>
+    <li><strong>Identification.</strong> Exact-token pass, then fuzzy. Returns generic name, aliases, risk band, cautions.</li>
+    <li><strong>Interaction.</strong> Symmetric term-set intersection between the medicine's <code>avoid_if</code> / <code>interacts_with</code> and her conditions, allergies and current medicines.</li>
+    <li><strong>Adjudication.</strong> Rule-based verdict with its reasoning and sources. No model. See section 07.</li>
+  </ol>
+</section>
+
+<section id="vision">
+  <h2><span class="num">11</span>Camera watch</h2>
+  <p class="lede">Two cheap signals that run all night, and a vision model that gives a second opinion when one of them changes.</p>
+
+  <h3>Demo footage</h3>
+  <p>The camera lane has the same problem the audio lane had, for the same two reasons: an emulator has no nursery — its camera shows a rendered living room with a cat in it, and a face detector pointed at that correctly reports no face — and nobody demonstrating a baby monitor can produce a baby on cue.</p>
+  <p>So <strong>Play demo footage</strong> replays a real clip of a baby crawling through the real watcher, <em>and shows it</em> — in the same place the camera preview would be. Frames go through the same downscale, the same BlazeFace detector, the same motion-energy comparison and the same escalation rules the camera feeds; only the source of the pixels differs. The camera stays off, because binding it would put a rendered living room underneath a video of a baby.</p>
+  <p>The clip is a landscape recording in a portrait container, so the black bars are measured once on open and cropped from every frame. That matters twice: the detector stops spending half its input on black, and the frame fills the space instead of floating in a letterbox inside a letterbox.</p>
+  <p>Showing the frames is the point. Numbers moving beside a blank rectangle prove nothing to anyone watching — the demo has to let you see the baby the detector is reading. On screen the movement figure tracks the crawl (62% → 42% → 33% across three seconds) and the headline flips between <em>Face visible</em> and <em>Can't see the face</em> as she turns away from the lens.</p>
+
+  <h3>The always-on layer</h3>
+  <p>MediaPipe BlazeFace gives face presence; frame differencing gives motion energy. A few megabytes, every frame, all night. The app reports exactly those two facts — <em>"can't see the face, still moving"</em> — which is the correct output when a baby has rolled or a blanket has shifted, and is genuinely useful to know.</p>
+  <p>Infant pose estimation was tried and abandoned. Adult-trained pose models, and the infant-specific SyRIP/FiDIP line, measurably fail on infants: the limb proportions are wrong, babies are usually swaddled, and the confident-looking skeletons they emit are not to be trusted for anything safety-adjacent.</p>
+
+  <h3>The vision model</h3>
+  <p><strong>FastVLM-0.5B</strong>, Apple's model converted for LiteRT, running through the LiteRT-LM API. It was chosen over the alternatives for specific reasons:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Candidate</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="name">FastVLM-0.5B</td><td>Chosen. Ungated, 1.1 GB, and its FastViTHD encoder gives 0.55 s to first token on GPU where a SigLIP model of the same size takes several seconds. An NPU build exists for the Snapdragon 8 Elite Gen 5 at 0.12 s.</td></tr>
+      <tr><td class="name dim">Gemma 3n E2B</td><td class="dim">Better model, ~3 GB, and gated behind a licence acceptance no app can perform for a user. A download that 401s for invisible reasons is worse than a smaller model.</td></tr>
+      <tr><td class="name dim">SmolVLM-256M</td><td class="dim">Smallest and cheapest at ~260 MB of ONNX, and the app already ships ONNX Runtime — but it exports as three separate graphs, so the tokenizer, the image-token expansion and the KV-cache loop would all have to be written by hand in Kotlin. A thousand lines of numerically delicate code to save 900 MB.</td></tr>
+      <tr><td class="name dim">MoViNet-A0</td><td class="dim">The only mature on-device <em>video</em> model, but its 600 classes are adult actions. "Baby rolled over" is not among them, and fine-tuning needs infant video that does not exist here.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout">
+    <h4>It is asked a form, not "describe this image"</h4>
+    <p>An open caption from a 0.5B model is fluent and unfalsifiable, and this is a camera pointed at a sleeping infant — the worst possible place for confident invention. So the prompt asks for four fields with closed vocabularies:</p>
+    <pre><code>POSITION: on back / on front / on side / sitting / standing / not visible
+FACE:     clear / covered / turned away / not visible
+CONCERN:  none / face covered / out of cot / tangled in bedding / cannot tell
+DOING:    one short sentence about what the baby is doing</code></pre>
+    <p>Anything outside those vocabularies is discarded rather than shown. That turns the model from a narrator into a classifier that can explain itself, and a wrong answer becomes a wrong <em>category</em> a parent can see and disagree with. Six JVM tests cover the parser, including the cases that matter most: a reply that ignored the form returns nothing rather than "not visible", and <code>cannot tell</code> never raises an alert.</p>
+  </div>
+
+  <h3>When it runs, and when it does not</h3>
+  <ol class="steps">
+    <li><strong>Not on a timer.</strong> A model narrating a sleeping baby every few minutes is one that gets muted before it says anything useful.</li>
+    <li><strong>And not as a card on the watch screen.</strong> It had one, labelled "Describe the cot", and the first person to see it asked what it was for. An optional download that cannot run yet does not belong in the middle of the thing you are trying to watch; it is a line in Settings beside the other optional download, and its only output is an alert.</li>
+    <li><strong>When the cheap watch loses the face</strong>, it takes one frame and gives a second opinion — which of the several things "no face" can mean this actually is.</li>
+    <li><strong>When the parent taps "Look now."</strong></li>
+    <li><strong>Only concerning findings notify.</strong> Uncertainty is not a concern.</li>
+    <li><strong>Released when the screen goes away.</strong> 1.7 GB resident is not something to hold behind a screen nobody is looking at, on a phone whose memory manager is deciding what to kill.</li>
+  </ol>
+
+  <div class="callout warn">
+    <h4>Status: built, and blocked on a runtime that is not published yet</h4>
+    <p>Everything around the model works and is tested: the download, the trigger, the prompt, the parser, the alert, the UI, the release-on-close. On the emulator FastVLM's engine builds and its 491 MB vision encoder loads and delegates all 563 nodes to the GPU.</p>
+    <p>The image path does not complete. LiteRT-LM's <code>Conversation</code> — the layer that preprocesses an image — rejects the FastVLM bundle with <code>INVALID_ARGUMENT: Unsupported model type</code>, and the <code>Session</code> layer underneath answers <code>INTERNAL: Image must be preprocessed before being used in SessionBasic</code>. The newest published runtime is <code>0.0.0-alpha05</code> from October 2025; the bundle is newer than it. Nothing here is fixable from this side.</p>
+    <p>So there is a second backend. MediaPipe's LLM Inference API has had working vision modality for longer, and the app already ships it for the phrasing model — <code>setMaxNumImages</code>, <code>enableVisionModality</code>, <code>addImage</code>. Drop a Gemma 3n <code>.task</code> into the models folder and the describer uses that instead, no code change. It is not the one-tap download because Gemma is gated behind a manual licence acceptance that no app can perform for a user.</p>
+    <p>SmolVLM-256M was the third candidate and is ruled out for a different reason: its own model card says AI Edge Torch VLMs are not supported by the MediaPipe LLM Inference API, and it ships as a bare tflite needing a custom C++ pipeline.</p>
+  </div>
+
+  <p>The frame is compressed in memory and handed over as bytes — it is never written to disk, which is a stronger guarantee than writing it and deleting it. And the model requires Android 12: LiteRT-LM declares minSdk 31, admitted into a minSdk-26 build with an explicit override and a runtime guard, because raising the whole app to 31 would drop every Android 8-to-11 phone from a baby monitor that runs on them perfectly well.</p>
+
+  <div class="callout stop">
+    <h4>What it must never be used for</h4>
+    <p>Breathing, heart rate, oxygen, sleep staging, or any statement about whether a baby is alive or well. It reports posture and visibility, which is what a camera can establish. The FDA's warning letter to Owlet is what happens to products that blur that line.</p>
+  </div>
+</section>
+
+<section id="test-emulator">
+  <h2><span class="num">12</span>Testing on the emulator</h2>
+
+  <div class="callout warn">
+    <h4>The emulator has no microphone by default</h4>
+    <p>This is why "Start monitoring" appeared to do nothing. <code>AudioRecord</code> returns valid buffers full of zeroes — a successful read of silence — so nothing errors anywhere. Two things now make it visible: the live level meter, and an explicit warning after a minute of total silence.</p>
+  </div>
+
+  <div class="callout">
+    <h4>The demo clip is a real infant</h4>
+    <p>Assembled from two Donate-a-Cry recordings chosen by scoring the whole corpus with the shipped detector and keeping the ones where every window is confidently a cry. Both sit at a fundamental of 360–470 Hz, which is where infant cry lives.</p>
+    <p>The structure is deliberate: 1.2 s of room tone, then bursts separated by breath gaps, rising in level across twelve seconds. The detector reads 0.09 through the opening silence and 1.00 on the first burst — so a video shows the threshold being crossed rather than a meter that was already pinned — and the level ramp makes the RISING trend that drives escalation visible instead of theoretical.</p>
+  </div>
+
+  <h3>Cry detection — three ways, easiest first</h3>
+  <ol class="steps">
+    <li><strong>Run a demo cry.</strong> On the Monitor tab. Replays a recorded cry through the real pipeline at 6× speed. In about 20 seconds you see detection, the cause estimate, a soothing sound play, the verification, and the alert — all real, only the microphone bypassed. This is also the best 20 seconds of a jury demo.</li>
+    <li><strong>Run self-test.</strong> A one-second check of the audio path on the real accelerator. Reports confidence, per-window latency and which compute unit ran it. Expect ~99% and CPU on an emulator.</li>
+    <li><strong>Give the emulator real audio.</strong> Extended controls (⋯) → Microphone → enable <em>Virtual microphone uses host audio input</em>, then play a cry recording on your Mac. The meter moves and detection fires from the microphone path. This is the only way to test the microphone itself.</li>
+  </ol>
+
+  <h3>Camera watch</h3>
+  <p>Extended controls → Camera → set the back camera to <em>VirtualScene</em> or <em>Webcam0</em>. With a webcam, holding a photo of a face up to it makes the face-presence line flip. What you saw — <em>"can't see the face, still moving"</em> — is correct behaviour for the emulator's default scene: no face in frame, but the rendered scene has frame-to-frame variation.</p>
+
+  <h3>The suites</h3>
+  <pre><code>cd "baby cry/nila/android"
+
+./gradlew :app:testDebugUnitTest        # 108 tests, no device
+./gradlew :app:connectedDebugAndroidTest \
+  -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true   # 57 tests</code></pre>
+  <div class="callout warn">
+    <h4>Always pass that flag</h4>
+    <p>Without <code>leaveApksInstalledAfterRun</code>, Gradle uninstalls the app afterwards, which deletes <code>/sdcard/Android/data/com.nila/</code> — and with it the 547 MB language model. Re-push it with <code>./install-model.sh</code> if that happens.</p>
+  </div>
+</section>
+
+<section id="test-device">
+  <h2><span class="num">13</span>Putting it on a Vivo T1</h2>
+  <p class="lede">One APK, no model download, no developer tools needed. Then four Funtouch settings that decide whether it survives the night.</p>
+
+  <h3>Install</h3>
+  <ol class="steps">
+    <li><strong>Get the APK onto the phone.</strong> <code>Nila-phone.apk</code>, 72.9 MB, in the project root. Copy it over USB, or send it to yourself — anything that lands it in Downloads.</li>
+    <li><strong>Open it from Files.</strong> Funtouch will say installing from unknown sources is blocked; tap <em>Settings</em> in that dialog and allow it for the app you opened the file with.</li>
+    <li><strong>Ignore the security scan prompt.</strong> Vivo offers to send the APK for scanning. Decline — the whole point of this build is that nothing leaves the device.</li>
+    <li><strong>Grant three permissions on first launch:</strong> microphone, notifications, and camera if you want the safety watch. The app asks for all three at once.</li>
+  </ol>
+  <p>The T1 is arm64, which is the only ABI this APK ships. Both the Snapdragon 695 and Dimensity 900 variants are fine, and both have hardware that NNAPI can use — Settings will show whether the detector landed on NNAPI, GPU or CPU.</p>
+
+  <div class="callout warn">
+    <h4>Funtouch will kill this app overnight unless you tell it not to</h4>
+    <p>Vivo's memory manager is among the most aggressive on Android, and a foreground service with a wake lock is exactly what it targets. All four of these, or the monitor stops at 2am without saying why:</p>
+    <ol class="steps">
+      <li><strong>Settings → Battery → Background power consumption management → Nila → Allow background power consumption.</strong> This is the one that matters most.</li>
+      <li><strong>Settings → Apps → Nila → Battery → Unrestricted</strong> (some builds label this <em>Allow high background power</em>).</li>
+      <li><strong>Recent apps → swipe down on the Nila card → padlock.</strong> Locks it against "clear all".</li>
+      <li><strong>Settings → Battery → turn off Super power saving</strong> before a night run. It suspends background services regardless of the above.</li>
+    </ol>
+    <p>Verify it stuck: start monitoring, lock the phone, leave it an hour, then check the notification is still there and <em>Listening for</em> reads about an hour.</p>
+  </div>
+
+  <h3>Check it actually works, in this order</h3>
+  <ol class="steps">
+    <li><strong>Test the detector.</strong> On Monitor. One second, and it reports confidence, latency and which compute unit ran it. On a real phone expect NNAPI or GPU rather than CPU.</li>
+    <li><strong>Play a demo cry.</strong> The whole ladder — detect, guess a cause, play a sound, check whether it helped, then alert — in about twenty seconds.</li>
+    <li><strong>Start monitoring and talk.</strong> The microphone bar should move. If it sits at silence, a permission or another app has the mic.</li>
+    <li><strong>Play a real cry recording</strong> from another phone, a metre away. Detection fires inside a second.</li>
+    <li><strong>Record your own voice</strong> under Settings → Your voice. The next episode will prefer it over white noise.</li>
+    <li><strong>Photograph a medicine strip</strong> on the Scan tab. First scan takes an extra half-second while PP-OCR loads.</li>
+  </ol>
+
+  <h3>If you have adb</h3>
+  <pre><code># Developer options: Settings > About phone > Software version, tap 7 times
+# Then: Settings > System > Developer options > USB debugging
+
+adb install -r Nila-phone.apk
+adb logcat -s MonitorService:I CryEngine:I PaddleOcr:I SoothePlayer:I</code></pre>
+  <p>The watch module is separate and optional: <code>Nila-watch.apk</code>, installed to a paired Wear OS watch. Not needed for alerts — any paired watch or band that mirrors notifications already buzzes.</p>
+</section>
+
+<section id="models-download">
+  <h2><span class="num">14</span>Does anything need downloading?</h2>
+  <p class="lede">No. Install the APK and every feature works, offline, immediately.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>Size</th><th>How it arrives</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Cry detection + cause</td><td class="num">99 KB</td><td><span class="chip ok">in the APK</span></td></tr>
+      <tr><td class="name">PP-OCRv4 det / cls / rec</td><td class="num">15.2 MB</td><td><span class="chip ok">in the APK</span></td></tr>
+      <tr><td class="name">Face detector</td><td class="num">230 KB</td><td><span class="chip ok">in the APK</span></td></tr>
+      <tr><td class="name">Knowledge base</td><td class="num">43 KB</td><td><span class="chip ok">in the APK</span></td></tr>
+      <tr><td class="name">Soothing sounds</td><td class="num">4.1 MB</td><td><span class="chip ok">in the APK</span></td></tr>
+      <tr><td class="name">ML Kit recognisers</td><td class="num">2.4 MB</td><td><span class="chip partial">Play Services, once</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>The one asterisk is ML Kit, which Google Play Services fetches on first use. PP-OCR covers text recognition in the meantime, so nothing is broken while it lands — and on a phone with Play Services it is usually already there.</p>
+  <div class="callout">
+    <h4>There used to be a manual step</h4>
+    <p>A 547 MB language model had to be pushed to the phone with a script, and re-pushed after every uninstall because Android deletes <code>/sdcard/Android/data/</code> with the app. It is gone. See section 07 for why, and section 16 for what it cost.</p>
+  </div>
+</section>
+
+<section id="memory">
+  <h2><span class="num">15</span>What it costs to run</h2>
+  <p class="lede">Measured with <code>dumpsys meminfo</code> on a Pixel 7 emulator, API 36.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>State</th><th>Total PSS</th><th>Native heap</th><th>Java heap</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Monitoring all night</td><td class="num">206 MB</td><td class="num">48 MB</td><td class="num">17 MB</td></tr>
+      <tr><td class="name">After opening Scan</td><td class="num">273 MB</td><td class="num">92 MB</td><td class="num">21 MB</td></tr>
+      <tr><td class="name dim">Before, with the LLM</td><td class="num dim">357 MB</td><td class="num dim">210 MB</td><td class="num dim">19 MB</td></tr>
+    </tbody>
+  </table></div>
+  <p>The number that matters is the first one: <strong>206 MB while listening</strong>. That is the state the app is in for eight hours at a stretch, and it is the state a phone's memory manager judges when it decides which background service to kill.</p>
+
+  <h3>Where it goes</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Component</th><th>Disk</th><th>Loaded when</th></tr></thead>
+    <tbody>
+      <tr><td class="name">ONNX Runtime</td><td class="num">16.8 MB</td><td class="dim">First scan</td></tr>
+      <tr><td class="name">MediaPipe vision</td><td class="num">12.2 MB</td><td class="dim">Camera watch on</td></tr>
+      <tr><td class="name">ML Kit OCR</td><td class="num">10.6 MB</td><td class="dim">First scan</td></tr>
+      <tr><td class="name">PP-OCRv4 weights</td><td class="num">15.2 MB</td><td class="dim">First scan</td></tr>
+      <tr><td class="name">TensorFlow Lite</td><td class="num">5.1 MB</td><td class="dim">Monitoring</td></tr>
+      <tr><td class="name">Cry models</td><td class="num">99 KB</td><td class="dim">Monitoring</td></tr>
+    </tbody>
+  </table></div>
+  <p>PP-OCR used to load at startup. It now loads when the Scan screen opens, which is what takes the monitoring case from 273 MB down to 206 — an app that spends the night being a microphone should not be carrying a text recogniser.</p>
+
+  <h3>Battery and CPU</h3>
+  <ul class="plain">
+    <li><strong>0.2 ms per analysis window</strong> on the emulator CPU, one window every 480 ms — around 0.04% of one core.</li>
+    <li>Below −55 dBFS no inference runs at all. In a quiet nursery that is nearly every window, and it is most of why this can run all night.</li>
+    <li>A partial wake lock is held while monitoring. Without it the CPU sleeps between audio buffers and detection latency becomes unpredictable in exactly the conditions the product exists for.</li>
+    <li>Disk writes are one row per event. No audio is ever written.</li>
+  </ul>
+</section>
+
+<section id="gaps">
+  <h2><span class="num">16</span>What is not built</h2>
+  <div class="feature is-none"><h4>Multilingual answers</h4><span class="chip none">not built</span>
+    <p>The plumbing exists — a language field on the baby profile, passed through the router, retriever and prompt. What does not exist is a translated corpus. A 0.5B model translating clinical guidance into Hindi or Tamil is not something to ship. The honest fix is to translate the 46 documents with a human in the loop.</p></div>
+  <div class="feature is-none"><h4>Pre-roll clip export</h4><span class="chip none">not wired</span>
+    <p><code>PreRoll.kt</code> buffers the seconds before an event but no screen exposes it. It also conflicts with "no recordings are written to disk", which would need re-stating if this shipped.</p></div>
+  <div class="feature is-none"><h4>Sleep-cycle and growth tracking</h4><span class="chip none">not built</span>
+    <p>Sleep start is logged; sleep end, duration analysis, and weight/height percentiles are not.</p></div>
+  <div class="feature is-partial"><h4>Infrared on real hardware</h4><span class="chip partial">unverified</span>
+    <p>Implemented and test-covered as far as an emulator allows, which is not far. Needs an iQOO or Xiaomi handset with an emitter and a real remote to confirm.</p></div>
+  <div class="feature is-partial"><h4>Wear on real hardware</h4><span class="chip partial">unverified</span>
+    <p>The module builds and the protocol is parity-tested against the phone side. It has not run on a physical watch.</p></div>
+</section>
+
+<section id="improve">
+  <h2><span class="num">17</span>How to make it better</h2>
+
+  <h3>The cause classifier — the only route that is honest</h3>
+  <p>No amount of architecture work fixes 0.444. The dataset is 457 clips, 76% one class, 8 clips of <code>burping</code>, and no protocol establishing that the labels are anything more than the parent's guess at the time. The route forward is data, collected properly: multiple sessions per infant, labels confirmed by what actually resolved the cry, and enough subjects that a subject-wise split has statistical power. Anything else is re-deriving 0.953 by leaking and calling it progress.</p>
+
+  <h3>The three highest-value next moves</h3>
+  <ol class="steps">
+    <li><strong>Personalise the detector.</strong> A few minutes of a specific baby's cry, fine-tuning only the final layer on-device, should push per-baby recall well past a general model — and it is a genuinely on-device learning story, which is exactly the kind of thing a phone-first hackathon rewards.</li>
+    <li><strong>Widen the corpus.</strong> 46 documents is thin, and the evaluation says exactly where: night weaning, stool changes, baby walkers and reflux all return "I don't know" because they genuinely are not there. Two hundred entries, translated with human review, would both fix that and unlock the multilingual claim honestly.</li>
+    <li><strong>Real-photo OCR evaluation.</strong> Everything so far is synthetic. Fifty photographs of real strips and boxes — torn, foil, watermarked, angled — scored against ground truth would turn "it reads rotated text" into a number.</li>
+  </ol>
+
+  <h3>Smaller, cheap wins</h3>
+  <ul class="plain">
+    <li>Batch the PP-OCR recognition passes; currently one crop at a time, which leaves 2–3× on the table.</li>
+    <li>Quantise the PP-OCR recogniser to int8 — 10.9 MB is most of the APK growth.</li>
+    <li>Wire <code>PreRoll</code> to a UI, with the privacy copy updated to match.</li>
+    <li>Cache the assistant's BM25 index across launches rather than rebuilding it.</li>
+    <li>Add sleep-end logging so sleep duration becomes measurable alongside crying.</li>
+  </ul>
+
+  <div class="callout stop">
+    <h4>Two credentials still need revoking</h4>
+    <p><code>Why-is-my-Baby-Crying</code> has a live Gemini API key hardcoded in <code>ai.py</code> and <code>sample2.py</code>. <code>Nurture-Sync</code> has a Gemini key and a Serper key hardcoded in <code>backend/routes/medicines_routes.py</code>, plus a committed <code>.env</code> and two Google OAuth <code>client_secret</code> files. Both repositories are public and all of it is in git history, so rotating the keys is the only fix — deleting the files is not.</p>
+  </div>
+</section>
+
+<hr>
+<p class="footnote">Nila is an awareness aid, not a medical device. It does not monitor breathing or vital signs and must not be relied on to detect a medical emergency. It never states a medicine dose and never diagnoses.</p>
+
+</main>
+</div>

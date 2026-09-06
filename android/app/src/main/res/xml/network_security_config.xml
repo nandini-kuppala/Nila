@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app makes no outbound requests at all, so cleartext is forbidden outright
+  rather than left to the platform default. The opt-in laptop dashboard is a
+  *listening* socket on the local network; a browser connecting to it is not
+  governed by this policy, and nothing here permits the app to call out.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

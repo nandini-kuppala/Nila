@@ -1,0 +1,630 @@
+<title>Nila Build Spec</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ── Nightlight palette — deliberately single-theme dark.
+        This document renders in the exact palette it specifies. ── */
+  :root{
+    --night:#0D1117;
+    --surface:#141A22;
+    --raised:#1C242E;
+    --hairline:#2A3542;
+
+    --text:#ECE7DF;
+    --text-2:#9AA5B1;
+    --text-3:#6B7683;
+
+    --amber:#E9B872;
+    --amber-lt:#F5D9A8;
+    --amber-dim:#3A2E1E;
+
+    --sage:#7FB09A;
+    --attention:#E8934A;
+    --urgent:#E0574F;
+    --urgent-lt:#F5A9A3;
+    --urgent-dim:#3A1D1B;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -12px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--night);}
+  body{
+    margin:0; background:var(--night); color:var(--text);
+    font-family:"Figtree", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{margin:0; text-wrap:balance; font-weight:700; letter-spacing:-0.015em;}
+  code,.mono{font-family:"JetBrains Mono", ui-monospace, Menlo, monospace; font-variant-numeric:tabular-nums;}
+  a{color:var(--amber); text-decoration:none; border-bottom:1px solid rgba(233,184,114,.35);}
+  a:hover{border-bottom-color:var(--amber);}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--amber); outline-offset:3px; border-radius:4px;}
+
+  .page{max-width:940px; margin:0 auto; padding:0 24px 110px;}
+
+  /* nav */
+  .nav{position:sticky; top:0; z-index:30; background:rgba(13,17,23,.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--hairline);}
+  .nav-in{max-width:940px; margin:0 auto; padding:11px 24px; display:flex; gap:7px; overflow-x:auto; scrollbar-width:none;}
+  .nav-in::-webkit-scrollbar{display:none;}
+  .np{flex:0 0 auto; font-family:"JetBrains Mono",monospace; font-size:12px; padding:6px 12px; border-radius:100px;
+      border:1px solid var(--hairline); color:var(--text-2); white-space:nowrap; border-bottom:1px solid var(--hairline);}
+  .np:hover{color:var(--text); border-color:var(--text-3);}
+
+  /* masthead */
+  .mast{padding:64px 0 8px;}
+  .eyebrow{font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .eyebrow .pulse{width:8px; height:8px; border-radius:50%; background:var(--amber); box-shadow:0 0 0 0 rgba(233,184,114,.6); animation:breathe 3.2s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(233,184,114,.45);} 50%{box-shadow:0 0 0 9px rgba(233,184,114,0);}}
+  @media (prefers-reduced-motion:reduce){ .pulse{animation:none;} }
+  h1{font-size:clamp(34px,5vw,52px); line-height:1.04; max-width:15ch;}
+  .dek{margin-top:18px; font-size:18.5px; color:var(--text-2); max-width:64ch;}
+  .meta{margin-top:24px; display:flex; flex-wrap:wrap; gap:20px; font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--text-3);}
+  .meta b{color:var(--text-2); font-weight:500;}
+
+  section{padding-top:76px;}
+  h2{font-size:clamp(25px,3.2vw,33px); margin-bottom:8px;}
+  h3{font-size:20px; margin-top:44px; margin-bottom:6px;}
+  h4{font-size:15px; margin-bottom:6px;}
+  p{color:var(--text-2); max-width:72ch;}
+  p b, li b{color:var(--text); font-weight:600;}
+  .lead{font-size:16.5px;}
+
+  /* prompt block */
+  .promptwrap{margin-top:26px; border:1px solid var(--hairline); border-radius:14px; overflow:hidden; background:#0A0E13; box-shadow:var(--shadow);}
+  .prompthead{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--hairline); background:var(--surface);}
+  .prompthead span{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--text-2);}
+  .copybtn{font-family:"JetBrains Mono",monospace; font-size:12px; padding:6px 14px; border-radius:7px; cursor:pointer;
+           background:var(--amber-dim); color:var(--amber-lt); border:1px solid rgba(233,184,114,.35);}
+  .copybtn:hover{background:#4a3a24;}
+  pre{margin:0; padding:20px 22px; overflow-x:auto; font-size:12.6px; line-height:1.7; color:#D7DEE7;}
+  pre code{font-family:"JetBrains Mono",monospace;}
+  .c-key{color:var(--amber);} .c-cmt{color:var(--text-3);} .c-str{color:var(--sage);}
+
+  /* palette */
+  .swatches{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:24px;}
+  @media (max-width:760px){.swatches{grid-template-columns:repeat(2,1fr);}}
+  .sw{border:1px solid var(--hairline); border-radius:12px; overflow:hidden; background:var(--surface);}
+  .sw .chip{height:76px;}
+  .sw .meta2{padding:11px 13px;}
+  .sw .nm{font-size:13.5px; font-weight:600; color:var(--text);}
+  .sw .hx{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--text-3); margin-top:2px;}
+  .sw .use{font-size:11.5px; color:var(--text-2); margin-top:5px; line-height:1.45;}
+
+  /* tables */
+  .tw{overflow-x:auto; margin-top:22px; border:1px solid var(--hairline); border-radius:12px; background:var(--surface);}
+  table{width:100%; border-collapse:collapse; font-size:13.6px; min-width:580px;}
+  thead th{text-align:left; font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+           color:var(--text-3); padding:12px 15px; border-bottom:1px solid var(--hairline); white-space:nowrap;}
+  tbody td{padding:11px 15px; border-bottom:1px solid var(--hairline); vertical-align:top; color:var(--text-2);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody td b{color:var(--text);}
+  td.num,th.num{font-family:"JetBrains Mono",monospace; text-align:right;}
+
+  /* cards */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:24px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .card{border:1px solid var(--hairline); border-radius:12px; padding:18px 20px; background:var(--surface);}
+  .card h4{color:var(--text);}
+  .card p{margin:0; font-size:14px;}
+  .k{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--amber); margin-bottom:8px;}
+
+  /* wireframes */
+  .wf{margin-top:26px; border:1px solid var(--hairline); border-radius:14px; background:var(--surface); padding:24px 20px 8px; box-shadow:var(--shadow);}
+  .wf svg{width:100%; height:auto; display:block;}
+  .wfcap{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--text-3); padding:14px 4px 12px; border-top:1px solid var(--hairline); margin-top:18px;}
+
+  /* severity ladder */
+  .ladder{margin-top:24px; border:1px solid var(--hairline); border-radius:12px; overflow:hidden;}
+  .rung{display:grid; grid-template-columns:64px 1fr; gap:16px; padding:15px 18px; border-bottom:1px solid var(--hairline); background:var(--surface);}
+  .rung:last-child{border-bottom:none;}
+  .rung .lv{font-family:"JetBrains Mono",monospace; font-size:12.5px; font-weight:600;}
+  .rung .bd{font-size:14px; color:var(--text-2);}
+  .rung .bd b{color:var(--text);}
+
+  /* focus bars */
+  .focus{margin-top:24px; display:grid; gap:11px;}
+  .fr{border:1px solid var(--hairline); border-radius:11px; padding:15px 18px; background:var(--surface);}
+  .fr .top{display:flex; justify-content:space-between; align-items:baseline; gap:12px;}
+  .fr .ttl{font-weight:600; color:var(--text); font-size:15px;}
+  .fr .pc{font-family:"JetBrains Mono",monospace; font-size:15px; color:var(--amber);}
+  .bar{height:5px; border-radius:3px; background:var(--hairline); margin-top:11px; overflow:hidden;}
+  .bar i{display:block; height:100%; background:var(--amber); border-radius:3px;}
+  .fr .bd{margin-top:10px; font-size:13.8px; color:var(--text-2);}
+  .fr .bd b{color:var(--text);}
+
+  /* timeline */
+  .tl{margin-top:22px; border:1px solid var(--hairline); border-radius:12px; overflow:hidden; background:var(--surface);}
+  .tlr{display:grid; grid-template-columns:96px 1fr; gap:16px; padding:14px 18px; border-bottom:1px solid var(--hairline);}
+  .tlr:last-child{border-bottom:none;}
+  .tlr .t{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--amber); padding-top:2px;}
+  .tlr .d{font-size:14px; color:var(--text-2);}
+  .tlr .d b{color:var(--text);}
+  @media (max-width:620px){.tlr{grid-template-columns:1fr; gap:3px;}}
+
+  /* callout */
+  .co{margin-top:24px; border-radius:12px; padding:18px 21px; border:1px solid var(--hairline); background:var(--surface);}
+  .co.warn{border-color:rgba(224,87,79,.4); background:var(--urgent-dim);}
+  .co.good{border-color:rgba(127,176,154,.35); background:rgba(127,176,154,.07);}
+  .co h4{font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; margin-bottom:11px;}
+  .co.warn h4{color:var(--urgent-lt);} .co.good h4{color:var(--sage);} .co h4{color:var(--text-2);}
+  .co ul{margin:0; padding-left:20px;} .co li{margin-bottom:9px; font-size:14.3px; color:var(--text-2);}
+  .co li:last-child{margin-bottom:0;}
+  .tag{display:inline-block; font-family:"JetBrains Mono",monospace; font-size:10px; text-transform:uppercase; letter-spacing:.05em;
+       padding:2px 7px; border-radius:4px; margin-right:7px; vertical-align:1.5px; background:var(--amber-dim); color:var(--amber-lt);}
+  .tag.no{background:var(--urgent-dim); color:var(--urgent-lt);}
+  .tag.yes{background:rgba(127,176,154,.15); color:var(--sage);}
+
+  footer{margin-top:90px; padding-top:24px; border-top:1px solid var(--hairline); font-family:"JetBrains Mono",monospace;
+         font-size:12px; color:var(--text-3); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+
+  /* svg helpers */
+  .s-frame{fill:#0A0E13; stroke:var(--hairline); stroke-width:1.5;}
+  .s-el{fill:var(--raised); stroke:var(--hairline); stroke-width:1;}
+  .s-amber{fill:var(--amber-dim); stroke:var(--amber); stroke-width:1.2;}
+  .s-urgent{fill:var(--urgent-dim); stroke:var(--urgent); stroke-width:1.2;}
+  .s-t{fill:var(--text); font-family:"Figtree",sans-serif; font-size:11px;}
+  .s-t2{fill:var(--text-2); font-family:"Figtree",sans-serif; font-size:9.5px;}
+  .s-m{fill:var(--amber); font-family:"JetBrains Mono",monospace; font-size:9px;}
+  .s-lbl{fill:var(--text-3); font-family:"JetBrains Mono",monospace; font-size:9px; letter-spacing:.05em;}
+</style>
+
+<div class="nav"><div class="nav-in">
+  <a class="np" href="#top">Overview</a>
+  <a class="np" href="#prompt">The build prompt</a>
+  <a class="np" href="#design">Design system</a>
+  <a class="np" href="#screens">Screens</a>
+  <a class="np" href="#honesty">Honesty UI</a>
+  <a class="np" href="#severity">Severity model</a>
+  <a class="np" href="#focus">What wins</a>
+  <a class="np" href="#demo">Demo script</a>
+  <a class="np" href="#scope">Scope guard</a>
+</div></div>
+
+<div class="page">
+
+  <div class="mast" id="top">
+    <div class="eyebrow"><span class="pulse"></span>KOTLIN · JETPACK COMPOSE · SNAPDRAGON NPU</div>
+    <h1>Nila build spec</h1>
+    <p class="dek">Everything needed to build the app in 30 hours: a copy-paste prompt for your coding agent, a complete design system in a palette designed for a dark nursery at 2am, screen-by-screen specs, the severity model that makes the safety claim credible, and a rubric-weighted map of where to spend your remaining hours.</p>
+    <div class="meta">
+      <span><b>Product</b> — two-phone, on-device infant safety monitor</span>
+      <span><b>Target</b> — iQOO City Battles 2026</span>
+      <span><b>Clock</b> — 30 hours</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ PROMPT ═══════════ -->
+  <section id="prompt">
+    <h2>The build prompt</h2>
+    <p class="lead">Paste this whole block into your coding agent as the opening instruction. It is written to be executed in order — the build sequence at the bottom is load-bearing, because it gets you a demoable artifact by hour 7 rather than hour 25.</p>
+
+    <div class="promptwrap">
+      <div class="prompthead">
+        <span>nila-build-prompt.txt</span>
+        <button class="copybtn" id="cbtn" type="button">Copy</button>
+      </div>
+<pre id="ptxt"><code><span class="c-cmt"># NILA — on-device infant safety monitor (Android, Kotlin)</span>
+
+<span class="c-key">ROLE</span>
+You are building a two-phone Android app for a 30-hour hackathon judged on
+working product quality, on-device AI use, and technical depth. Optimise for a
+system that demonstrably works offline over one that has more features.
+
+<span class="c-key">PRODUCT</span>
+Two Android phones on the same local network:
+  GUARDIAN  an old phone placed at the crib. Camera + mic. Runs all inference.
+  PARENT    the user's phone. Live view, alerts, logs, guidance, learning.
+Hard constraint: no cloud, no account, no analytics, no network calls beyond
+the LAN. The product must work end-to-end with the router unplugged
+(Wi-Fi Direct fallback). This is a headline feature, not an optimisation.
+
+<span class="c-key">STACK — pin these, do not substitute</span>
+  Kotlin 2.x, Jetpack Compose (Material 3), minSdk 26, targetSdk 35
+  CameraX                    preview + ImageAnalysis
+  AudioRecord                16 kHz mono PCM16, 960 ms window, 50% overlap
+  LiteRT (TF Lite)           + Qualcomm AI Engine Direct (QNN) accelerator
+                             GPU delegate fallback, CPU last resort
+  MediaPipe Pose Landmarker  (Tasks Vision), LITE model, 5-8 fps
+  MediaPipe LLM Inference    Gemma 3n E2B int4, on the PARENT phone only
+  Room                       local persistence, no remote sync
+  Foreground services        camera + microphone types, on GUARDIAN
+
+<span class="c-key">MODULE LAYOUT</span>
+  :app            navigation, theme, screens
+  :core-audio     capture, ring buffer, log-mel frontend
+  :core-vision    CameraX analyzer, pose, geometric safety rules
+  :core-ml        model load, delegate selection, latency benchmarking
+  :core-events    fusion, severity tiers, Room entities, debounce
+  :core-transport pairing, LAN video, event sync
+  :core-llm       Gemma session, prompt assembly, streaming output
+
+<span class="c-key">AUDIO PIPELINE (Guardian)</span>
+1. AudioRecord 16 kHz mono into a lock-free ring buffer.
+2. Every 480 ms emit the last 960 ms as log-mel (64 mels, 25 ms win, 10 ms hop).
+3. Cry classifier: YAMNet (TFLite) day one — AudioSet already has
+   "Baby cry, infant cry". Read that logit plus "Speech" and "Silence".
+   Upgrade later to a fine-tuned MobileNetV3 head on log-mel if time allows.
+4. Smooth with a 3-of-5 majority vote before declaring CRY_START.
+5. Track the episode: start time, duration, RMS envelope sampled at 1 Hz,
+   peak intensity, and whether the envelope is rising or settling
+   (linear fit over the last 20 s).
+<span class="c-cmt">   NEVER classify WHY the baby is crying. Reason is not a label in this app.</span>
+
+<span class="c-key">VISION PIPELINE (Guardian)</span>
+CameraX ImageAnalysis at 5-8 fps -> Pose Landmarker -> geometric rules over
+landmarks, evaluated against a user-drawn crib quadrilateral:
+  ROLLOVER       shoulder-hip vector flips from supine to prone, held 5 frames
+  FACE_COVERED   nose+eyes landmark confidence < 0.3 while torso is tracked,
+                 held 2 s (distinguishes occlusion from "left the frame")
+  EDGE_APPROACH  any landmark within 12% of the crib polygon edge
+  CLIMB_OUT      hip landmark rises above the crib rail line, held 3 frames
+Every rule needs hysteresis: N frames to fire, M frames to clear, N != M.
+Log every rule evaluation with its input values — you will need this to debug
+at 3am and to prove technical depth to judges.
+
+<span class="c-key">EVENT FUSION + SEVERITY</span>
+  L0 QUIET      nothing
+  L1 NOTE       movement, brief fuss (< 20 s). Logged only.
+  L2 ATTENTION  cry episode confirmed > 20 s, or FACE_COVERED < 2 s.
+                Push to parent phone.
+  L3 URGENT     ROLLOVER to prone, or FACE_COVERED > 2 s.
+                Parent full-screen alert + Guardian local tone.
+  L4 CRITICAL   CLIMB_OUT or EDGE_APPROACH with rising trajectory.
+                Guardian sounds IMMEDIATELY at full volume, on-device,
+                WITHOUT waiting for network acknowledgement from the parent.
+<span class="c-cmt">L3/L4 must never depend on the transport layer. This is the whole safety claim.</span>
+
+<span class="c-key">ON-DEVICE LLM (Parent phone)</span>
+Gemma 3n receives structured evidence, never raw audio, and never a label:
+  { cry: { duration_s, intensity, trend, confidence },
+    context: { hours_since_feed, last_sleep_end, last_diaper, room_temp_c,
+               baby_age_months },
+    recent_events: [ ... last 6 ... ] }
+System prompt must enforce: state the most likely explanation WITH its
+reasoning, name the competing explanation, give 2-3 concrete actions, and
+say plainly when the acoustic evidence alone is not conclusive. Never output
+a bare diagnosis. Never mention SIDS. Always allow "I'm not sure — here's
+what to check first." Answer in the language the user selected.
+
+<span class="c-key">TRANSPORT</span>
+Pairing by QR code shown on Guardian, scanned by Parent (6-digit fallback).
+Video over WebRTC on the LAN; events over a small local socket with a JSON
+schema, at most a few messages per second. Encrypt with a key derived from
+the pairing secret. If discovery fails, fall back to Wi-Fi Direct.
+
+<span class="c-key">SELF-TEST (build this early, it is your demo opener)</span>
+One button on the Parent phone plays a recorded cry through its speaker.
+The Guardian must detect it and surface the event within 2 s. Show the
+measured end-to-end latency on screen. This proves the system works in five
+seconds flat and doubles as onboarding.
+
+<span class="c-key">BUILD ORDER — do not reorder</span>
+  1. Pairing + camera preview streaming Guardian -> Parent
+  2. AudioRecord loop + YAMNet on CPU, event fires, Parent shows it
+  3. Swap to LiteRT QNN accelerator; log and display per-model latency
+  4. Pose Landmarker + ROLLOVER rule only, tested with a doll
+  5. FACE_COVERED + crib polygon drawing UI
+  6. Room persistence + event timeline + quick-log buttons
+  7. Gemma 3n reasoning screen
+  8. Micro-lesson cards triggered by event type
+  9. Office Kit laptop dashboard mirror
+ 10. Airplane-mode rehearsal
+
+<span class="c-key">NON-GOALS — refuse these if asked</span>
+  No cry-reason classification as a label.  No RTSP/CCTV integration.
+  No cloud sync, accounts, or telemetry.    No iOS.
+  No medical claims of any kind.            No breathing/vitals monitoring.
+</code></pre>
+    </div>
+    <script>
+      (function(){
+        var b=document.getElementById('cbtn');
+        b.addEventListener('click',function(){
+          var t=document.getElementById('ptxt').innerText;
+          try{
+            navigator.clipboard.writeText(t).then(function(){
+              b.textContent='Copied';setTimeout(function(){b.textContent='Copy';},1800);
+            },function(){b.textContent='Select + copy';});
+          }catch(e){ b.textContent='Select + copy'; }
+        });
+      })();
+    </script>
+  </section>
+
+  <!-- ═══════════ DESIGN ═══════════ -->
+  <section id="design">
+    <h2>Design system — "Nightlight"</h2>
+    <p class="lead">The design decision that carries the whole app: <b>this is a 2am product</b>. A parent opens it half-asleep, one-handed, in a dark room, next to a sleeping infant. Every choice below follows from that, and every one of them is defensible out loud to a jury — which is worth more than a prettier palette with no reasoning behind it.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="k">Why dark-only</div>
+        <h4>Ship one theme, deliberately</h4>
+        <p>A white screen at 2am is hostile and wakes the room. Committing to dark-only halves your theming work and is a stronger design statement than a mediocre pair of themes. Say it on stage: "we didn't build a light theme, because nobody uses this at noon."</p>
+      </div>
+      <div class="card">
+        <div class="k">Why amber</div>
+        <h4>Warm accents, not blue</h4>
+        <p>Amber and warm tones carry the least short-wavelength light, so the UI disturbs adapted night vision and infant sleep less than the blue every other app defaults to. It is a nightlight, rendered as an interface — and it's a real reason, not a mood board.</p>
+      </div>
+    </div>
+
+    <h3>Palette</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#0D1117"></div><div class="meta2"><div class="nm">Night</div><div class="hx">#0D1117</div><div class="use">App ground. Not pure black — softer on adapted eyes.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#141A22"></div><div class="meta2"><div class="nm">Surface</div><div class="hx">#141A22</div><div class="use">Cards, sheets, list rows.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1C242E"></div><div class="meta2"><div class="nm">Raised</div><div class="hx">#1C242E</div><div class="use">Inputs, chips, pressed states.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#2A3542"></div><div class="meta2"><div class="nm">Hairline</div><div class="hx">#2A3542</div><div class="use">Borders and dividers. Never a heavy rule.</div></div></div>
+
+      <div class="sw"><div class="chip" style="background:#E9B872"></div><div class="meta2"><div class="nm">Amber</div><div class="hx">#E9B872</div><div class="use">Brand + primary action + the "watching" pulse.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#7FB09A"></div><div class="meta2"><div class="nm">Sage</div><div class="hx">#7FB09A</div><div class="use">All-clear, sleeping soundly, confirmations.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E8934A"></div><div class="meta2"><div class="nm">Attention</div><div class="hx">#E8934A</div><div class="use">L2 events only. Never decorative.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E0574F"></div><div class="meta2"><div class="nm">Urgent</div><div class="hx">#E0574F</div><div class="use">L3/L4 only. Large text and fills — pair with #F5A9A3 for small type.</div></div></div>
+
+      <div class="sw"><div class="chip" style="background:#ECE7DF"></div><div class="meta2"><div class="nm">Text</div><div class="hx">#ECE7DF</div><div class="use">Warm off-white. Pairs with amber; less clinical than pure white.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#9AA5B1"></div><div class="meta2"><div class="nm">Text 2</div><div class="hx">#9AA5B1</div><div class="use">Secondary copy, labels.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#6B7683"></div><div class="meta2"><div class="nm">Text 3</div><div class="hx">#6B7683</div><div class="use">Timestamps, metadata. Never body copy.</div></div></div>
+      <div class="sw"><div class="chip" style="background:#3A2E1E"></div><div class="meta2"><div class="nm">Amber dim</div><div class="hx">#3A2E1E</div><div class="use">Container behind amber text and icons.</div></div></div>
+    </div>
+
+    <div class="co good">
+      <h4>The discipline that keeps it from looking generic</h4>
+      <ul>
+        <li><span class="tag yes">rule</span><b>One dominant hue.</b> Amber is roughly 70% of your coloured pixels. Sage appears only on all-clear states. Attention and urgent appear <i>only</i> at their severity level and nowhere else — the moment you use urgent red as a decorative accent, it stops meaning anything at 3am.</li>
+        <li><span class="tag yes">rule</span><b>Severity is encoded in form, not just colour.</b> L2 is a chip. L3 is a full card. L4 takes the entire screen. A colour-blind parent, or one looking from across a room, still reads the difference.</li>
+        <li><span class="tag no">avoid</span>No pastel baby-blue or nursery-pink. It reads as a toy, and this is a safety instrument. No accent stripes down card edges, no gradient heroes — both are instantly recognisable as filler.</li>
+      </ul>
+    </div>
+
+    <h3>Type</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Role</th><th>Face</th><th class="num">Size</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Display numerals</td><td class="mono">JetBrains Mono 600</td><td class="num">44sp</td><td>Time since last feed, cry duration, latency. Tabular figures, always.</td></tr>
+          <tr><td>Screen title</td><td class="mono">Figtree 700</td><td class="num">28sp</td><td>One per screen. No subtitle unless it earns its place.</td></tr>
+          <tr><td>Section header</td><td class="mono">Figtree 600</td><td class="num">20sp</td><td></td></tr>
+          <tr><td>Body</td><td class="mono">Figtree 400</td><td class="num">16sp</td><td><b>Never below 15sp.</b> Sleepy eyes, dim screen, one hand.</td></tr>
+          <tr><td>Label / chip</td><td class="mono">Figtree 500</td><td class="num">13sp</td><td>Slight positive letter-spacing on uppercase only.</td></tr>
+          <tr><td>Timestamp / telemetry</td><td class="mono">JetBrains Mono 400</td><td class="num">12sp</td><td>Mono everywhere a number must line up or be read precisely.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px;">Load both via Android's downloadable-fonts so nothing ships in the APK. The mono/sans split is doing real work here: it silently frames the app as an <i>instrument</i> rather than a content app, which is exactly the impression you want when a jury looks at it for four seconds.</p>
+
+    <h3>Motion and touch</h3>
+    <div class="grid2">
+      <div class="card"><div class="k">Motion</div><h4>Slow by default, fast only for danger</h4><p>The armed indicator breathes on a 3.2s cycle. Screen transitions 220ms ease-out. The <i>only</i> fast motion in the app is an L3/L4 alert arriving — so speed itself becomes a signal. Honour <code class="mono">Settings.Global.ANIMATOR_DURATION_SCALE</code>.</p></div>
+      <div class="card"><div class="k">Touch</div><h4>One hand, in the dark</h4><p>Every primary control in the bottom third. Minimum 56dp targets, 64dp for alert actions. Quick-log buttons (fed / slept / changed) big enough to hit without looking. No swipe-only actions anywhere — a half-asleep parent will not discover them.</p></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SCREENS ═══════════ -->
+  <section id="screens">
+    <h2>Screens</h2>
+    <p class="lead">Seven screens total. Four of them are the demo. Build in this order.</p>
+
+    <div class="wf">
+      <svg viewBox="0 0 940 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- GUARDIAN ARMED -->
+        <text x="4" y="14" class="s-lbl">GUARDIAN — ARMED (the screen nobody looks at)</text>
+        <rect x="4" y="26" width="200" height="380" rx="20" class="s-frame"></rect>
+        <circle cx="104" cy="150" r="26" class="s-amber"></circle>
+        <circle cx="104" cy="150" r="7" fill="#E9B872"></circle>
+        <text x="104" y="206" text-anchor="middle" class="s-t">Watching</text>
+        <text x="104" y="226" text-anchor="middle" class="s-m">4h 12m · 2 events</text>
+        <rect x="34" y="258" width="140" height="34" rx="17" class="s-el"></rect>
+        <text x="104" y="280" text-anchor="middle" class="s-t2">Tap twice to stop</text>
+        <text x="104" y="330" text-anchor="middle" class="s-t2">screen dims to 1% after 20s</text>
+        <text x="104" y="348" text-anchor="middle" class="s-t2">camera + mic stay live</text>
+
+        <!-- PARENT HOME -->
+        <text x="248" y="14" class="s-lbl">PARENT — HOME</text>
+        <rect x="248" y="26" width="200" height="380" rx="20" class="s-frame"></rect>
+        <rect x="262" y="42" width="172" height="96" rx="10" class="s-el"></rect>
+        <text x="348" y="86" text-anchor="middle" class="s-t2">live view</text>
+        <text x="348" y="102" text-anchor="middle" class="s-t2">(tap to expand)</text>
+        <rect x="262" y="148" width="172" height="46" rx="10" fill="rgba(127,176,154,.1)" stroke="#7FB09A" stroke-width="1.2"></rect>
+        <circle cx="280" cy="171" r="5" fill="#7FB09A"></circle>
+        <text x="294" y="168" class="s-t">Sleeping soundly</text>
+        <text x="294" y="184" class="s-t2">quiet for 47 min</text>
+        <text x="262" y="222" class="s-lbl">SINCE</text>
+        <text x="262" y="252" class="s-m" style="font-size:19px">3h 10m</text>
+        <text x="262" y="268" class="s-t2">last feed</text>
+        <text x="356" y="252" class="s-m" style="font-size:19px">1h 05m</text>
+        <text x="356" y="268" class="s-t2">last change</text>
+        <rect x="262" y="292" width="52" height="44" rx="10" class="s-el"></rect>
+        <text x="288" y="318" text-anchor="middle" class="s-t2">Fed</text>
+        <rect x="322" y="292" width="52" height="44" rx="10" class="s-el"></rect>
+        <text x="348" y="318" text-anchor="middle" class="s-t2">Slept</text>
+        <rect x="382" y="292" width="52" height="44" rx="10" class="s-el"></rect>
+        <text x="408" y="318" text-anchor="middle" class="s-t2">Changed</text>
+        <rect x="262" y="348" width="172" height="42" rx="21" class="s-amber"></rect>
+        <text x="348" y="374" text-anchor="middle" class="s-t" style="fill:#F5D9A8">Ask about this cry</text>
+
+        <!-- ALERT -->
+        <text x="492" y="14" class="s-lbl">PARENT — L4 ALERT (full takeover)</text>
+        <rect x="492" y="26" width="200" height="380" rx="20" fill="#3A1D1B" stroke="#E0574F" stroke-width="2"></rect>
+        <text x="592" y="104" text-anchor="middle" class="s-t" style="font-size:15px; fill:#F5A9A3">CLIMBING OUT</text>
+        <text x="592" y="132" text-anchor="middle" class="s-t2" style="fill:#F5A9A3">detected 2 seconds ago</text>
+        <rect x="512" y="152" width="160" height="86" rx="8" fill="#1C242E" stroke="#E0574F" stroke-width="1"></rect>
+        <text x="592" y="200" text-anchor="middle" class="s-t2">frame at trigger</text>
+        <text x="592" y="264" text-anchor="middle" class="s-t2" style="fill:#F5A9A3">Alarm sounding on the crib phone</text>
+        <rect x="512" y="288" width="160" height="52" rx="12" fill="#E0574F"></rect>
+        <text x="592" y="320" text-anchor="middle" class="s-t" style="fill:#1A0F0E; font-size:14px; font-weight:700">I'm going now</text>
+        <rect x="512" y="350" width="160" height="40" rx="12" fill="none" stroke="#6B7683" stroke-width="1"></rect>
+        <text x="592" y="376" text-anchor="middle" class="s-t2">False alarm</text>
+
+        <!-- READING -->
+        <text x="736" y="14" class="s-lbl">PARENT — READING (the honesty screen)</text>
+        <rect x="736" y="26" width="200" height="380" rx="20" class="s-frame"></rect>
+        <text x="750" y="60" class="s-lbl">CRY EPISODE · 2m 40s</text>
+        <path d="M750,104 L764,96 L778,84 L792,88 L806,72 L820,66 L834,70 L848,58 L862,54 L876,62 L890,50 L904,46 L918,52"
+              fill="none" stroke="#E8934A" stroke-width="2"></path>
+        <text x="750" y="126" class="s-t2">rising · peak 20s ago</text>
+        <rect x="750" y="142" width="172" height="1" fill="#2A3542"></rect>
+        <text x="750" y="170" class="s-t" style="font-size:12.5px">Most likely hunger</text>
+        <text x="750" y="190" class="s-t2">3h 10m since the last feed,</text>
+        <text x="750" y="204" class="s-t2">and the cry is still building.</text>
+        <text x="750" y="228" class="s-t2" style="fill:#9AA5B1">Also possible: discomfort —</text>
+        <text x="750" y="242" class="s-t2" style="fill:#9AA5B1">1h since the last change.</text>
+        <rect x="750" y="258" width="172" height="34" rx="8" fill="rgba(233,184,114,.08)" stroke="#3A2E1E" stroke-width="1"></rect>
+        <text x="762" y="274" class="s-t2" style="fill:#E9B872">The sound alone can't tell</text>
+        <text x="762" y="286" class="s-t2" style="fill:#E9B872">these apart. Try feeding first.</text>
+        <rect x="750" y="306" width="82" height="30" rx="8" class="s-el"></rect>
+        <text x="791" y="325" text-anchor="middle" class="s-t2">Why?</text>
+        <rect x="840" y="306" width="82" height="30" rx="8" class="s-el"></rect>
+        <text x="881" y="325" text-anchor="middle" class="s-t2">Ask more</text>
+        <text x="750" y="364" class="s-lbl">EVIDENCE</text>
+        <rect x="750" y="374" width="60" height="22" rx="11" class="s-el"></rect>
+        <text x="780" y="389" text-anchor="middle" class="s-t2" style="font-size:8.5px">rising</text>
+        <rect x="816" y="374" width="60" height="22" rx="11" class="s-el"></rect>
+        <text x="846" y="389" text-anchor="middle" class="s-t2" style="font-size:8.5px">3h10 fed</text>
+        <rect x="882" y="374" width="40" height="22" rx="11" class="s-el"></rect>
+        <text x="902" y="389" text-anchor="middle" class="s-t2" style="font-size:8.5px">31°C</text>
+      </svg>
+      <div class="wfcap">The Guardian screen is intentionally the emptiest thing you build. Every other monitoring app shows a dashboard on the crib device; yours shows one breathing dot and dims itself, because there is a sleeping baby half a metre away.</div>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Screen</th><th>Device</th><th>Job</th><th>Priority</th></tr></thead>
+        <tbody>
+          <tr><td><b>Pair</b></td><td>Both</td><td>QR on Guardian, scan on Parent. 6-digit fallback. Under 20 seconds.</td><td>P0</td></tr>
+          <tr><td><b>Set the zone</b></td><td>Guardian</td><td>Camera preview, drag four corners onto the crib. Persist the polygon.</td><td>P0</td></tr>
+          <tr><td><b>Armed</b></td><td>Guardian</td><td>One breathing dot, uptime, event count. Dims to 1%. Two-tap to stop.</td><td>P0</td></tr>
+          <tr><td><b>Home</b></td><td>Parent</td><td>Live view, status band, since-counters, three quick-log buttons.</td><td>P0</td></tr>
+          <tr><td><b>Alert</b></td><td>Parent</td><td>Full takeover. What, when, frame at trigger, two actions.</td><td>P0</td></tr>
+          <tr><td><b>Reading</b></td><td>Parent</td><td>Intensity curve + grounded explanation + evidence chips + follow-up.</td><td>P1</td></tr>
+          <tr><td><b>Timeline</b></td><td>Parent</td><td>Chronological events with severity chips. Scrollable, groupable by night.</td><td>P1</td></tr>
+          <tr><td><b>Learn</b></td><td>Parent</td><td>30-second cards, surfaced by event type, not a browsable library.</td><td>P2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════ HONESTY ═══════════ -->
+  <section id="honesty">
+    <h2>The honesty components</h2>
+    <p class="lead">This is the part of the UI that no competitor has, and the reason your research finding becomes a product advantage rather than an awkward footnote. Three components carry it.</p>
+
+    <div class="grid2">
+      <div class="card"><div class="k">Component 1</div><h4>The intensity curve</h4><p>A sparkline of RMS over the episode, with the trend named in words: <i>rising</i>, <i>settling</i>, <i>steady</i>. This is real, measurable information about the cry — unlike a reason label — and it's what a parent actually wants to know from the next room.</p></div>
+      <div class="card"><div class="k">Component 2</div><h4>Evidence chips</h4><p>Every explanation shows the inputs it used as tappable chips: <code class="mono">rising</code>, <code class="mono">3h10 fed</code>, <code class="mono">31°C</code>. The reasoning is inspectable. Tap one and it explains its contribution.</p></div>
+      <div class="card"><div class="k">Component 3</div><h4>The hedge line</h4><p>A fixed slot in the Reading card that states what the system <i>cannot</i> tell. "The sound alone can't separate hunger from discomfort." It is always present, never empty, never boilerplate.</p></div>
+      <div class="card"><div class="k">The rule</div><h4>No bare labels, ever</h4><p>The string "Your baby is hungry" must not exist in the codebase. Grep for it before you demo. Every explanation carries its reason and its uncertainty, or it doesn't ship.</p></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SEVERITY ═══════════ -->
+  <section id="severity">
+    <h2>Severity model</h2>
+    <p class="lead">Get this right and the safety story is credible. Get it wrong and the app either cries wolf all night or misses the thing it exists to catch.</p>
+    <div class="ladder">
+      <div class="rung"><div class="lv" style="color:var(--text-3)">L0</div><div class="bd"><b>Quiet.</b> Nothing rendered, nothing stored. Most of the night lives here.</div></div>
+      <div class="rung"><div class="lv" style="color:var(--sage)">L1</div><div class="bd"><b>Note.</b> Movement, a brief fuss under 20s. Written to the timeline, no notification. Builds the night's story without waking anyone.</div></div>
+      <div class="rung"><div class="lv" style="color:var(--attention)">L2</div><div class="bd"><b>Attention.</b> Confirmed cry over 20s, or a face briefly covered. Notification on the Parent phone, amber chip, no sound by default.</div></div>
+      <div class="rung"><div class="lv" style="color:var(--urgent)">L3</div><div class="bd"><b>Urgent.</b> Rollover to prone, or face covered beyond 2s. Full-screen alert, sound, haptic. <b>Guardian sounds locally too</b> — it does not wait for the parent phone to acknowledge.</div></div>
+      <div class="rung"><div class="lv" style="color:var(--urgent)">L4</div><div class="bd"><b>Critical.</b> Climb-out or edge approach with rising trajectory. Guardian alarms <b>immediately at full volume, on-device, before any network round trip</b>. The alert must beat the fall, not report it.</div></div>
+    </div>
+    <div class="co warn">
+      <h4>The two failure modes that lose you the demo</h4>
+      <ul>
+        <li><span class="tag no">flapping</span>Without hysteresis, every rule oscillates and the demo becomes a fire alarm. Require N consecutive frames to fire and a <i>different</i> M to clear. Tune with a doll and a towel before you tune anything else.</li>
+        <li><span class="tag no">silent failure</span>If the Guardian's camera or mic dies, the Parent phone must say so within 10 seconds. A monitor that fails quietly is worse than no monitor, and a judge <i>will</i> ask what happens when it breaks. Have the answer on screen.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ FOCUS ═══════════ -->
+  <section id="focus">
+    <h2>Where to spend your hours</h2>
+    <p class="lead">Their rubric is published, so treat it as a spec. Ranked by return per hour, not by weight alone — some criteria are cheap to max out and some are not.</p>
+
+    <div class="focus">
+      <div class="fr">
+        <div class="top"><span class="ttl">End product quality</span><span class="pc">30%</span></div>
+        <div class="bar"><i style="width:100%"></i></div>
+        <div class="bd"><b>Spend the most here, and spend it on finishing rather than adding.</b> Their rubric says outright that a well-built simple product beats a broken complex one. Two P0 features that never fail beat five that mostly work. The single highest-value hour of your build is the airplane-mode rehearsal at H25.</div>
+      </div>
+      <div class="fr">
+        <div class="top"><span class="ttl">Novelty and impact</span><span class="pc">20%</span></div>
+        <div class="bar"><i style="width:67%"></i></div>
+        <div class="bd"><b>You already have this, and it costs you almost no build time — it's a slide.</b> Three claims: safety AI that until now needed a ₹18,000–₹35,000 camera, running on a phone from a drawer; a system that states its uncertainty in a category full of overclaiming; and the leakage finding from your own research, which is the credibility anchor for everything else you say.</div>
+      </div>
+      <div class="fr">
+        <div class="top"><span class="ttl">HackTracker — creative phone use</span><span class="pc">15%</span></div>
+        <div class="bar"><i style="width:100%"></i></div>
+        <div class="bd"><b>Free points, if you build the product as specified.</b> Read from device data, not self-reported: camera, mic and NPU inference running continuously on two phones in different roles is about as strong as this metric gets. Make sure both devices are logged in and active for the whole window.</div>
+      </div>
+      <div class="fr">
+        <div class="top"><span class="ttl">Technical depth</span><span class="pc">15%</span></div>
+        <div class="bar"><i style="width:80%"></i></div>
+        <div class="bd"><b>One slide wins this: the latency table.</b> Per-model, CPU vs GPU vs NPU, measured on the actual device via Qualcomm AI Hub and your own instrumentation. Add the quantisation choice, the hysteresis constants, and why L4 fires locally. Concrete numbers beat architecture diagrams every time.</div>
+      </div>
+      <div class="fr">
+        <div class="top"><span class="ttl">HackTracker — Office Kit</span><span class="pc">10%</span></div>
+        <div class="bar"><i style="width:90%"></i></div>
+        <div class="bd"><b>Cheap to earn, easy to forget.</b> Mirror the Guardian's live event timeline to the laptop and use it as your actual debugging surface from hour 3 onward. Genuine sustained use, not a five-minute cameo at the end — it's measured from device data.</div>
+      </div>
+      <div class="fr">
+        <div class="top"><span class="ttl">Demo and presentation</span><span class="pc">10%</span></div>
+        <div class="bar"><i style="width:100%"></i></div>
+        <div class="bd"><b>Weighted lowest, decides the most.</b> Two scored rounds feed the Top 10 and the final pitch picks winners, so presentation gates everything. Rehearse three times, timed, out loud. Script below.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ DEMO ═══════════ -->
+  <section id="demo">
+    <h2>The five-minute demo</h2>
+    <p class="lead">Open with the product working, not with slides. Bring a doll and a small towel — you need something to roll over and something to put over its face.</p>
+    <div class="tl">
+      <div class="tlr"><div class="t">0:00 – 0:30</div><div class="d"><b>Cold open, no slides.</b> Two phones on the table, one at a doll. "This costs nothing. It does what a ₹30,000 monitor does." Hit self-test: a cry plays, the Guardian catches it, latency appears on screen. <b>You've proven it works before you've introduced yourself.</b></div></div>
+      <div class="tlr"><div class="t">0:30 – 1:15</div><div class="d"><b>The stake.</b> One slide, three numbers from your own research: 5.6% of parents of 6-month-olds admitted smothering, slapping or shaking their baby over crying; 27% report crying problems in the first four months; ~20% of infants cry excessively, linked to parental anxiety and depression. Then: "the existing answer costs ₹30,000 and ships your baby's video to a cloud."</div></div>
+      <div class="tlr"><div class="t">1:15 – 2:30</div><div class="d"><b>Safety, live.</b> Roll the doll prone — L3 fires. Towel over the face — L3. Lift it towards the rail — <b>L4, and the crib phone alarms on its own.</b> Then say the line that lands: "that alarm didn't touch the network. It has to beat the fall, not report it."</div></div>
+      <div class="tlr"><div class="t">2:30 – 3:15</div><div class="d"><b>The honesty beat.</b> Show the Reading card. "Published cry classifiers report 96–99% accuracy. We built one — 98.76%. Then we split by infant instead of by clip and it fell to chance, which matches the 2026 controlled study on this corpus. So we don't tell you why your baby is crying. We show you the evidence and say what we can't know." <b>This is the moment the jury remembers.</b></div></div>
+      <div class="tlr"><div class="t">3:15 – 4:00</div><div class="d"><b>Under the hood.</b> Airplane mode on, both phones — everything still works. The latency table: NPU vs GPU vs CPU on this device. Gemma 3n answering in Hindi or Tamil, offline, on the phone in your hand.</div></div>
+      <div class="tlr"><div class="t">4:00 – 4:40</div><div class="d"><b>The market gap.</b> Thirty seconds: real safety AI is locked in $199–$399 hardware; the free two-phone apps have no intelligence at all. India is the fastest-growing market in Asia Pacific at 8.9% CAGR. Nobody occupies the middle.</div></div>
+      <div class="tlr"><div class="t">4:40 – 5:00</div><div class="d"><b>Close on the constraint, not the roadmap.</b> "No cloud, no subscription, no new hardware. It's an awareness aid, not a medical device — and we're careful about that line." Then stop talking.</div></div>
+    </div>
+    <div class="co">
+      <h4>Demo insurance</h4>
+      <ul>
+        <li>Record a full working video at H25 and have it queued. Demo live anyway — but never be the team whose only copy was live.</li>
+        <li>Bring a battery pack for both phones and a small Bluetooth speaker in case the room is loud.</li>
+        <li>Pre-set the crib polygon for the demo table and save it — don't re-draw it on stage.</li>
+        <li>Rehearse the doll choreography. Fumbling the rollover for fifteen seconds costs more than any missing feature.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════ SCOPE ═══════════ -->
+  <section id="scope">
+    <h2>Scope guard</h2>
+    <p class="lead">Pin this where the team can see it. Every hour spent on the right column is an hour stolen from the 30% that actually scores.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Build</th><th>Refuse</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><b>Second phone as the crib camera</b></td><td>CCTV / RTSP integration</td><td>Compatibility rabbit hole, scores nothing — the rubric rewards phone use, read from device data.</td></tr>
+          <tr><td><b>Evidence + uncertainty</b></td><td>Cry-reason classifier</td><td>The science doesn't support it and an informed judge will know.</td></tr>
+          <tr><td><b>Local LAN, no account</b></td><td>Cloud sync, login, backend</td><td>Nothing to deploy or debug, and "works with the router unplugged" is a better feature than any of it.</td></tr>
+          <tr><td><b>Event-triggered cards</b></td><td>A content library or CMS</td><td>Ten hardcoded cards beat an empty browsable shelf.</td></tr>
+          <tr><td><b>Rollover + face-covered</b></td><td>Breathing, vitals, sleep staging</td><td>Straight into medical-device territory — see Owlet's FDA warning letter.</td></tr>
+          <tr><td><b>Android only</b></td><td>iOS, tablet layouts, landscape</td><td>Every device in the room is an Android phone in portrait.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="co warn">
+      <h4>The hour-13 rule</h4>
+      <ul>
+        <li>If Pose Landmarker isn't stable by <b>H13</b>, ship <b>rollover only</b> and move every remaining vision hour to the Reading screen and the demo. A polished two-feature product outscores a broken four-feature one, and their rubric says so in as many words.</li>
+        <li>If the QNN accelerator isn't up by <b>H7</b>, fall back to the GPU delegate and keep building. Revisit it at H21 if you're ahead — never at H12.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>Nila · build spec v1</span>
+    <span>Kotlin · Compose · LiteRT/QNN · Gemma 3n</span>
+  </footer>
+</div>

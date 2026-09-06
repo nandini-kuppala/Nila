@@ -1,0 +1,442 @@
+{
+  "pipeline": "Why-is-my-Baby-Crying endsem.ipynb, reproduced",
+  "n_features": 466,
+  "n_rows": 1207,
+  "n_subjects": 221,
+  "augmented_rows": 750,
+  "clip_wise": {
+    "n": 242,
+    "accuracy": 0.9380165289256198,
+    "balanced_accuracy": 0.9407664197366788,
+    "macro_f1": 0.9375551202681672,
+    "weighted_f1": 0.9382203995564236,
+    "macro_auc": 0.994319225439444,
+    "majority_baseline": 0.3181818181818182,
+    "confusion": [
+      [
+        34,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        17,
+        0,
+        0,
+        1
+      ],
+      [
+        2,
+        0,
+        57,
+        0,
+        0
+      ],
+      [
+        3,
+        1,
+        0,
+        72,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        6,
+        47
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.8717948717948718,
+        "recall": 0.9714285714285714,
+        "f1-score": 0.918918918918919,
+        "support": 35.0
+      },
+      "burping": {
+        "precision": 0.9444444444444444,
+        "recall": 0.9444444444444444,
+        "f1-score": 0.9444444444444444,
+        "support": 18.0
+      },
+      "discomfort": {
+        "precision": 1.0,
+        "recall": 0.9661016949152542,
+        "f1-score": 0.9827586206896551,
+        "support": 59.0
+      },
+      "hungry": {
+        "precision": 0.9230769230769231,
+        "recall": 0.935064935064935,
+        "f1-score": 0.9290322580645162,
+        "support": 77.0
+      },
+      "tired": {
+        "precision": 0.94,
+        "recall": 0.8867924528301887,
+        "f1-score": 0.912621359223301,
+        "support": 53.0
+      },
+      "accuracy": 0.9380165289256198,
+      "macro avg": {
+        "precision": 0.9358632478632479,
+        "recall": 0.9407664197366788,
+        "f1-score": 0.9375551202681672,
+        "support": 242.0
+      },
+      "weighted avg": {
+        "precision": 0.9397096842551388,
+        "recall": 0.9380165289256198,
+        "f1-score": 0.9382203995564236,
+        "support": 242.0
+      }
+    }
+  },
+  "subject_wise_same_model": {
+    "n": 80,
+    "accuracy": 0.975,
+    "balanced_accuracy": 0.8666666666666666,
+    "macro_f1": 0.8973333333333333,
+    "weighted_f1": 0.9689166666666666,
+    "macro_auc": 0.9923423423423424,
+    "majority_baseline": 0.925,
+    "confusion": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        74,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        1
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "burping": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "discomfort": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1.0
+      },
+      "hungry": {
+        "precision": 0.9736842105263158,
+        "recall": 1.0,
+        "f1-score": 0.9866666666666667,
+        "support": 74.0
+      },
+      "tired": {
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1-score": 0.5,
+        "support": 3.0
+      },
+      "accuracy": 0.975,
+      "macro avg": {
+        "precision": 0.9947368421052631,
+        "recall": 0.8666666666666666,
+        "f1-score": 0.8973333333333333,
+        "support": 80.0
+      },
+      "weighted avg": {
+        "precision": 0.9756578947368422,
+        "recall": 0.975,
+        "f1-score": 0.9689166666666666,
+        "support": 80.0
+      }
+    }
+  },
+  "subject_wise_retrained": {
+    "n": 80,
+    "accuracy": 0.875,
+    "balanced_accuracy": 0.1891891891891892,
+    "macro_f1": 0.18666666666666668,
+    "weighted_f1": 0.8633333333333333,
+    "macro_auc": 0.41442022739491086,
+    "majority_baseline": 0.925,
+    "confusion": [
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        2,
+        1,
+        70,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        3,
+        0
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "burping": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "discomfort": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 1.0
+      },
+      "hungry": {
+        "precision": 0.9210526315789473,
+        "recall": 0.9459459459459459,
+        "f1-score": 0.9333333333333333,
+        "support": 74.0
+      },
+      "tired": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 3.0
+      },
+      "accuracy": 0.875,
+      "macro avg": {
+        "precision": 0.18421052631578946,
+        "recall": 0.1891891891891892,
+        "f1-score": 0.18666666666666668,
+        "support": 80.0
+      },
+      "weighted avg": {
+        "precision": 0.8519736842105263,
+        "recall": 0.875,
+        "f1-score": 0.8633333333333333,
+        "support": 80.0
+      }
+    }
+  },
+  "top_features": [
+    {
+      "name": "mel_spec_27_mean",
+      "importance": 0.011852947089775856
+    },
+    {
+      "name": "mel_spec_27_std",
+      "importance": 0.011596411517748133
+    },
+    {
+      "name": "mel_spec_28_std",
+      "importance": 0.010578459206369253
+    },
+    {
+      "name": "mfcc_16_skew",
+      "importance": 0.009490380229020833
+    },
+    {
+      "name": "mel_spec_4_std",
+      "importance": 0.009480330390417456
+    },
+    {
+      "name": "mel_spec_28_mean",
+      "importance": 0.009025900030119376
+    },
+    {
+      "name": "mel_spec_3_std",
+      "importance": 0.00865253077208818
+    },
+    {
+      "name": "mfcc_delta2_3_std",
+      "importance": 0.0083650786900725
+    },
+    {
+      "name": "mel_spec_26_std",
+      "importance": 0.008243100556898714
+    },
+    {
+      "name": "spectral_contrast_2_mean",
+      "importance": 0.007840085750630787
+    },
+    {
+      "name": "mel_spec_26_mean",
+      "importance": 0.00743944581327931
+    },
+    {
+      "name": "mel_spec_29_mean",
+      "importance": 0.007299249223053387
+    },
+    {
+      "name": "mel_spec_29_std",
+      "importance": 0.007217573715416109
+    },
+    {
+      "name": "mel_spec_2_std",
+      "importance": 0.0070707636922041385
+    },
+    {
+      "name": "mfcc_delta2_4_std",
+      "importance": 0.006972324129176997
+    },
+    {
+      "name": "mel_spec_3_mean",
+      "importance": 0.006918379008454114
+    },
+    {
+      "name": "mel_spec_4_mean",
+      "importance": 0.00684770314075319
+    },
+    {
+      "name": "mel_spec_2_mean",
+      "importance": 0.006333238063509908
+    },
+    {
+      "name": "spectral_contrast_2_std",
+      "importance": 0.006193193565601531
+    },
+    {
+      "name": "mfcc_delta2_5_std",
+      "importance": 0.006080552485592825
+    },
+    {
+      "name": "rms_1_std",
+      "importance": 0.005780122787835063
+    },
+    {
+      "name": "mel_spec_25_std",
+      "importance": 0.005578538861175979
+    },
+    {
+      "name": "mfcc_15_skew",
+      "importance": 0.0053084132296060006
+    },
+    {
+      "name": "mel_spec_8_std",
+      "importance": 0.005296493623239933
+    },
+    {
+      "name": "mel_spec_8_mean",
+      "importance": 0.005005948470915528
+    },
+    {
+      "name": "mel_spec_25_mean",
+      "importance": 0.004860591827794036
+    },
+    {
+      "name": "rms_1_max",
+      "importance": 0.004745464211896257
+    },
+    {
+      "name": "mel_spec_5_std",
+      "importance": 0.004699584193634371
+    },
+    {
+      "name": "mfcc_delta2_6_std",
+      "importance": 0.004571785180900924
+    },
+    {
+      "name": "spectral_contrast_1_mean",
+      "importance": 0.0043606328697578575
+    },
+    {
+      "name": "spectral_contrast_7_std",
+      "importance": 0.004296663150828734
+    },
+    {
+      "name": "mel_spec_14_std",
+      "importance": 0.004244705278527936
+    },
+    {
+      "name": "mfcc_27_kurt",
+      "importance": 0.004198462690735609
+    },
+    {
+      "name": "mfcc_delta2_1_std",
+      "importance": 0.004112433035583686
+    },
+    {
+      "name": "mfcc_delta2_7_std",
+      "importance": 0.004108332510666104
+    },
+    {
+      "name": "mfcc_delta_3_mean",
+      "importance": 0.004030536500775804
+    },
+    {
+      "name": "spectral_centroid_1_min",
+      "importance": 0.003975591294541536
+    },
+    {
+      "name": "mel_spec_5_mean",
+      "importance": 0.0039715732351328125
+    },
+    {
+      "name": "mfcc_delta2_2_std",
+      "importance": 0.0039266190386630885
+    },
+    {
+      "name": "tonnetz_3_std",
+      "importance": 0.0038739907383024135
+    }
+  ]
+}

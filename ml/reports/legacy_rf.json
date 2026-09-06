@@ -1,0 +1,281 @@
+{
+  "contaminated_shipped_pkl": {
+    "n": 127,
+    "accuracy": 0.984251968503937,
+    "majority_baseline": 0.7559055118110236,
+    "balanced_accuracy": 0.9523809523809523,
+    "macro_f1": 0.9723489187406713,
+    "macro_auc": 0.9898104949791167,
+    "confusion": [
+      [
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        13,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        96,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        5
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 6.0
+      },
+      "burping": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 5.0
+      },
+      "discomfort": {
+        "precision": 1.0,
+        "recall": 0.9285714285714286,
+        "f1-score": 0.9629629629629629,
+        "support": 14.0
+      },
+      "hungry": {
+        "precision": 0.9795918367346939,
+        "recall": 1.0,
+        "f1-score": 0.9896907216494846,
+        "support": 96.0
+      },
+      "tired": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1-score": 0.9090909090909091,
+        "support": 6.0
+      },
+      "accuracy": 0.984251968503937,
+      "macro avg": {
+        "precision": 0.9959183673469388,
+        "recall": 0.9523809523809523,
+        "f1-score": 0.9723489187406713,
+        "support": 127.0
+      },
+      "weighted avg": {
+        "precision": 0.9845733569018158,
+        "recall": 0.984251968503937,
+        "f1-score": 0.9838294190108461,
+        "support": 127.0
+      }
+    }
+  },
+  "honest_retrained_same_architecture": {
+    "n": 127,
+    "accuracy": 0.7559055118110236,
+    "majority_baseline": 0.7559055118110236,
+    "balanced_accuracy": 0.2,
+    "macro_f1": 0.17219730941704037,
+    "macro_auc": 0.4615355646306247,
+    "confusion": [
+      [
+        0,
+        0,
+        0,
+        6,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        5,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        14,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        96,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        6,
+        0
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 6.0
+      },
+      "burping": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 5.0
+      },
+      "discomfort": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 14.0
+      },
+      "hungry": {
+        "precision": 0.7559055118110236,
+        "recall": 1.0,
+        "f1-score": 0.8609865470852018,
+        "support": 96.0
+      },
+      "tired": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 6.0
+      },
+      "accuracy": 0.7559055118110236,
+      "macro avg": {
+        "precision": 0.15118110236220472,
+        "recall": 0.2,
+        "f1-score": 0.17219730941704037,
+        "support": 127.0
+      },
+      "weighted avg": {
+        "precision": 0.5713931427862856,
+        "recall": 0.7559055118110236,
+        "f1-score": 0.6508244765368455,
+        "support": 127.0
+      }
+    }
+  },
+  "claimed_performance": {
+    "accuracy": 0.987603305785124,
+    "f1": 0.9876147468977174,
+    "recall": 0.987603305785124
+  },
+  "our_cnn": {
+    "split": "test",
+    "n": 762,
+    "accuracy": 0.5826771653543307,
+    "majority_baseline": 0.7559055118110236,
+    "balanced_accuracy": 0.18541666666666665,
+    "macro_f1": 0.1718645009460614,
+    "weighted_f1": 0.5752985178942353,
+    "macro_auc": 0.4436782840499339,
+    "confusion": [
+      [
+        2,
+        3,
+        1,
+        29,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        25,
+        4
+      ],
+      [
+        1,
+        1,
+        0,
+        66,
+        16
+      ],
+      [
+        44,
+        5,
+        14,
+        438,
+        75
+      ],
+      [
+        3,
+        1,
+        1,
+        27,
+        4
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.0392156862745098,
+        "recall": 0.05555555555555555,
+        "f1-score": 0.04597701149425287,
+        "support": 36.0
+      },
+      "burping": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 30.0
+      },
+      "discomfort": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 84.0
+      },
+      "hungry": {
+        "precision": 0.7487179487179487,
+        "recall": 0.7604166666666666,
+        "f1-score": 0.7545219638242894,
+        "support": 576.0
+      },
+      "tired": {
+        "precision": 0.04,
+        "recall": 0.1111111111111111,
+        "f1-score": 0.058823529411764705,
+        "support": 36.0
+      },
+      "accuracy": 0.5826771653543307,
+      "macro avg": {
+        "precision": 0.1655867269984917,
+        "recall": 0.18541666666666665,
+        "f1-score": 0.1718645009460614,
+        "support": 762.0
+      },
+      "weighted avg": {
+        "precision": 0.5697024975950404,
+        "recall": 0.5826771653543307,
+        "f1-score": 0.5752985178942353,
+        "support": 762.0
+      }
+    }
+  },
+  "winner": "461-feature RF",
+  "both_at_chance": true
+}

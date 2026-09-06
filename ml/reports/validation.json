@@ -1,0 +1,119 @@
+{
+  "models": [
+    {
+      "model": "detect_hn",
+      "keras": {
+        "accuracy": 0.9606245756958588,
+        "macro_f1": 0.9418484031691579,
+        "macro_auc": 0.9922588985088985
+      },
+      "tflite": {
+        "accuracy": 0.9596062457569586,
+        "macro_f1": 0.9404461771713233,
+        "macro_auc": 0.9923233182161754
+      },
+      "auc_delta": 6.441970727688595e-05,
+      "within_tolerance": true,
+      "latency_ms_mean": 0.046615180974694706,
+      "latency_ms_p95": 0.05133402009960264
+    },
+    {
+      "model": "reason",
+      "keras": {
+        "accuracy": 0.5826771653543307,
+        "macro_f1": 0.1718645009460614,
+        "macro_auc": 0.4436782840499339
+      },
+      "tflite": {
+        "accuracy": 0.573490813648294,
+        "macro_f1": 0.1702290450318358,
+        "macro_auc": 0.444610399140306
+      },
+      "auc_delta": 0.0009321150903720543,
+      "within_tolerance": true,
+      "latency_ms_mean": 0.06296140801166417,
+      "latency_ms_p95": 0.06687501154374331
+    }
+  ],
+  "selftest": {
+    "patches": 7,
+    "peak_cry_probability": 0.9968662858009338,
+    "fires": true
+  },
+  "negatives": {
+    "per_category": [
+      {
+        "category": "vacuum_cleaner",
+        "clips": 8,
+        "mean_peak": 0.1065467819571495,
+        "fired": 0
+      },
+      {
+        "category": "washing_machine",
+        "clips": 8,
+        "mean_peak": 0.12626132696459536,
+        "fired": 0
+      },
+      {
+        "category": "clock_alarm",
+        "clips": 8,
+        "mean_peak": 0.1740679037757218,
+        "fired": 1
+      },
+      {
+        "category": "door_wood_knock",
+        "clips": 8,
+        "mean_peak": 0.04895771364681423,
+        "fired": 0
+      },
+      {
+        "category": "can_opening",
+        "clips": 8,
+        "mean_peak": 0.048185152816586196,
+        "fired": 0
+      },
+      {
+        "category": "laughing",
+        "clips": 8,
+        "mean_peak": 0.21540769678540528,
+        "fired": 1
+      },
+      {
+        "category": "coughing",
+        "clips": 8,
+        "mean_peak": 0.17132449941709638,
+        "fired": 0
+      },
+      {
+        "category": "snoring",
+        "clips": 8,
+        "mean_peak": 0.17678367206826806,
+        "fired": 1
+      },
+      {
+        "category": "cat",
+        "clips": 8,
+        "mean_peak": 0.26154973078519106,
+        "fired": 0
+      },
+      {
+        "category": "crying_baby",
+        "clips": 8,
+        "mean_peak": 0.9757888838648796,
+        "fired": 8
+      },
+      {
+        "category": "siren",
+        "clips": 8,
+        "mean_peak": 0.21318848268128932,
+        "fired": 0
+      },
+      {
+        "category": "car_horn",
+        "clips": 8,
+        "mean_peak": 0.15948173752985895,
+        "fired": 0
+      }
+    ]
+  }
+}

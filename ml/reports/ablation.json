@@ -1,0 +1,299 @@
+{
+  "detection_subject_wise": {
+    "split": "test",
+    "n": 2946,
+    "accuracy": 0.9456890699253224,
+    "majority_baseline": 0.7983706720977597,
+    "balanced_accuracy": 0.9596947364804507,
+    "macro_f1": 0.9222305523584258,
+    "weighted_f1": 0.947718855128886,
+    "macro_auc": 0.9909905460500699,
+    "confusion": [
+      [
+        2202,
+        150
+      ],
+      [
+        10,
+        584
+      ]
+    ],
+    "per_class": {
+      "not_cry": {
+        "precision": 0.9954792043399638,
+        "recall": 0.9362244897959183,
+        "f1-score": 0.964943032427695,
+        "support": 2352.0
+      },
+      "cry": {
+        "precision": 0.7956403269754768,
+        "recall": 0.9831649831649831,
+        "f1-score": 0.8795180722891566,
+        "support": 594.0
+      },
+      "accuracy": 0.9456890699253224,
+      "macro avg": {
+        "precision": 0.8955597656577203,
+        "recall": 0.9596947364804507,
+        "f1-score": 0.9222305523584258,
+        "support": 2946.0
+      },
+      "weighted avg": {
+        "precision": 0.9551858258082242,
+        "recall": 0.9456890699253224,
+        "f1-score": 0.947718855128886,
+        "support": 2946.0
+      }
+    }
+  },
+  "reason_subject_wise": {
+    "split": "test",
+    "n": 762,
+    "accuracy": 0.5826771653543307,
+    "majority_baseline": 0.7559055118110236,
+    "balanced_accuracy": 0.18541666666666665,
+    "macro_f1": 0.1718645009460614,
+    "weighted_f1": 0.5752985178942353,
+    "macro_auc": 0.4436782840499339,
+    "confusion": [
+      [
+        2,
+        3,
+        1,
+        29,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        25,
+        4
+      ],
+      [
+        1,
+        1,
+        0,
+        66,
+        16
+      ],
+      [
+        44,
+        5,
+        14,
+        438,
+        75
+      ],
+      [
+        3,
+        1,
+        1,
+        27,
+        4
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.0392156862745098,
+        "recall": 0.05555555555555555,
+        "f1-score": 0.04597701149425287,
+        "support": 36.0
+      },
+      "burping": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 30.0
+      },
+      "discomfort": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 84.0
+      },
+      "hungry": {
+        "precision": 0.7487179487179487,
+        "recall": 0.7604166666666666,
+        "f1-score": 0.7545219638242894,
+        "support": 576.0
+      },
+      "tired": {
+        "precision": 0.04,
+        "recall": 0.1111111111111111,
+        "f1-score": 0.058823529411764705,
+        "support": 36.0
+      },
+      "accuracy": 0.5826771653543307,
+      "macro avg": {
+        "precision": 0.1655867269984917,
+        "recall": 0.18541666666666665,
+        "f1-score": 0.1718645009460614,
+        "support": 762.0
+      },
+      "weighted avg": {
+        "precision": 0.5697024975950404,
+        "recall": 0.5826771653543307,
+        "f1-score": 0.5752985178942353,
+        "support": 762.0
+      }
+    }
+  },
+  "reason_leaky": {
+    "split": "test",
+    "n": 2261,
+    "accuracy": 0.7540911101282618,
+    "majority_baseline": 0.2724458204334365,
+    "balanced_accuracy": 0.736840957620666,
+    "macro_f1": 0.7429299357444049,
+    "weighted_f1": 0.7473279422432845,
+    "macro_auc": 0.9531899047632473,
+    "confusion": [
+      [
+        189,
+        7,
+        58,
+        54,
+        71
+      ],
+      [
+        3,
+        120,
+        4,
+        13,
+        20
+      ],
+      [
+        9,
+        16,
+        436,
+        79,
+        76
+      ],
+      [
+        3,
+        1,
+        8,
+        551,
+        16
+      ],
+      [
+        6,
+        8,
+        47,
+        57,
+        409
+      ]
+    ],
+    "per_class": {
+      "belly_pain": {
+        "precision": 0.9,
+        "recall": 0.49868073878627966,
+        "f1-score": 0.6417657045840407,
+        "support": 379.0
+      },
+      "burping": {
+        "precision": 0.7894736842105263,
+        "recall": 0.75,
+        "f1-score": 0.7692307692307693,
+        "support": 160.0
+      },
+      "discomfort": {
+        "precision": 0.7884267631103075,
+        "recall": 0.7077922077922078,
+        "f1-score": 0.7459366980325064,
+        "support": 616.0
+      },
+      "hungry": {
+        "precision": 0.7307692307692307,
+        "recall": 0.9516407599309153,
+        "f1-score": 0.8267066766691673,
+        "support": 579.0
+      },
+      "tired": {
+        "precision": 0.6908783783783784,
+        "recall": 0.7760910815939279,
+        "f1-score": 0.7310098302055407,
+        "support": 527.0
+      },
+      "accuracy": 0.7540911101282618,
+      "macro avg": {
+        "precision": 0.7799096112936886,
+        "recall": 0.736840957620666,
+        "f1-score": 0.7429299357444049,
+        "support": 2261.0
+      },
+      "weighted avg": {
+        "precision": 0.7697014443035929,
+        "recall": 0.7540911101282618,
+        "f1-score": 0.7473279422432845,
+        "support": 2261.0
+      }
+    }
+  },
+  "groupings": [
+    {
+      "grouping": "five_way",
+      "hypothesis": "the original task",
+      "targets": [
+        "belly_pain",
+        "burping",
+        "discomfort",
+        "hungry",
+        "tired"
+      ],
+      "test_n": 762,
+      "test_accuracy": 0.5984251968503937,
+      "majority_baseline": 0.7559055118110236,
+      "balanced_accuracy": 0.17599206349206348,
+      "macro_f1": 0.16385932723077737,
+      "macro_auc": 0.4314058500530555,
+      "beats_chance": false
+    },
+    {
+      "grouping": "hungry_vs_rest",
+      "hypothesis": "hunger is the majority class and the one parents act on first",
+      "targets": [
+        "hungry",
+        "other"
+      ],
+      "test_n": 762,
+      "test_accuracy": 0.6692913385826772,
+      "majority_baseline": 0.7559055118110236,
+      "balanced_accuracy": 0.5027721774193549,
+      "macro_f1": 0.4992959729653619,
+      "macro_auc": 0.496966472520908,
+      "beats_chance": false
+    },
+    {
+      "grouping": "pain_vs_rest",
+      "hypothesis": "pain cries are acoustically distinct -- the one claim with independent support in the literature",
+      "targets": [
+        "other",
+        "pain"
+      ],
+      "test_n": 762,
+      "test_accuracy": 0.8858267716535433,
+      "majority_baseline": 0.9133858267716536,
+      "balanced_accuracy": 0.4917711598746081,
+      "macro_f1": 0.4809223662060056,
+      "macro_auc": 0.4667145593869732,
+      "beats_chance": false
+    },
+    {
+      "grouping": "three_way",
+      "hypothesis": "merge the gut-related classes and keep tired separate",
+      "targets": [
+        "gut",
+        "hungry",
+        "tired"
+      ],
+      "test_n": 762,
+      "test_accuracy": 0.6732283464566929,
+      "majority_baseline": 0.7559055118110236,
+      "balanced_accuracy": 0.32738425925925924,
+      "macro_f1": 0.31226687450741203,
+      "macro_auc": 0.43701337474373814,
+      "beats_chance": false
+    }
+  ]
+}

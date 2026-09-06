@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nila</string>
+    <string name="channel_monitor_name">Monitoring</string>
+    <string name="channel_monitor_desc">Shows that Nila is listening. Silent and ongoing.</string>
+    <string name="channel_alerts_name">Baby alerts</string>
+    <string name="channel_alerts_desc">Cry episodes and safety events. These reach your watch.</string>
+</resources>

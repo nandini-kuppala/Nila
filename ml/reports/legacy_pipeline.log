@@ -1,0 +1,52 @@
+======================================================================
+LEGACY PIPELINE  (Why-is-my-Baby-Crying, retrained)
+======================================================================
+Initial class distribution:
+  belly_pain: 16 samples
+  burping: 8 samples
+  discomfort: 27 samples
+  hungry: 382 samples
+  tired: 24 samples
+belly_pain data is loading... (augmentation factor 23)
+burping data is loading... (augmentation factor 47)
+discomfort data is loading... (augmentation factor 14)
+hungry data is loading... (augmentation factor 0)
+tired data is loading... (augmentation factor 15)
+
+feature matrix (1207, 466), 221 subjects, 750 augmented rows
+Training data shape after SMOTE: (1525, 466)
+
+  [clip-wise, as published] n=242
+    accuracy        0.9380   (majority 0.3182)
+    balanced acc    0.9408
+    macro F1        0.9376
+    macro AUC       0.9943
+
+  [subject-wise, unseen infants] n=80
+    accuracy        0.9750   (majority 0.9250)
+    balanced acc    0.8667
+    macro F1        0.8973
+    macro AUC       0.9923
+
+  [subject-wise, retrained without them] n=80
+    accuracy        0.8750   (majority 0.9250)
+    balanced acc    0.1892
+    macro F1        0.1867
+    macro AUC       0.4144
+
+  top features:
+    0.0119  mel_spec_27_mean
+    0.0116  mel_spec_27_std
+    0.0106  mel_spec_28_std
+    0.0095  mfcc_16_skew
+    0.0095  mel_spec_4_std
+    0.0090  mel_spec_28_mean
+    0.0087  mel_spec_3_std
+    0.0084  mfcc_delta2_3_std
+    0.0082  mel_spec_26_std
+    0.0078  spectral_contrast_2_mean
+    0.0074  mel_spec_26_mean
+    0.0073  mel_spec_29_mean
+  -> reason_forest.json  7.9 MB  500 trees, 176870 nodes
+
+done in 73s

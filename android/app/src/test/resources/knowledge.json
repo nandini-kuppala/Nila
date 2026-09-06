@@ -1,0 +1,897 @@
+{
+ "version": 1,
+ "note": "Curated offline knowledge base. Retrieval is BM25 over these documents; nothing is fetched at runtime.",
+ "documents": [
+  {
+   "id": "cry-normal",
+   "collection": "guidance",
+   "topic": "crying",
+   "title": "How much crying is normal",
+   "text": "Crying peaks at around six to eight weeks of age and usually eases by three to four months. Two to three hours a day spread across the day is within the normal range for a young infant. Crying that follows this pattern is a stage of development, not a sign that anything is wrong with the baby or the caregiving.",
+   "source": "NHS",
+   "caution": "Crying that starts suddenly in a baby who was previously settled, or that sounds different from usual, is worth a call to your doctor.",
+   "keywords": "crying How much crying is normal why does my baby cry so much crying all the time normal amount hours a day peak six weeks is it normal newborn cries constantly",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "cry-colic",
+   "collection": "guidance",
+   "topic": "crying",
+   "title": "Colic and the rule of threes",
+   "text": "Infantile colic is defined by duration, not by any test. The classic Wessel criteria are crying for three or more hours a day, on three or more days a week, for three or more weeks, in a baby who is otherwise feeding and growing well. The Rome IV criteria are similar but drop the three-week requirement. Colic is self-limiting and typically resolves by three to four months.",
+   "source": "Wessel criteria; Rome IV",
+   "caution": "Colic is a description of a crying pattern, not a diagnosis you can make at home. Poor weight gain, fever, vomiting or blood in the stool mean this is something else -- see a doctor.",
+   "keywords": "crying Colic and the rule of threes colic colicky three hours every evening witching hour inconsolable screaming same time each night rule of threes wessel",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 6
+  },
+  {
+   "id": "cry-soothe",
+   "collection": "guidance",
+   "topic": "crying",
+   "title": "What helps a crying baby settle",
+   "text": "Things that commonly help: skin-to-skin holding, steady rhythmic motion, a firm swaddle for babies who are not yet rolling, white noise or shushing at a moderate volume, offering a feed, and a change of scene. Different babies respond to different things and the same baby changes over weeks, so it is worth keeping track of what actually worked.",
+   "source": "NHS",
+   "caution": "Stop swaddling once a baby shows any sign of rolling over.",
+   "keywords": "crying What helps a crying baby settle how to settle calm soothe stop crying wont stop crying at night what helps swaddle rocking white noise shushing hold",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "cry-caregiver",
+   "collection": "guidance",
+   "topic": "crying",
+   "title": "When you feel overwhelmed",
+   "text": "If you feel yourself losing patience, put the baby down somewhere safe such as their cot, leave the room, and take a few minutes. A baby is not harmed by crying alone in a safe place for a short while. Never shake a baby -- shaking causes serious, permanent brain injury in seconds.",
+   "source": "NHS",
+   "caution": "If you are struggling, tell your doctor or health visitor. This is common, it is not a failure, and there is help.",
+   "keywords": "crying When you feel overwhelmed i cant cope overwhelmed anymore frustrated angry losing patience put the baby down never shake exhausted breaking point crying gets to me",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "sleep-safe",
+   "collection": "guidance",
+   "topic": "sleep",
+   "title": "Safe sleep basics",
+   "text": "Put babies to sleep on their back for every sleep, on a firm flat mattress, in a cot with no pillows, duvets, bumpers or soft toys. Room sharing without bed sharing for at least the first six months lowers risk. Keep the room comfortably cool and avoid overheating.",
+   "source": "American Academy of Pediatrics",
+   "caution": "Once a baby can roll over on their own you do not need to keep turning them back, but always start them on their back.",
+   "keywords": "sleep Safe sleep basics safe sleep position on back not tummy not front cot crib bed sharing co sleeping sids suffocation where should my baby sleep alone flat firm empty car seat pram sofa armchair sling bouncer swing napping outside the cot blanket pillow bumper toys in the cot loose bedding",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "sleep-amount",
+   "collection": "guidance",
+   "topic": "sleep",
+   "title": "How much babies sleep",
+   "text": "Newborns sleep fourteen to seventeen hours across a day in short stretches. By three to six months many babies manage a longer stretch at night. Night waking remains normal well into the first year and does not by itself indicate a problem.",
+   "source": "American Academy of Pediatrics",
+   "caution": "",
+   "keywords": "sleep How much babies sleep how much sleep hours a day night waking naps schedule through the night newborn sleep pattern",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 24
+  },
+  {
+   "id": "feed-exclusive",
+   "collection": "guidance",
+   "topic": "feeding",
+   "title": "Feeding in the first six months",
+   "text": "Exclusive breastfeeding is recommended for the first six months, with continued breastfeeding alongside other foods up to two years or beyond. Babies fed formula should have an appropriate infant formula. Water, cow's milk as a main drink, and other foods are not needed before six months.",
+   "source": "WHO",
+   "caution": "",
+   "keywords": "feeding Feeding in the first six months how often should a newborn feed frequency on demand exclusively breastfed first six months water needed extra drinks per day cluster summer hot weather heat thirsty does she need water juice how long does a feed take duration minutes each side night feeds feeding at night waking to feed dream feed",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 6
+  },
+  {
+   "id": "feed-solids",
+   "collection": "guidance",
+   "topic": "feeding",
+   "title": "Starting solid food",
+   "text": "Start solids at around six months, when the baby can hold their head steady, sit with support, and bring food to their mouth. Begin with single foods, introduce common allergens such as egg and peanut early and regularly once solids have started, and offer iron-rich foods.",
+   "source": "WHO",
+   "caution": "Introduce one new food at a time so a reaction can be traced.",
+   "keywords": "feeding Starting solid food when to start solids weaning first foods what age begin eating six months complementary purees mashed porridge ragi khichdi dal rice vegetables fruit baby led readiness signs",
+   "audience": "baby",
+   "min_age": 5,
+   "max_age": 24
+  },
+  {
+   "id": "feed-avoid",
+   "collection": "guidance",
+   "topic": "feeding",
+   "title": "Foods to avoid under one year",
+   "text": "Do not give honey before twelve months -- it can carry the spores that cause infant botulism. Avoid added salt and added sugar, whole nuts, unpasteurised dairy, and cow's milk as a main drink before twelve months. Do not give rice drinks before five years.",
+   "source": "NHS",
+   "caution": "Honey before one year is a genuine hazard, not a precaution.",
+   "keywords": "feeding Foods to avoid under one year foods to avoid under one honey salt sugar whole nuts cows milk drink unpasteurised what not to give peanut peanut butter allergen allergens egg introduce allergy foods shellfish",
+   "audience": "baby",
+   "min_age": 5,
+   "max_age": 12
+  },
+  {
+   "id": "feed-choking",
+   "collection": "guidance",
+   "topic": "feeding",
+   "title": "Choking hazards",
+   "text": "Whole grapes, cherry tomatoes, whole nuts, popcorn, raw carrot sticks, sausage rounds and hard sweets are common choking hazards. Cut round foods lengthways into quarters. Always stay with a baby while they eat and keep them sitting upright.",
+   "source": "NHS",
+   "caution": "If a baby is coughing forcefully, let them cough. If they cannot cough, cry or breathe, start choking first aid and call emergency services.",
+   "keywords": "feeding Choking hazards choking hazard risk which foods dangerous shapes grapes nuts popcorn cut lengthways round hard small how to prepare safely gag gags gagging coughs coughing while eating splutters goes red food stuck",
+   "audience": "baby",
+   "min_age": 5,
+   "max_age": 36
+  },
+  {
+   "id": "feed-hunger-cues",
+   "collection": "guidance",
+   "topic": "feeding",
+   "title": "Hunger cues before crying",
+   "text": "Crying is a late hunger signal. Earlier ones are stirring and mouth opening, turning the head to look for the breast, hand-to-mouth movement, and sucking on fingers. Feeding at these earlier cues is usually calmer for everyone.",
+   "source": "WHO",
+   "caution": "",
+   "keywords": "feeding Hunger cues before crying how do i know my baby is hungry hunger signs cues rooting sucking hands to mouth fist in mouth chewing fingers licking lips before crying feeding signals wants milk stirring",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "health-fever",
+   "collection": "guidance",
+   "topic": "health",
+   "title": "Fever in a baby",
+   "text": "A temperature of 38C or above in a baby under three months is a medical emergency and needs to be seen the same day, even if the baby seems well. In older babies, how the baby looks and behaves matters more than the number on the thermometer.",
+   "source": "NHS",
+   "caution": "Under three months with a fever: go to a doctor now, do not wait.",
+   "keywords": "health Fever in a baby fever high temperature 38 39 degrees celsius fahrenheit 100 101 102 103 reading hot forehead thermometer feels warm burning up when to worry under three months",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 36
+  },
+  {
+   "id": "health-redflags",
+   "collection": "guidance",
+   "topic": "health",
+   "title": "Signs that need urgent help",
+   "text": "Get urgent medical help for: difficulty breathing or grunting with each breath, blue or very pale skin, a rash that does not fade when pressed with a glass, a baby who is floppy or unusually hard to wake, a bulging soft spot, repeated vomiting, no wet nappy for twelve hours, or a weak high-pitched continuous cry that is unlike the baby's normal cry.",
+   "source": "NHS",
+   "caution": "This list is for recognising an emergency, not for ruling one out. If you are worried, seek help.",
+   "keywords": "health Signs that need urgent help when should i go to hospital emergency doctor urgent warning signs serious worry rash not waking refusing feeds breathing fast",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 36
+  },
+  {
+   "id": "health-dehydration",
+   "collection": "guidance",
+   "topic": "health",
+   "title": "Dehydration",
+   "text": "Signs include fewer wet nappies than usual, a dry mouth, no tears when crying, a sunken soft spot, and unusual sleepiness. Babies dehydrate much faster than adults, especially with vomiting or diarrhoea.",
+   "source": "NHS",
+   "caution": "Suspected dehydration in an infant needs medical review.",
+   "keywords": "health Dehydration dehydrated dehydration not enough wet nappies dry mouth sunken fontanelle no tears fewer wet fluids losing fluid",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 36
+  },
+  {
+   "id": "health-vaccines",
+   "collection": "guidance",
+   "topic": "health",
+   "title": "Immunisation in India",
+   "text": "India's Universal Immunisation Programme schedules BCG, hepatitis B and OPV at birth; pentavalent, OPV, rotavirus and PCV doses at six, ten and fourteen weeks; measles-rubella and JE from nine months; and boosters in the second year. Vaccines are free at government facilities.",
+   "source": "Indian Academy of Pediatrics",
+   "caution": "Confirm the current schedule with your paediatrician -- it is revised periodically and some states differ.",
+   "keywords": "health Immunisation in India vaccine vaccination immunisation schedule india which jabs due when bcg opv pentavalent measles national programme",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 24
+  },
+  {
+   "id": "health-temperature",
+   "collection": "guidance",
+   "topic": "health",
+   "title": "Room temperature and clothing",
+   "text": "A comfortable room is around sixteen to twenty degrees Celsius. Feel the baby's chest or the back of the neck rather than hands or feet, which are normally cooler. Overheating is a risk factor for sudden infant death, so err towards one light layer fewer.",
+   "source": "NHS",
+   "caution": "",
+   "keywords": "health Room temperature and clothing room temperature nursery bedroom how warm should the room be fan ac air conditioning how many layers should my baby wear clothing blankets overheating too hot too cold sleeping bag tog",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "dev-milestones",
+   "collection": "guidance",
+   "topic": "development",
+   "title": "Early milestones",
+   "text": "Rough guide: social smiling by two months, head control by four months, rolling over by six months, sitting without support by nine months, and pulling to stand by twelve months. Ranges are wide and healthy babies vary a great deal.",
+   "source": "American Academy of Pediatrics",
+   "caution": "Loss of a skill a baby previously had is always worth a review.",
+   "keywords": "development Early milestones milestones when should my baby smile roll over sit crawl walk grasp head control eye contact looking at me following with her eyes tracking responding development age expect first",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 24
+  },
+  {
+   "id": "safety-toys",
+   "collection": "guidance",
+   "topic": "safety",
+   "title": "Whether a toy is safe",
+   "text": "For children under three, anything that fits entirely through a tube about four centimetres across -- roughly a toilet roll tube -- is a choking hazard. Check for small detachable parts, button batteries, magnets, and long cords or ribbons over about twenty centimetres. Button batteries and high-powered magnets cause severe internal injury if swallowed and need emergency care.",
+   "source": "EN 71 / ASTM F963 toy safety standards",
+   "caution": "Size cannot be judged reliably from a photograph. Check the actual object against a tube.",
+   "keywords": "safety Whether a toy is safe is this toy safe small parts choking hazard age label button battery magnets cords loops paint how do i know if a toy",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 36
+  },
+  {
+   "id": "safety-tummy",
+   "collection": "guidance",
+   "topic": "safety",
+   "title": "Tummy time",
+   "text": "Supervised tummy time while awake, from the first weeks, builds neck and shoulder strength and reduces flat spots on the head. Start with a minute or two a few times a day and build up.",
+   "source": "American Academy of Pediatrics",
+   "caution": "Never leave a baby on their front unsupervised or asleep.",
+   "keywords": "safety Tummy time tummy time how much awake supervised play on front head control flat head strengthen neck",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
+   "id": "mum-diet",
+   "collection": "guidance",
+   "topic": "maternal_diet",
+   "title": "What to eat while breastfeeding",
+   "text": "There is no list of foods a breastfeeding parent must avoid. Eat a varied diet and drink to thirst. You need roughly 300-500 extra calories a day. Continue a vitamin D supplement. Caffeine is fine in moderation - about two to three cups of coffee a day - and alcohol is best limited, timed away from feeds.",
+   "source": "NHS",
+   "caution": "Cutting out food groups 'just in case' is not recommended and can leave you short of nutrients. If you suspect a genuine reaction in your baby, ask a doctor before eliminating anything.",
+   "keywords": "maternal_diet What to eat while breastfeeding what should i eat while breastfeeding my own diet coffee caffeine chai tea alcohol fish foods to avoid for me can i drink calories extra",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-fussy-baby",
+   "collection": "guidance",
+   "topic": "maternal_diet",
+   "title": "Does what I eat make my baby fussy",
+   "text": "For most babies, no. Cow's milk protein is the one that occasionally matters, and a genuine allergy usually shows more than fussing - blood or mucus in the stool, eczema, poor weight gain, or vomiting. Spicy food, garlic and vegetables like cabbage do not need avoiding.",
+   "source": "NHS",
+   "caution": "Do not start an elimination diet without medical advice. It is hard to sustain and rarely the answer.",
+   "keywords": "maternal_diet Does what I eat make my baby fussy does what i eat make my baby fussy spicy food garlic dairy gas wind elimination diet blame my food upset windy",
+   "audience": "both",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-mastitis",
+   "collection": "guidance",
+   "topic": "lactation",
+   "title": "Mastitis and blocked ducts",
+   "text": "A hard, red, painful area of breast with flu-like symptoms and fever suggests mastitis. Keep feeding or expressing from that side - emptying the breast is the treatment. Rest, fluids and pain relief help.",
+   "source": "NHS",
+   "caution": "If it does not improve within 12 to 24 hours, or you feel seriously unwell, see a doctor the same day. Untreated mastitis can become an abscess.",
+   "keywords": "lactation Mastitis and blocked ducts mastitis blocked duct breast red painful hot lump sore flu like fever engorged cracked nipples my breast hurts",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-supply",
+   "collection": "guidance",
+   "topic": "lactation",
+   "title": "Worries about milk supply",
+   "text": "Supply follows demand, so frequent effective feeding is what protects it. Reliable signs of enough milk are steady weight gain, six or more wet nappies a day, and a baby who settles after most feeds. Breast softness and pumped volumes are poor indicators.",
+   "source": "WHO",
+   "caution": "If weight gain is faltering, get a feed assessed rather than starting supplements on your own.",
+   "keywords": "lactation Worries about milk supply milk supply not enough increase low supply galactagogue pumping expressing output less than before worried baby not getting enough boost more milk breast feels empty",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-recovery",
+   "collection": "guidance",
+   "topic": "postnatal",
+   "title": "Your own recovery",
+   "text": "Bleeding after birth gradually reduces over two to six weeks. Tiredness, night sweats and mood swings are common early on. Iron deficiency is frequent after delivery and causes breathlessness and exhaustion that people often put down to new parenthood.",
+   "source": "NHS",
+   "caution": "Heavy bleeding that soaks a pad an hour, large clots, fever, or severe headache with visual changes all need urgent review.",
+   "keywords": "postnatal Your own recovery my own recovery after delivery bleeding lochia stitches perineum c section scar when will i feel normal again six week check",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-mood",
+   "collection": "guidance",
+   "topic": "mental_health",
+   "title": "Mood after birth",
+   "text": "Feeling tearful and overwhelmed in the first two weeks is common and usually passes. Low mood that persists beyond two weeks, or that stops you enjoying anything or caring for yourself, is postnatal depression - it is common, it is treatable, and it is not a failing.",
+   "source": "NHS",
+   "caution": "Any thought of harming yourself or your baby needs help today. Contact your doctor or an emergency service now.",
+   "keywords": "mental_health Mood after birth i feel low sad tearful anxious since the birth baby blues mood postnatal down not myself crying a lot no joy i cry every day cry for no reason dont know why im crying weepy numb empty hopeless dont feel bonded bonding attachment love connection enjoy nothing edinburgh scale",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "mum-sleep",
+   "collection": "guidance",
+   "topic": "postnatal",
+   "title": "Coping with broken sleep",
+   "text": "Fragmented sleep is the hardest part of the first months for most parents. Sleeping when the baby sleeps, sharing night duties where possible, and accepting help with anything that is not feeding are the things that actually work.",
+   "source": "NHS",
+   "caution": "Persistent inability to sleep even when the baby is asleep can be a sign of anxiety or depression and is worth mentioning.",
+   "keywords": "postnatal Coping with broken sleep how do i cope with no sleep broken sleep exhausted my own sleep tired all the time shift sleeping napping when baby sleeps",
+   "audience": "mother",
+   "min_age": null,
+   "max_age": null
+  },
+  {
+   "id": "med-paracetamol",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Paracetamol while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Amounts in breast milk are far below the dose given to infants directly. Usually the first choice for pain or fever while breastfeeding. Also sold as: acetaminophen, crocin, dolo, calpol, tylenol.",
+   "detail": "Amounts in breast milk are far below the dose given to infants directly. Usually the first choice for pain or fever while breastfeeding.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Paracetamol acetaminophen, crocin, dolo, calpol, tylenol breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Paracetamol",
+   "aliases": [
+    "acetaminophen",
+    "crocin",
+    "dolo",
+    "calpol",
+    "tylenol"
+   ],
+   "avoid_if": [
+    "liver disease",
+    "hepatitis"
+   ],
+   "interacts_with": [],
+   "context_note": "Very safe, but liver disease changes the calculus and the ceiling dose.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-ibuprofen",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Ibuprofen while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Poorly excreted into breast milk and short-acting. Generally considered a preferred anti-inflammatory during breastfeeding. Also sold as: brufen, advil, combiflam, nurofen.",
+   "detail": "Poorly excreted into breast milk and short-acting. Generally considered a preferred anti-inflammatory during breastfeeding.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Ibuprofen brufen, advil, combiflam, nurofen breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Ibuprofen",
+   "aliases": [
+    "brufen",
+    "advil",
+    "combiflam",
+    "nurofen"
+   ],
+   "avoid_if": [
+    "asthma",
+    "peptic ulcer",
+    "stomach ulcer",
+    "kidney disease",
+    "ckd",
+    "gastritis"
+   ],
+   "interacts_with": [
+    "Aspirin",
+    "Diclofenac",
+    "Prednisolone"
+   ],
+   "context_note": "NSAIDs can trigger bronchospasm in aspirin-sensitive asthma and raise bleeding risk with other NSAIDs or steroids.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-amoxicillin",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Amoxicillin while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Small amounts pass into milk. Watch for loose stools, thrush or rash in the infant, which are usually mild and settle. Also sold as: amoxil, mox, novamox.",
+   "detail": "Small amounts pass into milk. Watch for loose stools, thrush or rash in the infant, which are usually mild and settle.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Amoxicillin amoxil, mox, novamox breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Amoxicillin",
+   "aliases": [
+    "amoxil",
+    "mox",
+    "novamox"
+   ],
+   "avoid_if": [
+    "penicillin allergy"
+   ],
+   "interacts_with": [],
+   "context_note": "A penicillin. A stated penicillin allergy is an absolute stop.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-azithromycin",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Azithromycin while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Low levels in milk. Considered acceptable during breastfeeding. Also sold as: azee, zithromax.",
+   "detail": "Low levels in milk. Considered acceptable during breastfeeding.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Azithromycin azee, zithromax breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Azithromycin",
+   "aliases": [
+    "azee",
+    "zithromax"
+   ],
+   "avoid_if": [
+    "long qt",
+    "arrhythmia",
+    "liver disease"
+   ],
+   "interacts_with": [
+    "Domperidone",
+    "Ondansetron"
+   ],
+   "context_note": "Macrolides prolong QT.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-cetirizine",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Cetirizine while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Non-sedating antihistamines are preferred over older ones, but large or prolonged doses may reduce milk supply. Watch the infant for drowsiness. Also sold as: zyrtec, alerid, cetzine.",
+   "detail": "Non-sedating antihistamines are preferred over older ones, but large or prolonged doses may reduce milk supply. Watch the infant for drowsiness.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Cetirizine zyrtec, alerid, cetzine breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Cetirizine",
+   "aliases": [
+    "zyrtec",
+    "alerid",
+    "cetzine"
+   ],
+   "avoid_if": [
+    "kidney disease",
+    "ckd"
+   ],
+   "interacts_with": [
+    "Chlorpheniramine",
+    "Levocetirizine"
+   ],
+   "context_note": "Doubling up on antihistamines adds sedation without adding benefit.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-chlorpheniramine",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Chlorpheniramine while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. An older sedating antihistamine. May cause drowsiness or irritability in the infant and can reduce milk supply. A non-sedating alternative is usually preferred. Also sold as: cpm, piriton, avil.",
+   "detail": "An older sedating antihistamine. May cause drowsiness or irritability in the infant and can reduce milk supply. A non-sedating alternative is usually preferred.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Chlorpheniramine cpm, piriton, avil breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Chlorpheniramine",
+   "aliases": [
+    "cpm",
+    "piriton",
+    "avil"
+   ],
+   "avoid_if": [
+    "glaucoma",
+    "asthma",
+    "urinary retention"
+   ],
+   "interacts_with": [
+    "Cetirizine",
+    "Levocetirizine",
+    "Codeine",
+    "Tramadol"
+   ],
+   "context_note": "Sedating. Compounding it with opioids raises the infant sedation risk sharply.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-pantoprazole",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Pantoprazole while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Very low levels in milk and poorly absorbed by the infant. Also sold as: pantop, pan, pan 40, pan d, protonix.",
+   "detail": "Very low levels in milk and poorly absorbed by the infant.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Pantoprazole pantop, pan, pan 40, pan d, protonix breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Pantoprazole",
+   "aliases": [
+    "pantop",
+    "pan",
+    "pan 40",
+    "pan d",
+    "protonix"
+   ],
+   "avoid_if": [],
+   "interacts_with": [
+    "Ciprofloxacin"
+   ],
+   "context_note": "Reduces stomach acid, which can cut absorption of some antibiotics.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-metronidazole",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Metronidazole while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Passes into milk in measurable amounts. Often used, but some clinicians advise a pause after a single large dose. Ask your doctor. Also sold as: flagyl, metrogyl.",
+   "detail": "Passes into milk in measurable amounts. Often used, but some clinicians advise a pause after a single large dose. Ask your doctor.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Metronidazole flagyl, metrogyl breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Metronidazole",
+   "aliases": [
+    "flagyl",
+    "metrogyl"
+   ],
+   "avoid_if": [
+    "liver disease",
+    "epilepsy"
+   ],
+   "interacts_with": [],
+   "context_note": "Do not drink alcohol during or for 48 hours after a course.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-ciprofloxacin",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Ciprofloxacin while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Acceptable to most authorities, though alternatives are often chosen first. Watch for diarrhoea or thrush in the infant. Also sold as: cipro, ciplox.",
+   "detail": "Acceptable to most authorities, though alternatives are often chosen first. Watch for diarrhoea or thrush in the infant.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Ciprofloxacin cipro, ciplox breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Ciprofloxacin",
+   "aliases": [
+    "cipro",
+    "ciplox"
+   ],
+   "avoid_if": [
+    "epilepsy",
+    "seizure disorder",
+    "tendon problems",
+    "myasthenia"
+   ],
+   "interacts_with": [
+    "Pantoprazole"
+   ],
+   "context_note": "Fluoroquinolones lower the seizure threshold and carry a tendon warning. Antacids and PPIs reduce absorption.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-codeine",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Codeine while breastfeeding",
+   "text": "Best avoided while breastfeeding. Avoid while breastfeeding. Some people metabolise codeine unusually fast, producing high morphine levels in milk, and infant deaths have been reported. Paracetamol or ibuprofen are safer choices. Also sold as: codeine phosphate.",
+   "detail": "Avoid while breastfeeding. Some people metabolise codeine unusually fast, producing high morphine levels in milk, and infant deaths have been reported. Paracetamol or ibuprofen are safer choices.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Codeine codeine phosphate breastfeeding lactation safe",
+   "risk": "avoid",
+   "generic": "Codeine",
+   "aliases": [
+    "codeine phosphate"
+   ],
+   "avoid_if": [
+    "asthma",
+    "breathing problems",
+    "sleep apnoea"
+   ],
+   "interacts_with": [
+    "Chlorpheniramine",
+    "Tramadol"
+   ],
+   "context_note": "Already contraindicated in breastfeeding; respiratory conditions and other sedatives compound it.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-aspirin",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Aspirin while breastfeeding",
+   "text": "Best avoided while breastfeeding. Regular or high-dose aspirin should be avoided while breastfeeding because of the risk of Reye syndrome and bleeding. Low-dose aspirin prescribed for a heart condition is a separate question for your doctor. Also sold as: acetylsalicylic acid, disprin.",
+   "detail": "Regular or high-dose aspirin should be avoided while breastfeeding because of the risk of Reye syndrome and bleeding. Low-dose aspirin prescribed for a heart condition is a separate question for your doctor.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Aspirin acetylsalicylic acid, disprin breastfeeding lactation safe",
+   "risk": "avoid",
+   "generic": "Aspirin",
+   "aliases": [
+    "acetylsalicylic acid",
+    "disprin"
+   ],
+   "avoid_if": [
+    "asthma",
+    "peptic ulcer",
+    "stomach ulcer",
+    "bleeding disorder"
+   ],
+   "interacts_with": [
+    "Ibuprofen",
+    "Diclofenac"
+   ],
+   "context_note": "Already best avoided while breastfeeding; these conditions make it worse.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-fluconazole",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Fluconazole while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Passes into milk but is also given directly to infants at higher doses. Commonly used for nipple thrush. Also sold as: forcan, diflucan.",
+   "detail": "Passes into milk but is also given directly to infants at higher doses. Commonly used for nipple thrush.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Fluconazole forcan, diflucan breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Fluconazole",
+   "aliases": [
+    "forcan",
+    "diflucan"
+   ],
+   "avoid_if": [
+    "liver disease",
+    "long qt"
+   ],
+   "interacts_with": [
+    "Domperidone"
+   ],
+   "context_note": "Hepatic metabolism, and a QT signal at higher doses.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-domperidone",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Domperidone while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Low levels in milk and sometimes prescribed to increase supply, but it carries cardiac warnings in several countries. Prescription decision. Also sold as: domstal, motilium.",
+   "detail": "Low levels in milk and sometimes prescribed to increase supply, but it carries cardiac warnings in several countries. Prescription decision.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Domperidone domstal, motilium breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Domperidone",
+   "aliases": [
+    "domstal",
+    "motilium"
+   ],
+   "avoid_if": [
+    "heart disease",
+    "long qt",
+    "arrhythmia"
+   ],
+   "interacts_with": [
+    "Ondansetron",
+    "Azithromycin",
+    "Fluconazole"
+   ],
+   "context_note": "Carries a QT-prolongation warning; stacking QT-prolonging drugs is the real hazard.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-ondansetron",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Ondansetron while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Little published data during breastfeeding. Short courses are generally considered acceptable; discuss longer use. Also sold as: emeset, zofran.",
+   "detail": "Little published data during breastfeeding. Short courses are generally considered acceptable; discuss longer use.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Ondansetron emeset, zofran breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Ondansetron",
+   "aliases": [
+    "emeset",
+    "zofran"
+   ],
+   "avoid_if": [
+    "long qt",
+    "arrhythmia"
+   ],
+   "interacts_with": [
+    "Domperidone",
+    "Azithromycin"
+   ],
+   "context_note": "Also prolongs QT.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-levocetirizine",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Levocetirizine while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. As with cetirizine: preferred over sedating antihistamines, but large or prolonged doses may affect supply. Also sold as: xyzal, levocet.",
+   "detail": "As with cetirizine: preferred over sedating antihistamines, but large or prolonged doses may affect supply.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Levocetirizine xyzal, levocet breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Levocetirizine",
+   "aliases": [
+    "xyzal",
+    "levocet"
+   ],
+   "avoid_if": [
+    "kidney disease",
+    "ckd"
+   ],
+   "interacts_with": [
+    "Cetirizine",
+    "Chlorpheniramine"
+   ],
+   "context_note": "Same molecule family as cetirizine -- taking both is a duplicate.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-amoxicillin-clavulanate",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Amoxicillin-clavulanate while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Considered acceptable. Infant may have looser stools. Also sold as: augmentin, clavam.",
+   "detail": "Considered acceptable. Infant may have looser stools.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Amoxicillin-clavulanate augmentin, clavam breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Amoxicillin-clavulanate",
+   "aliases": [
+    "augmentin",
+    "clavam"
+   ],
+   "avoid_if": [
+    "penicillin allergy",
+    "liver disease"
+   ],
+   "interacts_with": [],
+   "context_note": "A penicillin, and clavulanate adds a liver signal.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-prednisolone",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Prednisolone while breastfeeding",
+   "text": "Generally compatible with breastfeeding. Amounts in milk are small at usual doses. With very high doses some clinicians suggest waiting a few hours before feeding. Also sold as: omnacortil, wysolone.",
+   "detail": "Amounts in milk are small at usual doses. With very high doses some clinicians suggest waiting a few hours before feeding.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Prednisolone omnacortil, wysolone breastfeeding lactation safe",
+   "risk": "compatible",
+   "generic": "Prednisolone",
+   "aliases": [
+    "omnacortil",
+    "wysolone"
+   ],
+   "avoid_if": [
+    "diabetes",
+    "peptic ulcer",
+    "active infection"
+   ],
+   "interacts_with": [
+    "Ibuprofen",
+    "Diclofenac"
+   ],
+   "context_note": "Raises blood glucose and, with an NSAID, gastric bleeding risk.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-ranitidine",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Ranitidine while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Was widely used in breastfeeding, but has been withdrawn in many markets over an impurity concern. Check whether your product is still licensed. Also sold as: zinetac, rantac.",
+   "detail": "Was widely used in breastfeeding, but has been withdrawn in many markets over an impurity concern. Check whether your product is still licensed.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Ranitidine zinetac, rantac breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Ranitidine",
+   "aliases": [
+    "zinetac",
+    "rantac"
+   ],
+   "avoid_if": [
+    "kidney disease"
+   ],
+   "interacts_with": [
+    "Ciprofloxacin"
+   ],
+   "context_note": "Withdrawn in many markets over an impurity concern.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-diclofenac",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Diclofenac while breastfeeding",
+   "text": "Use with caution - discuss with your doctor. Low levels in milk and short-acting, but ibuprofen has more safety data during breastfeeding and is usually preferred. Also sold as: voveran, voltaren.",
+   "detail": "Low levels in milk and short-acting, but ibuprofen has more safety data during breastfeeding and is usually preferred.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Diclofenac voveran, voltaren breastfeeding lactation safe",
+   "risk": "caution",
+   "generic": "Diclofenac",
+   "aliases": [
+    "voveran",
+    "voltaren"
+   ],
+   "avoid_if": [
+    "asthma",
+    "peptic ulcer",
+    "stomach ulcer",
+    "kidney disease",
+    "heart disease",
+    "ckd"
+   ],
+   "interacts_with": [
+    "Ibuprofen",
+    "Aspirin",
+    "Prednisolone"
+   ],
+   "context_note": "Same NSAID cautions as ibuprofen, with a higher cardiovascular signal.",
+   "audience": "mother"
+  },
+  {
+   "id": "med-tramadol",
+   "collection": "medicines",
+   "topic": "medicine",
+   "title": "Tramadol while breastfeeding",
+   "text": "Best avoided while breastfeeding. Avoid while breastfeeding, particularly in newborns. Like codeine, it is metabolised to an opioid and carries a risk of infant sedation and breathing problems. Also sold as: ultracet, tramacip.",
+   "detail": "Avoid while breastfeeding, particularly in newborns. Like codeine, it is metabolised to an opioid and carries a risk of infant sedation and breathing problems.",
+   "source": "LactMed (NIH)",
+   "caution": "This is about a breastfeeding parent taking the medicine. It is not advice about giving medicine to a baby, and it never includes a dose. Confirm with your doctor or pharmacist.",
+   "keywords": "Tramadol ultracet, tramacip breastfeeding lactation safe",
+   "risk": "avoid",
+   "generic": "Tramadol",
+   "aliases": [
+    "ultracet",
+    "tramacip"
+   ],
+   "avoid_if": [
+    "epilepsy",
+    "seizure disorder",
+    "breathing problems"
+   ],
+   "interacts_with": [
+    "Codeine",
+    "Chlorpheniramine",
+    "Ondansetron"
+   ],
+   "context_note": "Lowers the seizure threshold and carries serotonergic interactions.",
+   "audience": "mother"
+  }
+ ]
+}

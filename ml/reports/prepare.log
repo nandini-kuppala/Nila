@@ -1,0 +1,29 @@
+
+[detect] 2457 clips, 1749 subjects
+split   label  clips  subjects
+train     cry    398       226
+train not_cry   1568      1386
+split   label  clips  subjects
+ test     cry     99        13
+ test not_cry    392       124
+    augment plan: {'cry': 3, 'not_cry': 0}
+    train: 250/1966 clips (29s)
+    train: 500/1966 clips (30s)
+    train: 750/1966 clips (30s)
+    train: 1000/1966 clips (30s)
+    train: 1250/1966 clips (30s)
+    train: 1500/1966 clips (30s)
+    train: 1750/1966 clips (30s)
+    train: 18960 patches in 32s {'cry': 9552, 'not_cry': 9408}
+    test: 250/491 clips (5s)
+    test: 2946 patches in 5s {'cry': 594, 'not_cry': 2352}
+  -> cache/detect.npz  train (16116, 96, 64) val (2844, 96, 64) test (2946, 96, 64)
+
+[reason] 457 clips, 221 subjects
+Traceback (most recent call last):
+  File "/Users/dev/Desktop/baby cry/paalna/ml/src/prepare.py", line 148, in <module>
+    prepare_task(t, a.leaky, a.workers, a.aug_cap)
+  File "/Users/dev/Desktop/baby cry/paalna/ml/src/prepare.py", line 113, in prepare_task
+    assert not overlap, f"subject leak: {overlap}"
+           ^^^^^^^^^^^
+AssertionError: subject leak: {'999bf14b-e417-4b44-b746-9253f81efe38', '10a40438-09aa-4a21-83b4-8119f03f7a11', 'd6cda191-4962-4308-9a36-46d5648a95ed', '549a46d8-9c84-430e-ade8-97eae2bef787'}
