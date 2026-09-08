@@ -216,6 +216,12 @@ class AppState(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             NfcInbox.taps.collect { kind -> logCare(kind, detail = "NFC tag") }
         }
+        // A fresh install has no last few days, and this app is mostly a record
+        // of the last few days. Seeds only into an empty database -- see DemoSeed.
+        viewModelScope.launch(Dispatchers.IO) {
+            if (com.nila.data.DemoSeed.applyIfEmpty(app, db)) refresh()
+        }
+
         // Re-arm whatever was scheduled before the process was last killed.
         viewModelScope.launch { runCatching { reminders.rescheduleAll() } }
     }
@@ -599,6 +605,21 @@ class AppState(app: Application) : AndroidViewModel(app) {
 
         /** Two minutes between unprompted looks. */
         const val AUTOMATIC_LOOK_COOLDOWN_MS = 120_000L
+    }
+
+    /**
+     * Wipe the log and lay the demo family down again.
+     *
+     * For running the same demo twice. Destructive by definition, which is why
+     * it sits at the bottom of Settings and says so.
+     */
+    fun resetDemoData() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                com.nila.data.DemoSeed.reset(getApplication(), db)
+            }
+            refresh()
+        }
     }
 
     fun setDraftQuestion(text: String) { _draftQuestion.value = text }

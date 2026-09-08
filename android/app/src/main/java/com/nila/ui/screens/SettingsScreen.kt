@@ -406,6 +406,25 @@ fun SettingsScreen(state: AppState) {
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionHeader("Demo data")
+            OutlinedBox(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "A fresh install is seeded with one example family so " +
+                            "every screen has something to show. Resetting wipes " +
+                            "the log and lays it down again.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedButton(
+                        onClick = state::resetDemoData,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Reset to demo data") }
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionHeader("Privacy")
             OutlinedBox(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

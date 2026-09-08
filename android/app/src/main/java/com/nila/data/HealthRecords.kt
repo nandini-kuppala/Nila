@@ -149,6 +149,13 @@ interface HealthRecordDao {
     @Query("SELECT COUNT(*) FROM health_records WHERE subject = :subject")
     suspend fun countFor(subject: String): Int
 
+    @Query("SELECT COUNT(*) FROM health_records")
+    suspend fun count(): Int
+
+    /** Used only by the demo seeder's reset. Never called on real data. */
+    @Query("DELETE FROM health_records")
+    suspend fun deleteAll()
+
     /**
      * Keyword search across title, notes and OCR text.
      *

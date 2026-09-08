@@ -260,6 +260,7 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
     <a href="#models-download">Nothing to download</a>
     <a href="#memory">Memory &amp; battery</a>
     <div class="grp">Ahead</div>
+    <a href="#demo-data">The demo family</a>
     <a href="#gaps">Not built</a>
     <a href="#improve">How to improve it</a>
   </nav>
@@ -276,6 +277,25 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
     <span>Release APK 121 MB</span>
     <span>Wear module 18.4 MB</span>
     <span>Network calls: none</span>
+  </div>
+
+  <div class="record">
+    <h4>The app, running</h4>
+    <p>Two minutes recorded off the release build, unedited: the escalation ladder on a real
+    cry, the camera watch on real footage of a baby crawling, a question answered from the
+    corpus on the phone, and a medicine checked against a stored health record.</p>
+    <div class="frame">
+      <video controls preload="metadata" poster="poster.jpg">
+        <source src="nila-demo.mp4" type="video/mp4">
+        The recording is at <code>docs/nila-demo.mp4</code> in the repository.
+      </video>
+    </div>
+    <div class="jump">
+      <a href="https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku">▶ Open it in a browser</a>
+      <a href="https://nandini-kuppala.github.io/Nila/">Landing page</a>
+      <a href="https://github.com/nandini-kuppala/Nila/releases/latest">Download the APK</a>
+      <a href="https://github.com/nandini-kuppala/Nila">Source</a>
+    </div>
   </div>
 </header>
 
@@ -917,8 +937,67 @@ adb logcat -s MonitorService:I CryEngine:I PaddleOcr:I SoothePlayer:I</code></pr
   </ul>
 </section>
 
+
+<section id="demo-data">
+  <h2><span class="num">16</span>The demo family</h2>
+  <p class="lede">A fresh install seeds itself, because an app that is mostly a record of the
+  last few days has nothing to show on a phone that has no last few days.</p>
+
+  <p>Every screen depends on history. The colic panel counts crying against the three-hour line,
+  the assistant answers "when did she last feed" from the log, the medicine check reads her own
+  allergies, and the soother ranking is a record of what has already worked. On an empty install
+  all of that is a blank. That is a poor first five minutes for a real parent and useless for a
+  demo on a device nobody has used.</p>
+
+  <h3>Authored in MongoDB, shipped in the APK</h3>
+  <p>The data lives in a MongoDB collection (<code>Nila.demo</code>) so it can be edited the night
+  before a pitch without touching Kotlin. <code>ml/src/demo_seed.py</code> pushes the definition
+  up, reads it back, and writes <code>assets/demo_seed.json</code>.</p>
+
+  <div class="callout">
+    <h4>The app never connects to MongoDB</h4>
+    <p>It reads the exported asset and nothing else. That is not a detail — it is the difference
+    between a demo that works on Appetize, on a plane and in a hall with no signal, and one that
+    works only where there is a network. It also means there is no connection string in the APK
+    for anyone to extract, which a runtime connection would have required.</p>
+    <p>The round trip is deliberate: what lands in the APK is what is in the collection, including
+    any edit made there since. If the two ever disagree, the collection wins.</p>
+  </div>
+
+  <h3>What is in it</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Records</th><th>Chosen so that</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Meera, four months</td><td class="dim">Old enough for the app to matter, young enough that the age guardrail bites — a question about feeding her must not return the choking-hazard page</td></tr>
+      <tr><td class="name">Penicillin allergy, asthma, ferrous sulphate</td><td class="dim">Turns the medicine check from a lookup into an answer about her: amoxicillin and Combiflam are both flagged, and the app says which of her own facts caused it</td></tr>
+      <tr><td class="name">20 care entries over 30 hours</td><td class="dim">The last feed is recent enough that "when did she last feed" answers with something an audience reads as now</td></tr>
+      <tr><td class="name">18 cry episodes over a week</td><td class="dim">Two days cross three hours — below the Wessel threshold of three such days, so the panel reports the count and stays quiet</td></tr>
+      <tr><td class="name">6 health documents</td><td class="dim">Including the six-week check whose EPDS score sits below the referral threshold, which is what the negation-aware history miner has to read correctly</td></tr>
+      <tr><td class="name">4 soother records</td><td class="dim">Her mother's own voice leads at 7 of 9, which is the finding the feature exists to surface</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Two rules in the loader</h3>
+  <ul class="plain">
+    <li><strong>Only ever into an empty database.</strong> If anything real has been logged it does
+    nothing at all. A demo seeder that can overwrite a parent's own record of their baby is a bug
+    with consequences, so the database itself — not a preference flag — is the authority on whether
+    the app has been used.</li>
+    <li><strong>Every time is relative.</strong> The file stores "165 minutes ago", never a date.
+    Absolute timestamps were the first version and they aged into a demo about a baby last fed
+    nine days ago.</li>
+  </ul>
+
+  <p>One cry episode expands into the rows the monitor would have written for it — a start, the
+  soothing attempt, its outcome, an escalation, an end — rather than a single summary row. The
+  timeline then shows causes before effects instead of an alert with nothing in front of it. And
+  <code>hypothesisTrustworthy</code> is false on every seeded row, because the cause estimate did
+  not clear chance on infants it had not heard and seed data claiming otherwise would put a false
+  badge on a real screen.</p>
+</section>
+
 <section id="gaps">
-  <h2><span class="num">16</span>What is not built</h2>
+  <h2><span class="num">17</span>What is not built</h2>
   <div class="feature is-none"><h4>Multilingual answers</h4><span class="chip none">not built</span>
     <p>The plumbing exists — a language field on the baby profile, passed through the router, retriever and prompt. What does not exist is a translated corpus. A 0.5B model translating clinical guidance into Hindi or Tamil is not something to ship. The honest fix is to translate the 46 documents with a human in the loop.</p></div>
   <div class="feature is-none"><h4>Pre-roll clip export</h4><span class="chip none">not wired</span>
@@ -932,7 +1011,7 @@ adb logcat -s MonitorService:I CryEngine:I PaddleOcr:I SoothePlayer:I</code></pr
 </section>
 
 <section id="improve">
-  <h2><span class="num">17</span>How to make it better</h2>
+  <h2><span class="num">18</span>How to make it better</h2>
 
   <h3>The cause classifier — the only route that is honest</h3>
   <p>No amount of architecture work fixes 0.444. The dataset is 457 clips, 76% one class, 8 clips of <code>burping</code>, and no protocol establishing that the labels are anything more than the parent's guess at the time. The route forward is data, collected properly: multiple sessions per infant, labels confirmed by what actually resolved the cry, and enough subjects that a subject-wise split has statistical power. Anything else is re-deriving 0.953 by leaking and calling it progress.</p>

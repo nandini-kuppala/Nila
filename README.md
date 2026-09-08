@@ -12,11 +12,15 @@ the breastfeeding mother — without a single network request.
 </p>
 
 <p align="center">
+  <a href="https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku"><b>Try it in your browser</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://nandini-kuppala.github.io/Nila/">Landing page</a>
+  &nbsp;·&nbsp;
   <a href="https://github.com/nandini-kuppala/Nila/releases/latest">Download the APK</a>
   &nbsp;·&nbsp;
   <a href="docs/nila-demo.mp4">Two-minute demo</a>
   &nbsp;·&nbsp;
-  <a href="docs/technical-record.html">Technical record</a>
+  <a href="https://nandini-kuppala.github.io/Nila/technical-record.html">Technical record</a>
 </p>
 
 <p align="center">
@@ -215,6 +219,15 @@ arm64-v8a only, `minSdk 26`, `targetSdk 35`. **Nothing needs downloading** —
 every model the app requires ships inside the APK and works offline from first
 launch.
 
+### Try it in a browser
+
+**[Run Nila now →](https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku)** — no install. It opens a real Android device with the
+app on it, already populated with the demo family.
+
+Tap **Play a demo cry** on the Monitor tab and **Play demo footage** on Watch.
+Both run the real pipeline; neither needs a microphone or a camera, which is why
+this works in a browser at all.
+
 ### See it working
 
 <p align="center"><a href="docs/nila-demo.mp4"><b>▶ Two-minute demo</b></a></p>
@@ -232,6 +245,30 @@ Both are on the relevant screen, and both run the real pipeline:
   — about twenty seconds.
 - **Watch → Play demo footage.** A real clip of a baby crawling, through the
   real face detector and motion analysis, shown on screen as it is analysed.
+
+### Demo data
+
+A fresh install seeds itself with one example family — a four-month-old, her
+mother's health record including a penicillin allergy, a day of feeds, and a
+week of crying with two days over the three-hour line. Without it every screen
+is an empty state and there is nothing to show.
+
+The data is authored in MongoDB (`Nila.demo`) and exported into the APK:
+
+```bash
+cd ml
+../.venv/bin/python src/demo_seed.py           # push to MongoDB, then export
+../.venv/bin/python src/demo_seed.py --export  # MongoDB -> assets/demo_seed.json
+```
+
+**The app never connects to MongoDB.** It reads the exported asset, so the demo
+works offline, in a browser emulator, and on a plane — and there is no
+connection string in the APK to find. Settings → *Reset to demo data* lays it
+down again for a second run.
+
+Every time in the file is relative — "165 minutes ago", never a date — so an APK
+built today still shows a baby who fed two hours ago when it is installed next
+month.
 
 ### Tests
 

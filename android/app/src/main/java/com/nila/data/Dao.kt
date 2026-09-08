@@ -45,6 +45,10 @@ interface EventDao {
     """)
     suspend fun cryEpisodesBetween(fromMs: Long, toMs: Long): Int
 
+    /** Used only by the demo seeder's reset. Never called on real data. */
+    @Query("DELETE FROM events")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM events WHERE startedAtMs < :beforeMs")
     suspend fun prune(beforeMs: Long): Int
 }
@@ -65,6 +69,10 @@ interface CareDao {
 
     @Query("DELETE FROM care_log WHERE id = :id")
     suspend fun delete(id: Long)
+
+    /** Used only by the demo seeder's reset. Never called on real data. */
+    @Query("DELETE FROM care_log")
+    suspend fun deleteAll()
 }
 
 @Dao

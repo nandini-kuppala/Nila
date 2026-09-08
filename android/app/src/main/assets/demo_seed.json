@@ -1,0 +1,352 @@
+{
+ "version": 1,
+ "note": "Demo data for Nila. Relative offsets, never absolute dates.",
+ "baby": {
+  "name": "Meera",
+  "ageDays": 124,
+  "language": "en",
+  "healthNotes": "Exclusively breastfed. No known allergies. Passed newborn hearing screen."
+ },
+ "mother": {
+  "name": "Nandini",
+  "isBreastfeeding": true,
+  "deliveryDaysAgo": 124,
+  "conditions": "Asthma, Iron deficiency anaemia",
+  "allergies": "Penicillin",
+  "currentMedicines": "Ferrous sulphate",
+  "notes": "Six-week check normal. Bleeding settled by week five."
+ },
+ "care": [
+  {
+   "kind": "FEED",
+   "minutesAgo": 95
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 140
+  },
+  {
+   "kind": "SLEEP_START",
+   "minutesAgo": 210
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 265
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 320
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 430
+  },
+  {
+   "kind": "SLEEP_START",
+   "minutesAgo": 500,
+   "detail": "Long nap"
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 605
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 640,
+   "detail": "NFC tag"
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 760
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 915
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 950
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 1080
+  },
+  {
+   "kind": "SLEEP_START",
+   "minutesAgo": 1140
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 1260
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 1310
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 1425
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 1580
+  },
+  {
+   "kind": "DIAPER",
+   "minutesAgo": 1640
+  },
+  {
+   "kind": "FEED",
+   "minutesAgo": 1755
+  }
+ ],
+ "cries": [
+  {
+   "hoursAgo": 2.1,
+   "seconds": 240,
+   "trend": "SETTLING",
+   "confidence": 0.94,
+   "cause": "tired",
+   "causeConfidence": 0.38,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 6.4,
+   "seconds": 95,
+   "trend": "SETTLING",
+   "confidence": 0.88,
+   "cause": null
+  },
+  {
+   "hoursAgo": 9.8,
+   "seconds": 410,
+   "trend": "RISING",
+   "confidence": 0.96,
+   "cause": "discomfort",
+   "causeConfidence": 0.34,
+   "soothed": "White noise",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 26.0,
+   "seconds": 180,
+   "trend": "SETTLING",
+   "confidence": 0.91,
+   "cause": "hungry",
+   "causeConfidence": 0.41,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 31.5,
+   "seconds": 620,
+   "trend": "RISING",
+   "confidence": 0.97,
+   "cause": "belly_pain",
+   "causeConfidence": 0.31,
+   "soothed": "Heartbeat",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 35.2,
+   "seconds": 130,
+   "trend": "STEADY",
+   "confidence": 0.86,
+   "cause": null
+  },
+  {
+   "hoursAgo": 40.0,
+   "seconds": 300,
+   "trend": "SETTLING",
+   "confidence": 0.93,
+   "cause": "tired",
+   "causeConfidence": 0.36,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 50.0,
+   "seconds": 2700,
+   "trend": "RISING",
+   "confidence": 0.97,
+   "cause": "belly_pain",
+   "causeConfidence": 0.33,
+   "soothed": "White noise",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 52.5,
+   "seconds": 3300,
+   "trend": "RISING",
+   "confidence": 0.98,
+   "cause": "belly_pain",
+   "causeConfidence": 0.31,
+   "soothed": "Heartbeat",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 55.0,
+   "seconds": 2400,
+   "trend": "STEADY",
+   "confidence": 0.95,
+   "cause": "discomfort",
+   "causeConfidence": 0.28,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 58.0,
+   "seconds": 2900,
+   "trend": "SETTLING",
+   "confidence": 0.94,
+   "cause": "discomfort",
+   "causeConfidence": 0.29,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 73.0,
+   "seconds": 3100,
+   "trend": "RISING",
+   "confidence": 0.97,
+   "cause": "belly_pain",
+   "causeConfidence": 0.35,
+   "soothed": "Heartbeat",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 76.0,
+   "seconds": 3600,
+   "trend": "RISING",
+   "confidence": 0.98,
+   "cause": "belly_pain",
+   "causeConfidence": 0.34,
+   "soothed": "White noise",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "hoursAgo": 79.0,
+   "seconds": 2200,
+   "trend": "SETTLING",
+   "confidence": 0.93,
+   "cause": "tired",
+   "causeConfidence": 0.4,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 81.5,
+   "seconds": 2100,
+   "trend": "SETTLING",
+   "confidence": 0.92,
+   "cause": "tired",
+   "causeConfidence": 0.38,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "hoursAgo": 99.0,
+   "seconds": 260,
+   "trend": "SETTLING",
+   "confidence": 0.9,
+   "cause": "hungry",
+   "causeConfidence": 0.44
+  },
+  {
+   "hoursAgo": 121.0,
+   "seconds": 175,
+   "trend": "STEADY",
+   "confidence": 0.87,
+   "cause": null
+  },
+  {
+   "hoursAgo": 147.0,
+   "seconds": 340,
+   "trend": "SETTLING",
+   "confidence": 0.93,
+   "cause": "tired",
+   "causeConfidence": 0.37,
+   "soothed": "Amma humming",
+   "settled": true
+  }
+ ],
+ "records": [
+  {
+   "subject": "BABY",
+   "category": "VACCINATION",
+   "title": "Immunisation card",
+   "daysAgo": 32,
+   "notes": "Up to date at 14 weeks.",
+   "text": "NATIONAL IMMUNISATION SCHEDULE. BCG at birth: given. OPV-0 at birth: given. Pentavalent 1 at 6 weeks: given. Pentavalent 2 at 10 weeks: given. Pentavalent 3 at 14 weeks: given. Next due: Measles-Rubella at 9 months."
+  },
+  {
+   "subject": "BABY",
+   "category": "CHECKUP",
+   "title": "Four-month review",
+   "daysAgo": 9,
+   "notes": "Growing along the 50th centile.",
+   "text": "Weight 6.4 kg. Length 62 cm. Head circumference 41 cm. Feeding: exclusively breastfed, on demand. Development: social smile present, good head control, rolling front to back. Newborn hearing screening: passed, both ears. No concerns raised."
+  },
+  {
+   "subject": "BABY",
+   "category": "OTHER",
+   "title": "Discharge summary",
+   "daysAgo": 122,
+   "notes": "Term delivery, no complications.",
+   "text": "Born at 39 weeks by normal vaginal delivery. Birth weight 3.1 kg. Apgar 9 and 10. Vitamin K given. Newborn screening sent. Discharged day 2, feeding well."
+  },
+  {
+   "subject": "MOTHER",
+   "category": "CHECKUP",
+   "title": "Six-week postnatal check",
+   "daysAgo": 82,
+   "notes": "All normal.",
+   "text": "Blood pressure 118/74. Perineum healed. Lochia settled at week five. Mood screening: EPDS score 6, below referral threshold, no action needed. Breastfeeding established. Contraception discussed."
+  },
+  {
+   "subject": "MOTHER",
+   "category": "PRESCRIPTION",
+   "title": "Prescription, iron and inhaler",
+   "daysAgo": 45,
+   "notes": "Repeat for three months.",
+   "text": "Ferrous sulphate 200 mg, one tablet twice daily with food. Salbutamol inhaler, two puffs as required for wheeze. Review in three months. Note: penicillin allergy documented -- rash and facial swelling, age 19."
+  },
+  {
+   "subject": "MOTHER",
+   "category": "LAB",
+   "title": "Full blood count",
+   "daysAgo": 47,
+   "notes": "Iron low, treatment started.",
+   "text": "Haemoglobin 9.8 g/dL (low). Mean cell volume 74 fL (low). Ferritin 11 ng/mL (low). White cells normal. Platelets normal. Impression: iron deficiency anaemia. Commence oral iron and repeat in three months."
+  }
+ ],
+ "soothers": [
+  {
+   "id": "Amma-humming",
+   "attempts": 9,
+   "successes": 7
+  },
+  {
+   "id": "white_noise",
+   "attempts": 6,
+   "successes": 2
+  },
+  {
+   "id": "heartbeat",
+   "attempts": 4,
+   "successes": 1
+  },
+  {
+   "id": "shush",
+   "attempts": 2,
+   "successes": 1
+  }
+ ]
+}
