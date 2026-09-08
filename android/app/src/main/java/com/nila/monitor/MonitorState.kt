@@ -53,6 +53,16 @@ data class MonitorState(
      * until the reader dismisses it.
      */
     val demoComplete: Boolean = false,
+    /**
+     * The sound coming out of the speaker right now, if any.
+     *
+     * Separate from [lastSoother], which records what was tried. This one is
+     * what the UI animates -- a sound that is playing should look like it is
+     * playing, or a demo of it is indistinguishable from a caption.
+     */
+    val nowPlaying: String? = null,
+    /** True when [nowPlaying] is a recording somebody made, not a built-in. */
+    val nowPlayingIsVoice: Boolean = false,
 ) {
 
     /**

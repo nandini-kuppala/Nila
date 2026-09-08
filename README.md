@@ -26,7 +26,7 @@ the breastfeeding mother — without a single network request.
 <p align="center">
   <img alt="Android" src="https://img.shields.io/badge/Android-8.1%2B-3DDC84?logo=android&logoColor=white">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-182%20passing-2ea44f">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-187%20passing-2ea44f">
   <img alt="Network" src="https://img.shields.io/badge/network%20calls-0-0F6B60">
   <img alt="Licence" src="https://img.shields.io/badge/licence-MIT-blue">
 </p>
@@ -241,11 +241,12 @@ the on-device corpus, and a medicine checked against a stored health record.
 
 Both are on the relevant screen, and both run the real pipeline:
 
-- **Monitor → Play a demo cry.** A real recorded cry through the real detector
-  at 6× speed. Detection, cause, **white noise out of the speaker**, the check
-  that says it did not help, **a second sound — your own recording if you have
-  made one**, the second check, then the alert. About thirty seconds, and it
-  waits for you to close it rather than clearing itself.
+- **Monitor → Play a demo cry.** *Sound up.* A real recorded cry, played aloud
+  and fed to the real detector at 6× speed. You hear the cry, see it classified,
+  hear **white noise**, see the check that says it did not help, hear the
+  **caregiver's recording**, see the second check, then the alert — which names
+  the cause. About thirty-five seconds, and it waits for you to close it rather
+  than clearing itself.
 - **Watch → Play demo footage.** A real clip of a baby crawling, through the
   real face detector and motion analysis, shown on screen as it is analysed.
 
@@ -277,7 +278,7 @@ month.
 
 ```bash
 cd android
-./gradlew :app:testDebugUnitTest            # 120 tests, no device
+./gradlew :app:testDebugUnitTest            # 125 tests, no device
 ./gradlew :app:connectedDebugAndroidTest \
   -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true   # 62 tests
 ```

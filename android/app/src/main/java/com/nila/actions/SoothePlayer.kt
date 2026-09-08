@@ -43,9 +43,16 @@ class SoothePlayer(private val context: Context) {
         private const val TAG = "SoothePlayer"
         private const val MAX_VOLUME_FRACTION = 0.55f
         const val DEFAULT_DURATION_SECONDS = 45
+
+        /** The demo cry, loud enough to be the thing you notice in the room. */
+        private const val CRY_VOLUME = 0.85f
+
+        /** And ducked under a soother, so the soother is what you hear next. */
+        private const val CRY_DUCKED_VOLUME = 0.22f
     }
 
     private var player: MediaPlayer? = null
+    private var cryPlayer: MediaPlayer? = null
     @Volatile var nowPlaying: Soother? = null; private set
 
     fun play(soother: Soother, loop: Boolean = true): Boolean {
@@ -79,6 +86,56 @@ class SoothePlayer(private val context: Context) {
             nowPlaying = null
             false
         }
+    }
+
+    /**
+     * Play the demo cry itself, on loop, until [stopCry].
+     *
+     * The simulation feeds the recording to the detector but never to the
+     * speaker, so a demo of a cry was silent -- which left the soothing sounds
+     * with nothing to be soothing, and the verification rung with nothing
+     * audible to have judged. This is the demo path only; the live monitor
+     * never plays what it hears.
+     */
+    fun playCryLoop(asset: String): Boolean {
+        stopCry()
+        return try {
+            cryPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                context.assets.openFd(asset).use {
+                    setDataSource(it.fileDescriptor, it.startOffset, it.length)
+                }
+                isLooping = true
+                setVolume(CRY_VOLUME, CRY_VOLUME)
+                prepare()
+                start()
+            }
+            Log.i(TAG, "playing the demo cry")
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "could not play the demo cry", t)
+            cryPlayer = null
+            false
+        }
+    }
+
+    /** Drop the cry under a soothing sound, or bring it back up. */
+    fun duckCry(ducked: Boolean) {
+        val v = if (ducked) CRY_DUCKED_VOLUME else CRY_VOLUME
+        cryPlayer?.runCatching { setVolume(v, v) }
+    }
+
+    fun stopCry() {
+        cryPlayer?.runCatching {
+            if (isPlaying) stop()
+            release()
+        }
+        cryPlayer = null
     }
 
     fun stop() {

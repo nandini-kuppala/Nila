@@ -135,6 +135,8 @@ object DemoSeed {
 
         json.optJSONArray("cries")?.forEach { cry -> writeEpisode(db, now, cry) }
 
+        installSampleVoice(context)
+
         json.optJSONArray("records")?.forEach { record ->
             db.healthRecords().insert(
                 HealthRecord(
@@ -161,6 +163,28 @@ object DemoSeed {
             val successes = soother.getInt("successes")
             repeat(attempts) { i -> memory.record(id, i < successes) }
         }
+    }
+
+    /**
+     * Lay down one sample caregiver recording, so a fresh install can show what
+     * "it plays your own voice first" actually looks and sounds like.
+     *
+     * This is a synthesised stand-in shipped with the demo family, not anyone's
+     * real voice, and it is written the same way a recording made in the app
+     * would be -- so the monitor finds it through the ordinary path and nothing
+     * downstream needs a special case. Recording over it in Settings replaces
+     * it, which is what anyone demonstrating this should do.
+     */
+    private fun installSampleVoice(context: Context) {
+        runCatching {
+            val target = java.io.File(
+                com.nila.actions.VoiceRecorder.directory(context), "Amma-humming.m4a"
+            )
+            if (target.exists()) return
+            context.assets.open("demo_mother_voice.m4a").use { input ->
+                target.outputStream().use { input.copyTo(it) }
+            }
+        }.onFailure { Log.w(TAG, "could not install the sample voice", it) }
     }
 
     /**

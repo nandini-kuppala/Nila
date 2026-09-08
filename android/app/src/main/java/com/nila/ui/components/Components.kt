@@ -1,5 +1,17 @@
 package com.nila.ui.components
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -267,3 +279,81 @@ fun WarningBox(title: String, body: String, modifier: Modifier = Modifier) {
         }
     }
 }
+
+/**
+ * A sound that is playing, shown as a voice note rather than a caption.
+ *
+ * The escalation ladder's middle rung -- try something before waking anyone --
+ * used to appear on screen as a line of text that changed and changed back.
+ * People read that as a log entry, not as an action the phone was taking, and
+ * the single most common reaction to the demo was not noticing it had happened.
+ * Bars that move while the speaker is making noise fix that without a word.
+ */
+@Composable
+fun VoiceNoteBar(
+    name: String,
+    isVoice: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val transition = rememberInfiniteTransition(label = "voice-note")
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(11.dp),
+    ) {
+        Icon(
+            imageVector = if (isVoice) Icons.Outlined.Mic else Icons.Outlined.VolumeUp,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.size(19.dp),
+        )
+
+        // Seven bars, each on its own period, so the group never pulses in
+        // unison -- which reads as a progress indicator rather than sound.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.height(22.dp),
+        ) {
+            val periods = listOf(430, 610, 350, 700, 480, 560, 390)
+            periods.forEach { period ->
+                val h by transition.animateFloat(
+                    initialValue = 0.22f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(period, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
+                    label = "bar",
+                )
+                Box(
+                    modifier = Modifier
+                        .width(3.dp)
+                        .fillMaxHeight(h)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.onSecondaryContainer)
+                )
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Text(
+                text = if (isVoice) "Your recorded voice, playing now"
+                       else "Playing now",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+    }
+}
+

@@ -145,6 +145,18 @@ class MonitorService : LifecycleService() {
     private var notedHypothesis = false
 
     /**
+     * The cause estimate for the episode in progress, decided once.
+     *
+     * The classifier runs on every window and, being at chance on infants it
+     * has never heard, returns a different label on many of them. Left live,
+     * one episode announced "tired" in the transcript, showed "discomfort" on
+     * the card and woke the parent with "belly pain" -- three answers to one
+     * question, which reads as a broken app rather than an honest one. The
+     * estimate is made once from the cry and then stands.
+     */
+    private var episodeHypothesis: com.nila.audio.ReasonHypothesis? = null
+
+    /**
      * Real milliseconds the simulation should pause before its next window.
      *
      * Set from the ladder when something happens a person needs time to hear or
@@ -264,12 +276,14 @@ class MonitorService : LifecycleService() {
 
             is CryEngine.Result.Started -> {
                 escalation.reset()
+                episodeHypothesis = null
+                val evidence = latched(result.evidence)
                 currentEventId = db.events().insert(
-                    recordFor(result.evidence, EventKind.CRY_STARTED, Severity.NOTE)
+                    recordFor(evidence, EventKind.CRY_STARTED, Severity.NOTE)
                 )
                 _state.value = _state.value.copy(
-                    phase = MonitorState.Phase.CryDetected(result.evidence.durationSeconds),
-                    currentEvidence = result.evidence,
+                    phase = MonitorState.Phase.CryDetected(evidence.durationSeconds),
+                    currentEvidence = evidence,
                     eventsTonight = _state.value.eventsTonight + 1,
                     inputDbfs = window.dbfs,
                     silentWindows = 0,
@@ -280,8 +294,9 @@ class MonitorService : LifecycleService() {
             }
 
             is CryEngine.Result.Ongoing -> {
+                val evidence = latched(result.evidence)
                 _state.value = _state.value.copy(
-                    currentEvidence = result.evidence,
+                    currentEvidence = evidence,
                     inputDbfs = window.dbfs,
                     silentWindows = 0,
                 )
@@ -289,42 +304,61 @@ class MonitorService : LifecycleService() {
                 // chance on infants it has not heard, so the transcript has to
                 // carry that caveat next to the label rather than under it.
                 if (!notedHypothesis) {
-                    result.evidence.hypothesis?.let { h ->
+                    evidence.hypothesis?.let { h ->
                         notedHypothesis = true
-                        note("Probably ${h.label} - a guess from the sound, not a diagnosis")
+                        note(
+                            "Classified the cry: probably ${plain(h.label)} " +
+                                "(${(h.confidence * 100).toInt()}%) - a guess from " +
+                                "the sound, not a diagnosis"
+                        )
                     }
                 }
-                step(result.evidence)
+                step(evidence)
                 pushToWatch()
             }
 
             is CryEngine.Result.Ended -> {
                 soothePlayer.stop()
+                val evidence = latched(result.evidence)
                 db.events().insert(
                     recordFor(
-                        result.evidence, EventKind.CRY_ENDED,
-                        if (result.evidence.durationSeconds >= 20) Severity.ATTENTION
+                        evidence, EventKind.CRY_ENDED,
+                        if (evidence.durationSeconds >= 20) Severity.ATTENTION
                         else Severity.NOTE,
                     )
                 )
                 // Attribute the outcome to whatever we last played, so the next
                 // episode picks a better sound.
                 pendingSoother?.let { soother ->
-                    sootheMemory.record(soother.id, escalation.judgeSettled(result.evidence))
+                    sootheMemory.record(soother.id, escalation.judgeSettled(evidence))
                 }
                 pendingSoother = null
                 currentEventId = null
                 escalation.reset()
-                note("The crying stopped after ${result.evidence.durationSeconds}s")
-                if (_state.value.simulated) demoSummary = result.evidence
+                soothePlayer.duckCry(false)
+                note("The crying stopped after ${evidence.durationSeconds}s")
+                if (_state.value.simulated) demoSummary = evidence
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Listening,
                     currentEvidence = null,
                     lastSoother = null,
+                    nowPlaying = null,
+                    nowPlayingIsVoice = false,
                 )
             }
         }
     }
+
+    /** Hold the episode's first cause estimate across every later window. */
+    private fun latched(evidence: CryEvidence): CryEvidence {
+        val current = evidence.hypothesis
+        if (episodeHypothesis == null && current != null) episodeHypothesis = current
+        val fixed = episodeHypothesis ?: return evidence
+        return if (current === fixed) evidence else evidence.copy(hypothesis = fixed)
+    }
+
+    /** `belly_pain` is a class name; "belly pain" is what a person reads. */
+    private fun plain(label: String) = label.replace('_', ' ')
 
     /** Append one line to the running account of what was done about this cry. */
     private fun note(text: String) {
@@ -411,11 +445,14 @@ class MonitorService : LifecycleService() {
                         recordFor(evidence, EventKind.SOOTHE_PLAYED, Severity.NOTE)
                             .copy(note = choice.displayName)
                     )
+                    soothePlayer.duckCry(true)
                     _state.value = _state.value.copy(
                         phase = MonitorState.Phase.Settling(
                             choice.displayName, evidence.durationSeconds
                         ),
                         lastSoother = choice.displayName,
+                        nowPlaying = choice.displayName,
+                        nowPlayingIsVoice = choice is Soother.Recorded,
                     )
                     note(
                         when (choice) {
@@ -450,10 +487,13 @@ class MonitorService : LifecycleService() {
                     )
                 }
                 if (!settled) soothePlayer.stop()
+                soothePlayer.duckCry(false)
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Verifying(
                         soother?.displayName ?: "the sound"
-                    )
+                    ),
+                    nowPlaying = if (settled) _state.value.nowPlaying else null,
+                    nowPlayingIsVoice = settled && _state.value.nowPlayingIsVoice,
                 )
                 // Lowercased for the built-ins so the sentence reads, but never
                 // for a recording: those carry a name somebody chose.
@@ -470,9 +510,19 @@ class MonitorService : LifecycleService() {
 
             is Escalation.Decision.Escalate -> {
                 soothePlayer.stop()
+                soothePlayer.duckCry(false)
+                // The cause leads the alert, because it is the first thing
+                // anybody woken at 3 a.m. wants -- but it leads it as "probably".
+                // The estimate did not clear chance on infants it had not heard,
+                // and an alert that says "hungry" flat is the exact claim this
+                // project exists to refuse.
+                val guess = evidence.hypothesis
+                    ?.let { "Probably ${plain(it.label)}. " }
+                    .orEmpty()
                 notifier.alert(
                     title = "Your baby needs you",
                     body = buildString {
+                        append(guess)
                         append(decision.reason)
                         append(".")
                         if (escalation.attemptCount > 0) {
@@ -488,9 +538,15 @@ class MonitorService : LifecycleService() {
                         .copy(note = decision.reason)
                 )
                 _state.value = _state.value.copy(
-                    phase = MonitorState.Phase.Escalated(decision.reason, decision.severity)
+                    phase = MonitorState.Phase.Escalated(decision.reason, decision.severity),
+                    nowPlaying = null,
+                    nowPlayingIsVoice = false,
                 )
-                note("Woke you: ${decision.reason.lowercase()}")
+                note(
+                    "Woke you: " +
+                        evidence.hypothesis?.let { "probably ${plain(it.label)}, " }.orEmpty() +
+                        decision.reason.lowercase()
+                )
                 if (_state.value.simulated) demoHoldMs = DEMO_ALERT_HOLD_MS
                 // Belt and braces: the notification already reaches any watch
                 // that mirrors them. This adds the distinct vibration pattern
@@ -537,6 +593,7 @@ class MonitorService : LifecycleService() {
         engine?.close()
         engine = cryEngine
         escalation.reset()
+        episodeHypothesis = null
         demoSummary = null
         demoHoldMs = 0L
 
@@ -547,6 +604,12 @@ class MonitorService : LifecycleService() {
             phase = MonitorState.Phase.Listening,
             accelerator = cryEngine.accelerator.name,
         )
+
+        // The recording goes to the detector and, now, to the speaker. A demo
+        // of a crying baby that makes no sound leaves the soothing sounds with
+        // nothing to soothe and the verification rung with nothing audible to
+        // have judged.
+        soothePlayer.playCryLoop("demo_cry.wav")
 
         simulation = lifecycleScope.launch(Dispatchers.Default) {
             try {
@@ -590,7 +653,7 @@ class MonitorService : LifecycleService() {
                         chunk[i] = cry[(offset + i) % cry.size]
                     }
                     offset = (offset + AudioCapture.HOP_SAMPLES) % cry.size
-                    applyDemoLevel(chunk, (w * HOP_MS / 1000L).toInt())
+                    applyDemoLevel(chunk, (w * HOP_MS / 1000L).toInt(), w)
                     push(chunk)
                 }
 
@@ -609,10 +672,13 @@ class MonitorService : LifecycleService() {
                     demoComplete = true,
                     phase = MonitorState.Phase.DemoFinished,
                     currentEvidence = demoSummary,
+                    nowPlaying = null,
+                    nowPlayingIsVoice = false,
                 )
                 cryEngine.close()
                 if (engine === cryEngine) engine = null
                 soothePlayer.stop()
+                soothePlayer.stopCry()
                 notifier.clear()
                 stopSelf()
             }
@@ -630,35 +696,15 @@ class MonitorService : LifecycleService() {
      * point of the feature. With nothing recorded, the heartbeat stands in and
      * the transcript says why.
      */
-    /**
-     * The loudness the simulated episode is held at, in dBFS, at a given second.
-     *
-     * Looping a few seconds of recording for two minutes produces a sawtooth
-     * envelope, and the trend estimator -- a least-squares slope over the last
-     * twenty windows -- reads that as rising or settling depending on nothing
-     * more than where the loop happened to wrap. The ladder then escalated at an
-     * arbitrary point, so the demo told a different story on every run and
-     * usually stopped after one sound.
-     *
-     * So the demo drives the level itself: a rise into the first sound, then a
-     * plateau long enough for both attempts to be played and judged, ending in
-     * the alert that fires once nothing has worked. The audio, the frontend, the
-     * detector, the classifier, the hysteresis and every rung of the ladder are
-     * untouched -- the only scripted thing is how loud the simulated baby is,
-     * which is the one quantity a recording of a different baby cannot supply.
-     */
-    private fun demoLevelDbfs(second: Int): Float =
-        if (second < 14) -34f + (second / 14f) * 8f else -26f
-
     /** Scale a simulated window onto that arc. */
-    private fun applyDemoLevel(chunk: FloatArray, second: Int) {
+    private fun applyDemoLevel(chunk: FloatArray, second: Int, window: Int) {
         val current = LogMelFrontend.dbfs(chunk, 0, chunk.size)
         if (current <= MonitorState.SILENCE_DBFS) return
         // Wide enough to reach the target from the quietest gap between cry
         // bursts, which is 36 dB below the loudest window in this clip. A
         // narrower clamp leaves those windows short, the envelope sags, and the
         // trend estimator swings again -- which was the original bug.
-        val gain = 10f.pow((demoLevelDbfs(second) - current) / 20f)
+        val gain = 10f.pow((DemoLevel.dbfsAt(second, window) - current) / 20f)
             .coerceIn(0.02f, 200f)
         for (i in chunk.indices) chunk[i] = (chunk[i] * gain).coerceIn(-1f, 1f)
     }
@@ -726,6 +772,7 @@ class MonitorService : LifecycleService() {
         engine?.close()
         engine = null
         soothePlayer.stop()
+        soothePlayer.stopCry()
         wakeLock?.runCatching { if (isHeld) release() }
         wakeLock = null
         notifier.clear()

@@ -39,6 +39,7 @@ import com.nila.ui.components.OutlinedBox
 import com.nila.ui.components.PulseDot
 import com.nila.ui.components.SectionHeader
 import com.nila.ui.components.StatBlock
+import com.nila.ui.components.VoiceNoteBar
 import com.nila.ui.components.WarningBox
 import com.nila.ui.theme.SeverityUrgent
 import java.util.concurrent.TimeUnit
@@ -111,6 +112,10 @@ private fun StatusCard(
                     color = if (urgent) SeverityUrgent
                             else MaterialTheme.colorScheme.onSurface,
                 )
+            }
+
+            monitor.nowPlaying?.let { sound ->
+                VoiceNoteBar(name = sound, isVoice = monitor.nowPlayingIsVoice)
             }
 
             if (monitor.running || monitor.demoComplete) {
