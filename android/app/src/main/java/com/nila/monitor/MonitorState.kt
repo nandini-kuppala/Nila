@@ -43,6 +43,16 @@ data class MonitorState(
      * line changing to "Playing White noise" and then changing back.
      */
     val actions: List<String> = emptyList(),
+    /**
+     * True once a demo cry has run to the end and its summary is being held on
+     * screen.
+     *
+     * The demo used to tear itself down the moment the episode closed, which
+     * meant the account of what Nila did -- the whole point of running it --
+     * vanished at the exact moment somebody wanted to read it. Now it stays up
+     * until the reader dismisses it.
+     */
+    val demoComplete: Boolean = false,
 ) {
 
     /**
@@ -69,6 +79,7 @@ data class MonitorState(
         data class Verifying(val soother: String) : Phase
         data class Escalated(val reason: String, val severity: Severity) : Phase
         data class Safety(val reason: String) : Phase
+        data object DemoFinished : Phase
     }
 
     /** Where the last window sat between silence and clipping, as 0..1. */
@@ -83,6 +94,7 @@ data class MonitorState(
         is Phase.Verifying -> "Checking whether ${p.soother} helped"
         is Phase.Escalated -> p.reason
         is Phase.Safety -> p.reason
+        Phase.DemoFinished -> "Demo finished"
     }
 
     companion object {

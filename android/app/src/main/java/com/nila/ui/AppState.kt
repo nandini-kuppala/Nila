@@ -496,6 +496,15 @@ class AppState(app: Application) : AndroidViewModel(app) {
      */
     fun runDemoCry() = MonitorService.simulate(getApplication())
 
+    /**
+     * Dismiss the summary a finished demo leaves on screen.
+     *
+     * The demo no longer clears itself when the episode ends -- the account of
+     * what Nila did is the reason to run it, and it is read afterwards. This is
+     * the reader saying they are done with it.
+     */
+    fun closeDemo() = MonitorService.closeDemo()
+
     fun logCare(kind: CareKind, detail: String? = null) {
         viewModelScope.launch {
             db.care().insert(

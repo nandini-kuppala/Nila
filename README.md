@@ -12,7 +12,7 @@ the breastfeeding mother — without a single network request.
 </p>
 
 <p align="center">
-  <a href="https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku"><b>Try it in your browser</b></a>
+  <a href="https://appetize.io/app/b_bsweclr2qfx2w4rdwjuwuptp5y"><b>Try it in your browser</b></a>
   &nbsp;·&nbsp;
   <a href="https://nandini-kuppala.github.io/Nila/">Landing page</a>
   &nbsp;·&nbsp;
@@ -221,10 +221,11 @@ launch.
 
 ### Try it in a browser
 
-**[Run Nila now →](https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku)** — no install. It opens a real Android device with the
+**[Run Nila now →](https://appetize.io/app/b_bsweclr2qfx2w4rdwjuwuptp5y)** — no install. It opens a real Android device with the
 app on it, already populated with the demo family.
 
 Tap **Play a demo cry** on the Monitor tab and **Play demo footage** on Watch.
+Turn the volume up for the first — the soothing sounds are real audio.
 Both run the real pipeline; neither needs a microphone or a camera, which is why
 this works in a browser at all.
 
@@ -241,8 +242,10 @@ the on-device corpus, and a medicine checked against a stored health record.
 Both are on the relevant screen, and both run the real pipeline:
 
 - **Monitor → Play a demo cry.** A real recorded cry through the real detector
-  at 6× speed. Detection, cause, a soothing sound, verification, then the alert
-  — about twenty seconds.
+  at 6× speed. Detection, cause, **white noise out of the speaker**, the check
+  that says it did not help, **a second sound — your own recording if you have
+  made one**, the second check, then the alert. About thirty seconds, and it
+  waits for you to close it rather than clearing itself.
 - **Watch → Play demo footage.** A real clip of a baby crawling, through the
   real face detector and motion analysis, shown on screen as it is analysed.
 

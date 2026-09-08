@@ -291,7 +291,7 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
       </video>
     </div>
     <div class="jump">
-      <a href="https://appetize.io/app/b_u2i6ovj4ndu777nons7aebu4ku">▶ Open it in a browser</a>
+      <a href="https://appetize.io/app/b_bsweclr2qfx2w4rdwjuwuptp5y">▶ Open it in a browser</a>
       <a href="https://nandini-kuppala.github.io/Nila/">Landing page</a>
       <a href="https://github.com/nandini-kuppala/Nila/releases/latest">Download the APK</a>
       <a href="https://github.com/nandini-kuppala/Nila">Source</a>
@@ -375,7 +375,8 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
   <div class="feature is-ok"><h4>Live microphone meter</h4><span class="chip ok">working</span>
     <p>New. A dBFS bar and cry score that move while listening, plus an explicit warning after a minute of complete silence. Added because "Listening" alone is indistinguishable from a dead microphone.</p></div>
   <div class="feature is-ok"><h4>Demo cry replay</h4><span class="chip ok">working</span>
-    <p>Feeds a real recorded cry through the real pipeline at 6× speed — same frontend, same models, same ladder, same notification. The whole escalation runs in about 20 seconds. Labelled on screen so it can never be mistaken for the microphone.</p></div>
+    <p>Feeds a real recorded cry through the real pipeline at 6× speed — same frontend, same models, same ladder, same notification. Both soothing sounds play aloud, and the replay pauses five real seconds on each so they are heard rather than glimpsed; the summary is held on screen until it is dismissed. About 30 seconds. Labelled on screen so it can never be mistaken for the microphone.</p>
+    <p class="dim">One thing in it <em>is</em> scripted, and it is worth naming. The clip is 12.7&nbsp;s long, with windows spanning −62 to −23&nbsp;dBFS; looped for two minutes it gives a sawtooth envelope, and the trend estimator — a least-squares slope over the last twenty windows — read that as rising or settling depending on nothing more than where the loop wrapped. The ladder then escalated at an arbitrary point and the demo usually stopped after one sound. So the replay normalises each window onto a fixed level arc: a rise into the first attempt, then a plateau long enough for both attempts to be played and judged. Audio, frontend, detector, classifier, hysteresis and every rung of the ladder are untouched — the only scripted quantity is how loud the simulated baby is, which is the one thing a recording of a different baby cannot supply.</p></div>
   <div class="feature is-ok"><h4>What Nila did</h4><span class="chip ok">working</span>
     <p>A running account during an episode: heard crying → playing a sound → turned the fan down over infrared → checked whether it helped → alerted you. The escalation ladder is the product; until this it was only visible as a status line changing and changing back.</p></div>
   <div class="feature is-ok"><h4>Self-test</h4><span class="chip ok">working</span>
@@ -816,7 +817,7 @@ DOING:    one short sentence about what the baby is doing</code></pre>
 
   <h3>Cry detection — three ways, easiest first</h3>
   <ol class="steps">
-    <li><strong>Run a demo cry.</strong> On the Monitor tab. Replays a recorded cry through the real pipeline at 6× speed. In about 20 seconds you see detection, the cause estimate, a soothing sound play, the verification, and the alert — all real, only the microphone bypassed. This is also the best 20 seconds of a jury demo.</li>
+    <li><strong>Run a demo cry.</strong> On the Monitor tab, with the volume up. Replays a recorded cry through the real pipeline at 6× speed. In about 30 seconds you hear white noise play, see the check that says it did not help, hear a second sound — the caregiver's own recording if one has been made — see the second check, and get the alert. All real, only the microphone bypassed. This is the best half-minute of a jury demo, and it now waits to be closed instead of clearing itself the moment anyone starts reading it.</li>
     <li><strong>Run self-test.</strong> A one-second check of the audio path on the real accelerator. Reports confidence, per-window latency and which compute unit ran it. Expect ~99% and CPU on an emulator.</li>
     <li><strong>Give the emulator real audio.</strong> Extended controls (⋯) → Microphone → enable <em>Virtual microphone uses host audio input</em>, then play a cry recording on your Mac. The meter moves and detection fires from the microphone path. This is the only way to test the microphone itself.</li>
   </ol>
@@ -864,7 +865,7 @@ DOING:    one short sentence about what the baby is doing</code></pre>
   <h3>Check it actually works, in this order</h3>
   <ol class="steps">
     <li><strong>Test the detector.</strong> On Monitor. One second, and it reports confidence, latency and which compute unit ran it. On a real phone expect NNAPI or GPU rather than CPU.</li>
-    <li><strong>Play a demo cry.</strong> The whole ladder — detect, guess a cause, play a sound, check whether it helped, then alert — in about twenty seconds.</li>
+    <li><strong>Play a demo cry.</strong> The whole ladder — detect, guess a cause, play white noise aloud, check whether it helped, play a second sound, check again, then alert — in about thirty seconds. Turn the volume up: the sounds are real audio, and the demo pauses on each one so it can be heard. It holds its summary on screen until you close it.</li>
     <li><strong>Start monitoring and talk.</strong> The microphone bar should move. If it sits at silence, a permission or another app has the mic.</li>
     <li><strong>Play a real cry recording</strong> from another phone, a metre away. Detection fires inside a second.</li>
     <li><strong>Record your own voice</strong> under Settings → Your voice. The next episode will prefer it over white noise.</li>

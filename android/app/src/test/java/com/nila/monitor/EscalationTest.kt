@@ -120,4 +120,32 @@ class EscalationTest {
         assertEquals(0, e.attemptCount)
         assertTrue(e.next(evidence(5), true) is Escalation.Decision.LogNote)
     }
+
+    /**
+     * The demo replays a looped clip, which reads as a steady cry rather than a
+     * rising one -- so it takes the two-attempt path, and that is what makes
+     * "white noise, then the caregiver's own recording" visible on screen.
+     * If this shape ever changes the demo silently becomes a one-sound demo.
+     */
+    @Test
+    fun `a steady cry gets two sounds before anyone is woken`() {
+        val e = Escalation()
+        val played = mutableListOf<Int>()
+        var escalatedAt = -1
+
+        // One window every 480 ms, as the service feeds them.
+        var seconds = 0
+        while (seconds <= 115 && escalatedAt < 0) {
+            when (val d = e.next(evidence(seconds, Trend.STEADY), true)) {
+                is Escalation.Decision.PlaySoother -> played += d.attempt
+                is Escalation.Decision.Escalate -> escalatedAt = seconds
+                else -> Unit
+            }
+            seconds++
+        }
+
+        assertEquals("expected two soothing attempts", listOf(1, 2), played)
+        assertTrue("expected an alert after both sounds, got $escalatedAt",
+                   escalatedAt in 56..115)
+    }
 }

@@ -68,6 +68,7 @@ fun HomeScreen(state: AppState) {
             monitor = monitor,
             onStart = state::startMonitoring,
             onStop = state::stopMonitoring,
+            onCloseDemo = state::closeDemo,
         )
 
         monitor.fault?.let {
@@ -91,6 +92,7 @@ private fun StatusCard(
     monitor: MonitorState,
     onStart: () -> Unit,
     onStop: () -> Unit,
+    onCloseDemo: () -> Unit,
 ) {
     val urgent = monitor.phase is MonitorState.Phase.Escalated ||
         monitor.phase is MonitorState.Phase.Safety
@@ -111,16 +113,19 @@ private fun StatusCard(
                 )
             }
 
-            if (monitor.running) {
+            if (monitor.running || monitor.demoComplete) {
                 Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
-                    StatBlock("Listening for", uptime(monitor.armedSinceMs))
+                    StatBlock(
+                        if (monitor.demoComplete) "Demo ran for" else "Listening for",
+                        uptime(monitor.armedSinceMs),
+                    )
                     StatBlock("Events", monitor.eventsTonight.toString())
                     StatBlock("Cry score", "${(monitor.lastCryProbability * 100).toInt()}%")
                 }
 
                 // The live signal. A bar that moves when you clap is the only
                 // thing that distinguishes "listening" from a dead microphone.
-                if (!monitor.simulated) {
+                if (!monitor.simulated && !monitor.demoComplete) {
                     InputLevelMeter(monitor.inputLevel, monitor.inputDbfs)
                 }
 
@@ -133,7 +138,13 @@ private fun StatusCard(
                 }
             }
 
-            if (monitor.simulated) {
+            if (monitor.demoComplete) {
+                WarningBox(
+                    "Demo finished",
+                    "Everything above ran through the real pipeline. " +
+                        "Read what Nila did, then close this.",
+                )
+            } else if (monitor.simulated) {
                 WarningBox(
                     "Demo cry",
                     "A recording, played through the real detector at 6x speed.",
@@ -145,7 +156,14 @@ private fun StatusCard(
                 )
             }
 
-            if (monitor.running) {
+            if (monitor.demoComplete) {
+                // Deliberately the only button here. The summary is the point of
+                // having run the demo, and a second control beside it invites
+                // dismissing it before reading it.
+                Button(onClick = onCloseDemo, modifier = Modifier.fillMaxWidth()) {
+                    Text("Close the demo")
+                }
+            } else if (monitor.running) {
                 OutlinedButton(onClick = onStop, modifier = Modifier.fillMaxWidth()) {
                     Text(if (monitor.simulated) "Stop the demo" else "Stop monitoring")
                 }
@@ -173,7 +191,7 @@ private fun TryItRow(state: AppState, monitor: MonitorState) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             TextButton(
                 onClick = state::runDemoCry,
-                enabled = !monitor.running,
+                enabled = !monitor.running && !monitor.demoComplete,
             ) { Text("Play a demo cry") }
             TextButton(
                 onClick = state::runSelfTest,

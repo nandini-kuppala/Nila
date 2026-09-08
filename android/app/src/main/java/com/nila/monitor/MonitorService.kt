@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.pow
 
 /**
  * The guardian. Owns capture, inference, the escalation ladder and the log.
@@ -60,6 +61,21 @@ class MonitorService : LifecycleService() {
 
         /** Long enough to pass the hard escalation ceiling of 100 s. */
         private const val SIMULATED_CRY_SECONDS = 115
+
+        /**
+         * Real milliseconds the demo pauses on each soothing sound.
+         *
+         * At six times speed a sound that plays for thirty-five seconds of
+         * episode is gone in under six seconds of wall clock, which is not long
+         * enough to register as an action somebody took -- it reads as a label
+         * flickering. The virtual clock is untouched; only the pace of the
+         * playback loop changes, so the ladder still sees the same episode.
+         */
+        private const val DEMO_SOOTHER_HOLD_MS = 5_000L
+
+        /** Same idea for the alert: let it land before the demo moves on. */
+        private const val DEMO_ALERT_HOLD_MS = 2_500L
+
         const val ACTION_START = "com.nila.START"
         const val ACTION_STOP = "com.nila.STOP"
         const val ACTION_SIMULATE = "com.nila.SIMULATE"
@@ -98,6 +114,17 @@ class MonitorService : LifecycleService() {
                 Intent(context, MonitorService::class.java).setAction(ACTION_SIMULATE),
             )
         }
+
+        /**
+         * Dismiss the summary a finished demo leaves on screen.
+         *
+         * The service has already stopped itself by this point -- the summary
+         * lives in this state holder, not in the service -- so this is a plain
+         * reset rather than another round trip through the service lifecycle.
+         */
+        fun closeDemo() {
+            _state.value = MonitorState()
+        }
     }
 
     private lateinit var notifier: Notifier
@@ -115,6 +142,25 @@ class MonitorService : LifecycleService() {
     private var currentEventId: Long? = null
     private var pendingSoother: Soother? = null
     private var simulation: kotlinx.coroutines.Job? = null
+    private var notedHypothesis = false
+
+    /**
+     * Real milliseconds the simulation should pause before its next window.
+     *
+     * Set from the ladder when something happens a person needs time to hear or
+     * read, consumed once by the playback loop.
+     */
+    @Volatile
+    private var demoHoldMs = 0L
+
+    /**
+     * The last evidence of a demo episode, kept for the summary.
+     *
+     * The trailing silence that closes the episode runs through [updateIdle],
+     * which clears the live evidence -- correct for a monitor, and fatal for a
+     * summary that has to survive it.
+     */
+    private var demoSummary: CryEvidence? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -229,6 +275,7 @@ class MonitorService : LifecycleService() {
                     silentWindows = 0,
                     actions = listOf("Heard crying"),
                 )
+                notedHypothesis = false
                 pushToWatch()
             }
 
@@ -238,6 +285,15 @@ class MonitorService : LifecycleService() {
                     inputDbfs = window.dbfs,
                     silentWindows = 0,
                 )
+                // Said once, and said as a guess. The cause estimate is at
+                // chance on infants it has not heard, so the transcript has to
+                // carry that caveat next to the label rather than under it.
+                if (!notedHypothesis) {
+                    result.evidence.hypothesis?.let { h ->
+                        notedHypothesis = true
+                        note("Probably ${h.label} - a guess from the sound, not a diagnosis")
+                    }
+                }
                 step(result.evidence)
                 pushToWatch()
             }
@@ -259,6 +315,8 @@ class MonitorService : LifecycleService() {
                 pendingSoother = null
                 currentEventId = null
                 escalation.reset()
+                note("The crying stopped after ${result.evidence.durationSeconds}s")
+                if (_state.value.simulated) demoSummary = result.evidence
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Listening,
                     currentEvidence = null,
@@ -336,9 +394,17 @@ class MonitorService : LifecycleService() {
                     }
                 }
 
-                // Never talk over a phone call or the parent's own music.
-                if (soothePlayer.audioBusy()) return
-                val choice = sootheMemory.choose(candidates) ?: return
+                val simulating = _state.value.simulated
+                // Never talk over a phone call or the parent's own music. Not
+                // during a demo: the only thing holding audio there is our own
+                // previous sound, stopped 80 ms earlier by the verify rung and
+                // still reported as active -- which silently cost the demo its
+                // second attempt.
+                if (!simulating && soothePlayer.audioBusy()) return
+                val choice = (
+                    if (simulating) demoSoother(decision.attempt, candidates)
+                    else sootheMemory.choose(candidates)
+                ) ?: return
                 if (soothePlayer.play(choice)) {
                     pendingSoother = choice
                     db.events().insert(
@@ -351,7 +417,22 @@ class MonitorService : LifecycleService() {
                         ),
                         lastSoother = choice.displayName,
                     )
-                    note("Playing ${choice.displayName}")
+                    note(
+                        when (choice) {
+                            is Soother.Recorded ->
+                                "Playing your own recording: ${choice.displayName}"
+                            else -> "Playing ${choice.displayName.lowercase()}"
+                        }
+                    )
+                    if (simulating) {
+                        // A recording of the caregiver is the sound this
+                        // feature exists for, and an install that has none
+                        // should be told so rather than quietly substituting.
+                        if (decision.attempt >= 2 && choice !is Soother.Recorded) {
+                            note("No recording of your voice yet - Settings, Your voice")
+                        }
+                        demoHoldMs = DEMO_SOOTHER_HOLD_MS
+                    }
                 }
             }
 
@@ -374,9 +455,16 @@ class MonitorService : LifecycleService() {
                         soother?.displayName ?: "the sound"
                     )
                 )
+                // Lowercased for the built-ins so the sentence reads, but never
+                // for a recording: those carry a name somebody chose.
+                val what = when (soother) {
+                    is Soother.Recorded -> soother.displayName
+                    is Soother.BuiltIn -> soother.displayName.lowercase()
+                    null -> "the sound"
+                }
                 note(
-                    if (settled) "Checked: the crying is settling"
-                    else "Checked: it did not help"
+                    if (settled) "Checked the loudness: $what is working"
+                    else "Checked the loudness: $what did not help"
                 )
             }
 
@@ -402,7 +490,8 @@ class MonitorService : LifecycleService() {
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Escalated(decision.reason, decision.severity)
                 )
-                note("Alerted you")
+                note("Woke you: ${decision.reason.lowercase()}")
+                if (_state.value.simulated) demoHoldMs = DEMO_ALERT_HOLD_MS
                 // Belt and braces: the notification already reaches any watch
                 // that mirrors them. This adds the distinct vibration pattern
                 // and the live timer on a watch running our own module.
@@ -448,6 +537,8 @@ class MonitorService : LifecycleService() {
         engine?.close()
         engine = cryEngine
         escalation.reset()
+        demoSummary = null
+        demoHoldMs = 0L
 
         _state.value = MonitorState(
             running = true,
@@ -478,6 +569,14 @@ class MonitorService : LifecycleService() {
                     runCatching { handleWindow(cryEngine, window) }
                         .onFailure { Log.e(TAG, "simulated window failed", it) }
                     kotlinx.coroutines.delay(HOP_MS / SIMULATION_SPEED)
+                    // Something just happened that a person needs time to hear
+                    // or read. The virtual clock has already advanced; only the
+                    // wall clock waits.
+                    val hold = demoHoldMs
+                    if (hold > 0L) {
+                        demoHoldMs = 0L
+                        kotlinx.coroutines.delay(hold)
+                    }
                 }
 
                 // A moment of room tone, so the detector has to actually cross
@@ -485,12 +584,13 @@ class MonitorService : LifecycleService() {
                 repeat(4) { push(silence) }
 
                 val windows = (SIMULATED_CRY_SECONDS * 1000L / HOP_MS).toInt()
-                repeat(windows) {
+                repeat(windows) { w ->
                     val chunk = FloatArray(AudioCapture.WINDOW_SAMPLES)
                     for (i in chunk.indices) {
                         chunk[i] = cry[(offset + i) % cry.size]
                     }
                     offset = (offset + AudioCapture.HOP_SAMPLES) % cry.size
+                    applyDemoLevel(chunk, (w * HOP_MS / 1000L).toInt())
                     push(chunk)
                 }
 
@@ -498,10 +598,17 @@ class MonitorService : LifecycleService() {
                 // what triggers the outcome attribution for whatever was played.
                 repeat(10) { push(silence) }
             } finally {
+                // Deliberately not a teardown. The demo used to erase itself the
+                // instant the episode closed, which took the account of what
+                // Nila did off the screen at exactly the moment somebody wanted
+                // to read it. The service stops; the summary stays until it is
+                // dismissed.
                 _state.value = _state.value.copy(
-                    simulated = false,
-                    phase = MonitorState.Phase.Idle,
                     running = false,
+                    simulated = true,
+                    demoComplete = true,
+                    phase = MonitorState.Phase.DemoFinished,
+                    currentEvidence = demoSummary,
                 )
                 cryEngine.close()
                 if (engine === cryEngine) engine = null
@@ -510,6 +617,56 @@ class MonitorService : LifecycleService() {
                 stopSelf()
             }
         }
+    }
+
+    /**
+     * A fixed, legible order for the demo.
+     *
+     * The live path asks [SootheMemory] which sound has the best record for
+     * this baby, which is right for a nursery and wrong for a demo: it can pick
+     * the same sound twice, or open with one nobody in the room recognises as
+     * an action. So the demo plays white noise first -- unmistakably a machine
+     * trying something -- and then the caregiver's own recording, which is the
+     * point of the feature. With nothing recorded, the heartbeat stands in and
+     * the transcript says why.
+     */
+    /**
+     * The loudness the simulated episode is held at, in dBFS, at a given second.
+     *
+     * Looping a few seconds of recording for two minutes produces a sawtooth
+     * envelope, and the trend estimator -- a least-squares slope over the last
+     * twenty windows -- reads that as rising or settling depending on nothing
+     * more than where the loop happened to wrap. The ladder then escalated at an
+     * arbitrary point, so the demo told a different story on every run and
+     * usually stopped after one sound.
+     *
+     * So the demo drives the level itself: a rise into the first sound, then a
+     * plateau long enough for both attempts to be played and judged, ending in
+     * the alert that fires once nothing has worked. The audio, the frontend, the
+     * detector, the classifier, the hysteresis and every rung of the ladder are
+     * untouched -- the only scripted thing is how loud the simulated baby is,
+     * which is the one quantity a recording of a different baby cannot supply.
+     */
+    private fun demoLevelDbfs(second: Int): Float =
+        if (second < 14) -34f + (second / 14f) * 8f else -26f
+
+    /** Scale a simulated window onto that arc. */
+    private fun applyDemoLevel(chunk: FloatArray, second: Int) {
+        val current = LogMelFrontend.dbfs(chunk, 0, chunk.size)
+        if (current <= MonitorState.SILENCE_DBFS) return
+        // Wide enough to reach the target from the quietest gap between cry
+        // bursts, which is 36 dB below the loudest window in this clip. A
+        // narrower clamp leaves those windows short, the envelope sags, and the
+        // trend estimator swings again -- which was the original bug.
+        val gain = 10f.pow((demoLevelDbfs(second) - current) / 20f)
+            .coerceIn(0.02f, 200f)
+        for (i in chunk.indices) chunk[i] = (chunk[i] * gain).coerceIn(-1f, 1f)
+    }
+
+    private fun demoSoother(attempt: Int, candidates: List<Soother>): Soother? {
+        if (candidates.isEmpty()) return null
+        val recorded = candidates.filterIsInstance<Soother.Recorded>().firstOrNull()
+        return if (attempt <= 1) Soother.WHITE_NOISE else recorded ?: Soother.HEARTBEAT
     }
 
     private fun availableSoothers(): List<Soother> {
@@ -554,7 +711,14 @@ class MonitorService : LifecycleService() {
             .apply { setReferenceCounted(false); acquire() }
     }
 
-    private fun stopMonitoring() {
+    /**
+     * Release everything the service holds.
+     *
+     * @param preserveSummary keep a finished demo's account on screen. The
+     * service dies as soon as the demo ends, and wiping the state holder from
+     * [onDestroy] would take the summary with it.
+     */
+    private fun stopMonitoring(preserveSummary: Boolean = false) {
         simulation?.cancel()
         simulation = null
         capture?.stop()
@@ -565,12 +729,12 @@ class MonitorService : LifecycleService() {
         wakeLock?.runCatching { if (isHeld) release() }
         wakeLock = null
         notifier.clear()
-        _state.value = MonitorState()
+        if (!preserveSummary) _state.value = MonitorState()
         Log.i(TAG, "monitoring stopped")
     }
 
     override fun onDestroy() {
-        stopMonitoring()
+        stopMonitoring(preserveSummary = _state.value.demoComplete)
         super.onDestroy()
     }
 }
