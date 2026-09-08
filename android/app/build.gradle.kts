@@ -17,10 +17,32 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Every device this ships to is arm64. Shipping x86 and armeabi-v7a
-        // copies of the MediaPipe and ML Kit native libraries triples the APK
-        // for emulators and phones from 2015.
-        ndk { abiFilters += listOf("arm64-v8a") }
+    }
+
+    /**
+     * One APK per architecture rather than one fat one.
+     *
+     * arm64-v8a is every real phone. x86_64 exists so the app can be handed to
+     * someone who has only a browser -- Appetize, BrowserStack and a desktop
+     * Android Studio emulator on an Intel machine all want it, and a judge who
+     * cannot install the app cannot judge it.
+     *
+     * Split rather than universal because the native libraries are most of the
+     * download: one fat APK is 212 MB, while each split is far smaller and
+     * nobody fetches the half they cannot run.
+     *
+     * This replaces the old `ndk.abiFilters`, which cannot coexist with an ABI
+     * split -- AGP refuses the build rather than picking one. armeabi-v7a is
+     * excluded either way: a third copy of the MediaPipe, ONNX and ML Kit
+     * native libraries, for handsets from 2015.
+     */
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = false
+        }
     }
 
     buildTypes {
