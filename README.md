@@ -1,6 +1,6 @@
 # Nila
 
-An offline infant-care companion for Android. It listens for a cry, tries to
+**An offline infant-care companion for Android.** It listens for a cry, tries to
 settle the baby before it wakes anyone, and answers questions about the baby and
 the breastfeeding mother — without a single network request.
 
@@ -9,6 +9,22 @@ the breastfeeding mother — without a single network request.
   <img src="docs/screenshots/cry-detected.png" width="23%" alt="A cry, with cause and actions">
   <img src="docs/screenshots/safety-watch.png" width="23%" alt="Safety watch">
   <img src="docs/screenshots/ask.png" width="23%" alt="Ask">
+</p>
+
+<p align="center">
+  <a href="https://github.com/nandini-kuppala/Nila/releases/latest">Download the APK</a>
+  &nbsp;·&nbsp;
+  <a href="docs/nila-demo.mp4">Two-minute demo</a>
+  &nbsp;·&nbsp;
+  <a href="docs/technical-record.html">Technical record</a>
+</p>
+
+<p align="center">
+  <img alt="Android" src="https://img.shields.io/badge/Android-8.1%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-182%20passing-2ea44f">
+  <img alt="Network" src="https://img.shields.io/badge/network%20calls-0-0F6B60">
+  <img alt="Licence" src="https://img.shields.io/badge/licence-MIT-blue">
 </p>
 
 ---
@@ -81,6 +97,91 @@ searchable, and usable by the assistant.
 
 ---
 
+## How it fits together
+
+Everything in the shaded box runs on the phone. Nothing crosses the dashed line
+unless the user taps a download button.
+
+```mermaid
+flowchart TB
+    subgraph inputs [" "]
+        direction LR
+        MIC["🎙️ Microphone<br/>16 kHz mono"]
+        CAM["📷 Camera<br/>~5 fps"]
+        DOC["📄 Photos of<br/>strips &amp; reports"]
+        TAP["👆 Quick log<br/>NFC stickers"]
+    end
+
+    subgraph device ["ON THIS PHONE"]
+        direction TB
+
+        FE["Log-mel frontend<br/><i>25 ms / 10 ms · 64 mels</i>"]
+        DET["Cry detector<br/><b>0.992 AUC</b> · 38 KB TFLite"]
+        HYS["Hysteresis<br/><i>3 of 5 in · 6 out</i>"]
+        RF["Cause classifier<br/><i>500-tree forest · a guess</i>"]
+
+        LADDER{{"Escalation ladder<br/>12s log → 20s play<br/>35s verify → alert"}}
+        SOOTHE["Your voice · white noise<br/>heartbeat · IR blaster"]
+        MEM[("Which sound<br/>works for<br/>this baby")]
+
+        FACE["Face presence<br/>BlazeFace"]
+        MOT["Motion energy<br/><i>frame difference</i>"]
+
+        OCR["PP-OCRv4<br/><i>rotated boxes · angle · CTC</i>"]
+        AGENTS["5 staged agents<br/><i>history → identify →<br/>interact → adjudicate</i>"]
+
+        ROUTE{{"Router<br/><i>emergency · dose<br/>diagnosis · distress</i>"}}
+        BM25["BM25 retrieval<br/><i>46 sourced entries</i>"]
+        LLM["Qwen 0.5B<br/><i>shortens only</i>"]
+
+        DB[("Room database<br/>log · records · outcomes")]
+    end
+
+    MIC --> FE --> DET --> HYS --> LADDER
+    HYS --> RF --> LADDER
+    LADDER --> SOOTHE --> MEM --> LADDER
+    CAM --> FACE --> MOT
+    DOC --> OCR --> AGENTS
+    TAP --> DB
+    DB --> AGENTS
+    DB --> ROUTE
+    ROUTE --> BM25 --> LLM
+
+    LADDER --> ALERT["🔔 Notification<br/>phone · watch · band"]
+    MOT --> ALERT
+    AGENTS --> VERDICT["Safe / caution / avoid<br/><i>with its reasoning</i>"]
+    LLM --> ANSWER["Answer + its source"]
+
+    NET[["Optional, one tap:<br/>Qwen 547 MB · FastVLM 1.1 GB"]]
+    NET -.-> LLM
+
+    classDef box fill:#E2F1ED,stroke:#0F6B60,stroke-width:1px,color:#101D1A
+    classDef out fill:#FFF4E5,stroke:#8F5C0E,color:#101D1A
+    classDef net fill:#FBEAE8,stroke:#A6231C,stroke-dasharray:4 3,color:#101D1A
+    classDef store fill:#EDF1EE,stroke:#68746F,color:#101D1A
+    class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,OCR,AGENTS,ROUTE,BM25,LLM box
+    class ALERT,VERDICT,ANSWER out
+    class NET net
+    class DB,MEM store
+```
+
+**Three things to notice.**
+
+The detector and the cause classifier are drawn differently on purpose — one is
+a measurement, the other is a guess, and the app says so on screen.
+
+The ladder is a **loop**, not a line. It plays a sound, re-reads the envelope to
+see whether that helped, and writes the outcome back. That feedback edge is the
+product.
+
+The language model sits at the very end of the assistant path and has one arrow
+in and one out. It never touches the medicine verdict, and it is never shown a
+health record — it phrases what retrieval already found, and its output is
+discarded if it drifts.
+
+
+---
+
 ## Nothing leaves the phone
 
 - **No network requests.** Cleartext is forbidden outright in
@@ -114,7 +215,15 @@ arm64-v8a only, `minSdk 26`, `targetSdk 35`. **Nothing needs downloading** —
 every model the app requires ships inside the APK and works offline from first
 launch.
 
-### Trying it without a baby
+### See it working
+
+<p align="center"><a href="docs/nila-demo.mp4"><b>▶ Two-minute demo</b></a></p>
+
+Recorded off the release build, unedited: the escalation ladder on a real cry,
+the camera watch on real footage of a baby crawling, a question answered from
+the on-device corpus, and a medicine checked against a stored health record.
+
+### Trying it yourself, without a baby
 
 Both are on the relevant screen, and both run the real pipeline:
 

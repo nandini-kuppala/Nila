@@ -10,8 +10,17 @@
 -keep class com.google.mediapipe.framework.** { *; }
 -keep class com.google.mediapipe.tasks.** { *; }
 
-# Protobuf classes MediaPipe references only for profiling and graph templates.
-# Neither is used here, so warning about their absence is noise.
+# Protobuf, kept rather than merely un-warned-about.
+#
+# MediaPipe builds its calculator graph from protobuf messages, and the lite
+# runtime resolves message fields reflectively *by name*. Obfuscating them turns
+# graph construction into "Field typeUrl_ for com.google.protobuf.e not found",
+# which surfaces as the face detector failing to start -- in release only.
+-keep class com.google.protobuf.** { *; }
+-keep class com.google.mediapipe.proto.** { *; }
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
+    <fields>;
+}
 -dontwarn com.google.mediapipe.proto.**
 -dontwarn com.google.protobuf.**
 
@@ -36,3 +45,21 @@
 
 # LlmBridge loads MediaPipe GenAI reflectively so the app builds without it.
 -dontwarn com.google.mediapipe.tasks.genai.**
+
+# MediaPipe logs through Google Flogger, and Flogger works out which class is
+# logging by walking the call stack. R8 inlines the caller away, the walk finds
+# nothing, and FluentLogger throws from inside the static initialiser of
+# com.google.mediapipe.framework.Graph -- which takes the face detector with it.
+#
+# It fails only in release, and only on the camera path, so it survived every
+# debug run and every unit test. The symptom on screen was "Camera unavailable:
+# no delegate could run the face model"; the cause in the log was
+# "IllegalStateException: no caller found on the stack for: o3.d", o3.d being
+# Flogger after obfuscation.
+#
+# R8 does not honour -optimizations, so inlining is turned off wholesale. The
+# cost is a slightly larger DEX in an APK that is 90 MB of native libraries and
+# models; shrinking and obfuscation still run.
+-keep class com.google.common.flogger.** { *; }
+-dontwarn com.google.common.flogger.**
+-dontoptimize
