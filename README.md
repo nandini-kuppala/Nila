@@ -75,16 +75,16 @@ guess from the sound, not a diagnosis."* Never as a fact.
 
 ## What it does
 
-**Listens.** 0.992 AUC on infants never heard in training, 98% cry recall,
-0.2 ms per 0.96-second window. Runs all night in a foreground service.
+**Listens.** A log-mel frontend and a small quantised detector, running all night in a
+foreground service. In a quiet room almost no inference runs at all.
 
 **Acts before it wakes you.** Log at 12 s → play a sound at 20 s → judge it at
 35 s → alert. It plays your own recorded voice if you made one, learns which
 sound settles *this* baby, and can turn a fan down over infrared.
 
-**Answers questions.** Field-weighted BM25 over 46 sourced entries, for the baby
-*and* the mother. Answers are retrieved text shown with their source; an
-optional 0.5B model shortens them and is never allowed to supply a fact.
+**Answers questions.** Retrieval over curated, sourced entries, for the baby *and*
+the mother. Answers are the retrieved text shown with where it came from; an
+optional local model shortens them and is never allowed to supply a fact.
 
 **Checks medicines.** PP-OCRv4 on device reads a strip — rotated, upside down or
 on foil — then five staged agents check it against your own health records.
