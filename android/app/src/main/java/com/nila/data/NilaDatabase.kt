@@ -7,8 +7,9 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [EventRecord::class, CareRecord::class, BabyProfile::class,
-                ConversationRecord::class, HealthRecord::class, MotherProfile::class],
-    version = 2,
+                ConversationRecord::class, HealthRecord::class, MotherProfile::class,
+                MedicineScanRecord::class],
+    version = 3,
     exportSchema = true,
 )
 abstract class NilaDatabase : RoomDatabase() {
@@ -18,6 +19,7 @@ abstract class NilaDatabase : RoomDatabase() {
     abstract fun conversations(): ConversationDao
     abstract fun healthRecords(): HealthRecordDao
     abstract fun mother(): MotherDao
+    abstract fun medicineScans(): MedicineScanDao
 
     companion object {
         @Volatile private var instance: NilaDatabase? = null

@@ -81,6 +81,19 @@
    "max_age": 24
   },
   {
+   "id": "sleep-night-feeds",
+   "collection": "guidance",
+   "topic": "sleep",
+   "title": "Night feeds and when they stop",
+   "text": "Night feeds are normal and necessary in the early months, and most babies still need at least one well past six months. There is no age at which they must stop. Babies usually drop them on their own as daytime intake grows; if you want to encourage that, do it gradually rather than all at once, and only once weight gain is established.",
+   "source": "NHS",
+   "caution": "Do not cut night feeds while weight gain is being monitored, or before six months, without asking your health visitor or doctor first.",
+   "keywords": "night feeds night feed nightfeeds night weaning wean off night feeds drop the night feed dream feed stop night feeds when do night feeds stop does she still need a feed at night",
+   "audience": "baby",
+   "min_age": 0,
+   "max_age": 12
+  },
+  {
    "id": "feed-exclusive",
    "collection": "guidance",
    "topic": "feeding",

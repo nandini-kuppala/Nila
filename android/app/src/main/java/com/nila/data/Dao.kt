@@ -98,3 +98,25 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations ORDER BY atMs DESC LIMIT :limit")
     suspend fun latest(limit: Int): List<ConversationRecord>
 }
+
+@Dao
+interface MedicineScanDao {
+    @Insert
+    suspend fun insert(record: MedicineScanRecord): Long
+
+    /**
+     * Capped at twenty on the way out rather than pruned on the way in.
+     *
+     * A history list is for recognising something, not for archiving it, and a
+     * hundred collapsed rows is a list nobody opens. Older rows stay in the
+     * database for the clinic report to total up.
+     */
+    @Query("SELECT * FROM medicine_scans ORDER BY atMs DESC LIMIT :limit")
+    fun recent(limit: Int = 20): Flow<List<MedicineScanRecord>>
+
+    @Query("DELETE FROM medicine_scans WHERE id = :id")
+    suspend fun delete(id: Long)
+
+    @Query("DELETE FROM medicine_scans")
+    suspend fun clear()
+}

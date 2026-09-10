@@ -160,11 +160,16 @@ class RagEvalTest {
      * than one that sometimes says it does not know.
      */
     @Test
-    fun freshQuestions() = evaluate(freshCases, "fresh", allowedFailures = 3)
+    fun freshQuestions() = evaluate(freshCases, "fresh", allowedFailures = 0)
 
     private val freshCases = listOf(
         Case("how long should a feed take", setOf("feed-exclusive", "feed-hunger-cues")),
-        Case("when do i stop night feeds", setOf("feed-exclusive", "sleep-amount")),
+        // Expectation changed because the behaviour got better, which is worth
+        // stating plainly. There was no entry on night feeds, so this listed
+        // the two least-wrong pages in the corpus and the retrieval actually
+        // returned the page on settling a crying baby. `sleep-night-feeds` now
+        // exists and answers the question, so that is what this asks for.
+        Case("when do i stop night feeds", "sleep-night-feeds"),
         Case("first foods for a 6 month old", "feed-solids"),
         Case("can i give ragi porridge", "feed-solids"),
         Case("is jaggery ok instead of sugar", "feed-avoid"),

@@ -135,7 +135,7 @@ flowchart TB
         AGENTS["5 staged agents<br/><i>history → identify →<br/>interact → adjudicate</i>"]
 
         ROUTE{{"Router<br/><i>emergency · dose<br/>diagnosis · distress</i>"}}
-        BM25["BM25 retrieval<br/><i>46 sourced entries</i>"]
+        BM25["BM25 retrieval<br/><i>47 sourced entries</i>"]
         LLM["Qwen 0.5B<br/><i>shortens only</i>"]
 
         DB[("Room database<br/>log · records · outcomes")]
@@ -317,7 +317,7 @@ the file directly gives you.
 | `reason_forest.json` | Five-way cause | 7.6 MB | In the APK |
 | `ppocr_det/cls/rec` | Reading a medicine strip | 15.2 MB | In the APK |
 | `blaze_face_short_range` | Face presence | 230 KB | In the APK |
-| `knowledge.json` | 46 sourced entries | 43 KB | In the APK |
+| `knowledge.json` | 47 sourced entries | 45 KB | In the APK |
 | Qwen2.5-0.5B | Shortening answers | 547 MB | Optional, one tap |
 | FastVLM-0.5B | Describing the cot | 1.1 GB | Optional, one tap |
 
@@ -354,7 +354,7 @@ docs/               Technical record and build spec
 - **The cause classifier is at chance on unseen infants.** See above. Fixing it
   needs data collected properly, not a better architecture.
 - **English only.** The language plumbing exists; the corpus does not. Translating
-  46 clinical entries needs a human, not a model.
+  47 clinical entries needs a human, not a model.
 - **The vision model does not run yet.** It is fully wired, and blocked on a
   LiteRT-LM runtime that is not published. A MediaPipe backend is in place for
   whenever a suitable bundle is available.

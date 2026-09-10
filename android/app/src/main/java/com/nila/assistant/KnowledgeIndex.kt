@@ -85,6 +85,15 @@ class KnowledgeIndex private constructor(
          */
         const val MIN_RELEVANCE = 2.8
 
+        /**
+         * How rare a lone matching term has to be to carry a long question.
+         *
+         * Three documents out of fifty. Above that the term is not what the
+         * question is about, and a single overlap really is a coincidence --
+         * which is the case this rule exists to reject.
+         */
+        const val SINGLE_MATCH_MAX_DF = 3
+
         /** Common words that would otherwise dominate a short medical query. */
         private val STOPWORDS = setOf(
             "a", "an", "and", "are", "as", "at", "be", "but", "by", "can", "do",
@@ -125,6 +134,13 @@ class KnowledgeIndex private constructor(
             "vaccination" to "vaccine", "vaccinations" to "vaccine",
             "jab" to "vaccine", "jabs" to "vaccine", "shots" to "vaccine",
             "hungry" to "hunger", "starving" to "hunger",
+            // Drinks people ask about by name, mapped to the word the corpus
+            // actually uses. Cheaper and more precise than adding them as
+            // keywords: a synonym costs no document length, so it cannot
+            // devalue the terms already in the entry it is meant to help.
+            "chai" to "caffeine", "tea" to "caffeine", "coffee" to "caffeine",
+            "kaapi" to "caffeine", "espresso" to "caffeine",
+            "cola" to "caffeine",
             "poop" to "stool", "poo" to "stool", "poops" to "stool",
             "puke" to "vomit", "sick" to "vomit",
             "pediatrician" to "doctor", "paediatrician" to "doctor",
@@ -381,7 +397,27 @@ class KnowledgeIndex private constructor(
         // incidental overlap really is a coincidence.
         if (queryTerms.size < 4) return true
         val docTerms = doc.fields.flatMapTo(HashSet()) { tokenize(it.first) }
-        return queryTerms.count { it in docTerms } >= 2
+        val overlap = queryTerms.filter { it in docTerms }
+        if (overlap.size >= 2) return true
+
+        // One overlap is usually a coincidence and occasionally the entire
+        // point. "Does chai affect breast milk" tokenises to
+        // [caffeine, affect, breast, breastmilk], and the entry that answers
+        // it -- the one saying caffeine is fine in moderation -- contains only
+        // "caffeine". It won on score by a wide margin and was then thrown
+        // away, and the app said it did not know.
+        //
+        // So a single overlap survives when it is a *rare* term found in the
+        // document's own prose rather than in its keyword list. Rarity is what
+        // separates the subject of a question from a word that happened to
+        // appear: a term in two documents out of fifty is what the question is
+        // about, and one in twenty is scenery. Requiring it in the text rather
+        // than the keywords stops the exemption being reachable by stuffing a
+        // keyword field.
+        val only = overlap.singleOrNull() ?: return false
+        val df = postings[only]?.size ?: return false
+        if (df > SINGLE_MATCH_MAX_DF) return false
+        return only in tokenize(doc.text).toSet()
     }
 
     /**
