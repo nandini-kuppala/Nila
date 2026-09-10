@@ -488,6 +488,23 @@ class AppState(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // ---- the camera lane
+    //
+    // The safe zone lives in DataStore rather than in this ViewModel because
+    // the service reads it on every camera bind, including when no screen and
+    // therefore no ViewModel exists.
+    private val safeZones = com.nila.vision.SafeZoneStore(app)
+
+    val safeZone: StateFlow<com.nila.vision.SafeZone> = safeZones.zone
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.nila.vision.SafeZone.DEFAULT)
+
+    suspend fun saveSafeZone(zone: com.nila.vision.SafeZone) = safeZones.save(zone)
+
+    suspend fun resetSafeZone() = safeZones.reset()
+
+    fun startWatching() = com.nila.monitor.WatchService.start(getApplication())
+    fun stopWatching() = com.nila.monitor.WatchService.stop(getApplication())
+
     fun startMonitoring() = MonitorService.start(getApplication())
     fun stopMonitoring() = MonitorService.stop(getApplication())
 
@@ -509,6 +526,14 @@ class AppState(app: Application) : AndroidViewModel(app) {
      * the reader saying they are done with it.
      */
     fun closeDemo() = MonitorService.closeDemo()
+
+    /**
+     * Put away the card for an episode that has closed.
+     *
+     * Not [closeDemo]: that resets the whole state holder, which is right after
+     * a demo and wrong here -- monitoring is still running underneath the card.
+     */
+    fun dismissEpisode() = MonitorService.dismissEpisode()
 
     fun logCare(kind: CareKind, detail: String? = null) {
         viewModelScope.launch {

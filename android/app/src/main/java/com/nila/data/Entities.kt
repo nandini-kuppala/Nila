@@ -29,6 +29,12 @@ enum class EventKind {
     SOOTHE_PLAYED, SOOTHE_WORKED, SOOTHE_FAILED,
     ESCALATED_TO_PARENT,
     GUARDIAN_FAULT,
+    // The camera lane, once it could tell these apart. Recorded as distinct
+    // kinds rather than one SAFETY_EVENT with the detail in a note, because a
+    // week of "rolled onto their front" and a week of "outside the safe zone"
+    // are different things to show a doctor.
+    ROLLED_TO_FRONT, ROLLED_TO_SIDE, CRAWLING, SITTING_UP, STANDING_UP,
+    LEFT_SAFE_ZONE, MOVED_AWAY, OUT_OF_VIEW, CAMERA_MOVED,
 }
 
 @Entity(tableName = "events", indices = [Index("startedAtMs"), Index("kind")])

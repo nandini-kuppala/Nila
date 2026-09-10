@@ -41,8 +41,41 @@ data class MonitorState(
      * The whole product argument is that the app acts before it wakes anyone,
      * and until this existed the only evidence of that on screen was the status
      * line changing to "Playing White noise" and then changing back.
+     *
+     * Kept alongside [pipeline] rather than replaced by it: this is the
+     * transcript, in the app's own words, and it is what the summary and the
+     * clinic report quote. [pipeline] is the same progression as structure.
      */
     val actions: List<String> = emptyList(),
+    /**
+     * The escalation ladder as rungs, including the ones that have not fired.
+     *
+     * Drawn as a live chart while an episode runs. Showing the rungs ahead of
+     * time is the part that matters: a parent watching at forty seconds can see
+     * that a verification step and a decision point are still coming, which is
+     * the difference between an app that is working and an app that has stopped.
+     */
+    val pipeline: List<EpisodePipeline.Step> = emptyList(),
+    /**
+     * The cause, and what the corpus says to do about it.
+     *
+     * Published at the ninety-second rung, when the app has run out of things
+     * to try and is waking somebody. Null before then -- the reason is on
+     * screen from twenty seconds via [CryEvidence.hypothesis], but the
+     * *instructions* wait until there is a person to read them.
+     */
+    val advice: CryAdvice.Advice? = null,
+    /** Seconds of this episode captured to a clip so far. */
+    val clipSeconds: Float = 0f,
+    /**
+     * The episode that just closed, held on screen until dismissed.
+     *
+     * Monitoring continues underneath it. The card is a record, not a modal:
+     * a parent who walks back in ten minutes later should still be able to see
+     * what happened, and the microphone should not have stopped while they were
+     * gone.
+     */
+    val lastEpisode: EpisodeSummary? = null,
     /**
      * True once a demo cry has run to the end and its summary is being held on
      * screen.
@@ -64,6 +97,41 @@ data class MonitorState(
     /** True when [nowPlaying] is a recording somebody made, not a built-in. */
     val nowPlayingIsVoice: Boolean = false,
 ) {
+
+    /**
+     * Everything worth keeping about a finished episode, in one object.
+     *
+     * Assembled once when the episode closes rather than reconstructed by the
+     * UI from live fields that are about to be cleared -- which is how the
+     * previous demo summary lost its evidence to the trailing silence.
+     */
+    data class EpisodeSummary(
+        val startedAtMs: Long,
+        val durationSeconds: Int,
+        val evidence: CryEvidence?,
+        /** The rungs, as they ended up. */
+        val pipeline: List<EpisodePipeline.Step>,
+        val actions: List<String>,
+        val advice: CryAdvice.Advice?,
+        /** App-private WAV of the first ninety seconds, or null if none was kept. */
+        val clipPath: String? = null,
+        val clipSeconds: Float = 0f,
+        /** True when the episode was cut off at the three-minute rung. */
+        val closedByTimeout: Boolean = false,
+        /** True when it was a replayed recording rather than the microphone. */
+        val simulated: Boolean = false,
+    ) {
+        val soothersTried: Int
+            get() = pipeline.count {
+                it.stage == EpisodePipeline.Stage.SOOTHED &&
+                    it.status != EpisodePipeline.Status.PENDING
+            }
+        val wokeSomebody: Boolean
+            get() = pipeline.any {
+                it.stage == EpisodePipeline.Stage.VERDICT &&
+                    it.status == EpisodePipeline.Status.DONE
+            }
+    }
 
     /**
      * Long enough that a genuinely quiet nursery does not trigger it, short
@@ -89,6 +157,14 @@ data class MonitorState(
         data class Verifying(val soother: String) : Phase
         data class Escalated(val reason: String, val severity: Severity) : Phase
         data class Safety(val reason: String) : Phase
+        /**
+         * The episode hit three minutes and was summarised.
+         *
+         * Distinct from [Listening], which it is otherwise identical to,
+         * because the status line has to say why a card is sitting on screen
+         * describing a cry that is no longer being tracked.
+         */
+        data class Closed(val seconds: Int) : Phase
         data object DemoFinished : Phase
     }
 
@@ -104,8 +180,12 @@ data class MonitorState(
         is Phase.Verifying -> "Checking whether ${p.soother} helped"
         is Phase.Escalated -> p.reason
         is Phase.Safety -> p.reason
+        is Phase.Closed -> "Listening - last cry ran ${p.seconds}s"
         Phase.DemoFinished -> "Demo finished"
     }
+
+    /** True while an episode is live, as opposed to summarised or absent. */
+    val inEpisode: Boolean get() = currentEvidence != null
 
     companion object {
         /** Quieter than this and the frontend is looking at the noise floor. */

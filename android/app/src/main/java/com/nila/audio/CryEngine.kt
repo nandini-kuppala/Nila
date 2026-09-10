@@ -39,6 +39,15 @@ data class ReasonHypothesis(
     val runnerUpConfidence: Float,
     val subjectWiseAuc: Float,
     val trustworthy: Boolean,
+    /**
+     * How many analysis windows were averaged to get here.
+     *
+     * On screen, because one window is 0.96 s of audio and the forest returns a
+     * different answer on many of them. A label backed by fifteen windows is a
+     * different object from a label backed by one, and the number is the only
+     * way a reader can tell them apart.
+     */
+    val windowsAveraged: Int = 1,
 ) {
     /** True when the top two classes are close enough that the ranking is noise. */
     val ambiguous: Boolean get() = confidence - runnerUpConfidence < 0.15f
@@ -66,9 +75,24 @@ class CryEngine(
          */
         val classifierAsset: String = "reason_forest.json",
         val silenceGateDbfs: Float = -55f,
-        /** Skip the reason head until the episode has enough audio to describe. */
-        val classifyAfterSeconds: Int = 4,
-        val classifyEverySeconds: Int = 6,
+        /**
+         * Skip the reason head until the episode has enough audio to describe.
+         *
+         * Twenty seconds, matching the rung of the escalation ladder where the
+         * app stops observing and starts acting. It used to be four, which
+         * meant the cause was published from the first few windows of a cry --
+         * the least representative audio in the episode, and early enough that
+         * a fuss which settled on its own still got a label attached to it.
+         */
+        val classifyAfterSeconds: Int = 20,
+        /**
+         * How often to run the forest once past that point.
+         *
+         * Frequent, because the answers are averaged rather than replaced: a
+         * classifier this uncertain window to window is better summarised by
+         * fifteen votes than by whichever one happened to land last.
+         */
+        val classifyEverySeconds: Int = 3,
     )
 
     companion object {
@@ -98,6 +122,19 @@ class CryEngine(
     private val state = CryStateMachine()
     private var lastClassifyMs = 0L
     private var lastHypothesis: ReasonHypothesis? = null
+
+    /**
+     * Running total of class probabilities across this episode's windows.
+     *
+     * Averaging is the whole point. A single window's argmax flips between
+     * classes as the cry changes, which produced episodes that announced three
+     * different causes on three different surfaces. Summing here and taking the
+     * argmax of the mean gives one answer per episode that is also the answer
+     * most of the audio supports -- and it is honest about how thin the
+     * evidence is, because [ReasonHypothesis.windowsAveraged] rides along.
+     */
+    private var reasonSum = FloatArray(REASON_LABELS.size)
+    private var reasonVotes = 0
 
     /** Validation metrics, read from ModelCard so the UI can show its own limits. */
     var reasonAuc: Float = ModelCard.REASON_SUBJECT_WISE_AUC
@@ -136,8 +173,7 @@ class CryEngine(
         return when (val t = state.update(cryProbability, window.dbfs, window.timestampMs)) {
             is CryStateMachine.Transition.Quiet -> Result.Quiet(cryProbability)
             is CryStateMachine.Transition.Started -> {
-                lastHypothesis = null
-                lastClassifyMs = 0L
+                clearReason()
                 Result.Started(evidenceFor(t.episode))
             }
             is CryStateMachine.Transition.Continued -> {
@@ -160,6 +196,7 @@ class CryEngine(
         lastClassifyMs = nowMs
         val labels = head.classes
         if (reasonOut.size != labels.size) reasonOut = FloatArray(labels.size)
+        if (reasonSum.size != labels.size) reasonSum = FloatArray(labels.size)
 
         // The forest is trained on statistics over a whole window rather than
         // on the patch the detector sees, so the features come from the raw
@@ -167,15 +204,28 @@ class CryEngine(
         ReasonFeatures.extract(window.samples, 0, window.samples.size, reasonFeatures)
         head.predict(reasonFeatures, reasonOut)
 
-        val order = reasonOut.indices.sortedByDescending { reasonOut[it] }
+        for (i in reasonOut.indices) reasonSum[i] += reasonOut[i]
+        reasonVotes++
+
+        val order = reasonSum.indices.sortedByDescending { reasonSum[it] }
         lastHypothesis = ReasonHypothesis(
             label = labels[order[0]],
-            confidence = reasonOut[order[0]],
+            confidence = reasonSum[order[0]] / reasonVotes,
             runnerUp = order.getOrNull(1)?.let { labels[it] },
-            runnerUpConfidence = order.getOrNull(1)?.let { reasonOut[it] } ?: 0f,
+            runnerUpConfidence =
+                order.getOrNull(1)?.let { reasonSum[it] / reasonVotes } ?: 0f,
             subjectWiseAuc = reasonAuc,
             trustworthy = reasonTrustworthy,
+            windowsAveraged = reasonVotes,
         )
+    }
+
+    /** Forget this episode's votes. Called when one starts and when one ends. */
+    private fun clearReason() {
+        lastHypothesis = null
+        lastClassifyMs = 0L
+        reasonSum.fill(0f)
+        reasonVotes = 0
     }
 
     private fun evidenceFor(episode: CryEpisode) = CryEvidence(
@@ -202,8 +252,7 @@ class CryEngine(
 
     fun reset() {
         state.reset()
-        lastHypothesis = null
-        lastClassifyMs = 0L
+        clearReason()
     }
 
     override fun close() {

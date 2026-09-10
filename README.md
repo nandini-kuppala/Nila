@@ -82,9 +82,16 @@ guess from the sound, not a diagnosis."* Never as a fact.
 **Listens.** A log-mel frontend and a small quantised detector, running all night in a
 foreground service. In a quiet room almost no inference runs at all.
 
-**Acts before it wakes you.** Log at 12 s → play a sound at 20 s → judge it at
-35 s → alert. It plays your own recorded voice if you made one, learns which
-sound settles *this* baby, and can turn a fan down over infrared.
+**Acts before it wakes you.** Log at 12 s → read the cause and play a sound at
+20 s → judge that sound 35 s later → at 90 s wake you with the cause *and what
+to try* → close the episode at 3 minutes with the clip, the steps and the
+reason. It plays your own recorded voice if you made one, learns which sound
+settles *this* baby, and can turn a fan down over infrared.
+
+**Shows its work while it happens.** The ladder is drawn live on the monitor
+screen — including the rungs that have not fired yet, so it is visible that a
+verification step and a decision point are still coming rather than that the app
+has stopped.
 
 **Answers questions.** Retrieval over curated, sourced entries, for the baby *and*
 the mother. Answers are the retrieved text shown with where it came from; an
@@ -93,8 +100,20 @@ optional local model shortens them and is never allowed to supply a fact.
 **Checks medicines.** PP-OCRv4 on device reads a strip — rotated, upside down or
 on foil — then five staged agents check it against your own health records.
 
-**Watches.** Face presence and motion energy from the camera. Not breathing, not
-vitals, not SIDS.
+**Watches, continuously.** The camera lane runs in its own foreground service,
+so it keeps analysing with the screen off — it used to live inside the screen
+and stop, silently, the moment the display dimmed. Pose landmarks give coarse
+posture and movement across the frame, so *rolled onto their front*, *crawling*,
+*standing up*, *outside the safe zone* and *out of view* are separate events
+with separate severities, instead of one "can't see the face". The
+accelerometer and the light sensor stop the camera making claims it is not
+entitled to: a knocked phone or a dark room suppresses the vision verdict
+rather than reporting the baby as missing. Not breathing, not vitals, not SIDS.
+
+**Runs both lanes at once.** Microphone and camera, two services, and the
+camera one subscribes to the audio one — because a baby who rolls over in their
+sleep is a notification, and a baby who rolls over *and starts crying* has
+probably fallen, which is a different phone call.
 
 **Keeps records.** Health documents for baby and mother, OCR'd at import,
 searchable, and usable by the assistant.
@@ -124,12 +143,16 @@ flowchart TB
         HYS["Hysteresis<br/><i>3 of 5 in · 6 out</i>"]
         RF["Cause classifier<br/><i>500-tree forest · a guess</i>"]
 
-        LADDER{{"Escalation ladder<br/>12s log → 20s play<br/>35s verify → alert"}}
+        LADDER{{"Escalation ladder<br/>12s log → 20s cause + play<br/>55s verify → 90s alert<br/>180s close"}}
         SOOTHE["Your voice · white noise<br/>heartbeat · IR blaster"]
         MEM[("Which sound<br/>works for<br/>this baby")]
 
         FACE["Face presence<br/>BlazeFace"]
         MOT["Motion energy<br/><i>frame difference</i>"]
+        POSE["Pose landmarks<br/><i>full · 9 MB task</i>"]
+        ACT{{"Activity rules<br/><i>prone · crawling · zone<br/>distance · out of view</i>"}}
+        SENS["Accelerometer + light<br/><i>is the view trustworthy</i>"]
+        ZONE[("Safe zone<br/>over the cot")]
 
         OCR["PP-OCRv4<br/><i>rotated boxes · angle · CTC</i>"]
         AGENTS["5 staged agents<br/><i>history → identify →<br/>interact → adjudicate</i>"]
@@ -144,15 +167,21 @@ flowchart TB
     MIC --> FE --> DET --> HYS --> LADDER
     HYS --> RF --> LADDER
     LADDER --> SOOTHE --> MEM --> LADDER
-    CAM --> FACE --> MOT
+    CAM --> FACE --> ACT
+    CAM --> MOT --> ACT
+    CAM --> POSE --> ACT
+    ZONE --> ACT
+    SENS --> ACT
     DOC --> OCR --> AGENTS
     TAP --> DB
     DB --> AGENTS
     DB --> ROUTE
     ROUTE --> BM25 --> LLM
 
+    LADDER --> CLIP[("90 s clip<br/><i>app-private, 7 days</i>")]
     LADDER --> ALERT["🔔 Notification<br/>phone · watch · band"]
-    MOT --> ALERT
+    ACT --> ALERT
+    LADDER -.->|"crying now"| ACT
     AGENTS --> VERDICT["Safe / caution / avoid<br/><i>with its reasoning</i>"]
     LLM --> ANSWER["Answer + its source"]
 
@@ -163,10 +192,10 @@ flowchart TB
     classDef out fill:#FFF4E5,stroke:#8F5C0E,color:#101D1A
     classDef net fill:#FBEAE8,stroke:#A6231C,stroke-dasharray:4 3,color:#101D1A
     classDef store fill:#EDF1EE,stroke:#68746F,color:#101D1A
-    class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,OCR,AGENTS,ROUTE,BM25,LLM box
+    class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,POSE,ACT,SENS,OCR,AGENTS,ROUTE,BM25,LLM box
     class ALERT,VERDICT,ANSWER out
     class NET net
-    class DB,MEM store
+    class DB,MEM,CLIP store
 ```
 
 **Three things to notice.**
@@ -190,9 +219,12 @@ discarded if it drifts.
 
 - **No network requests.** Cleartext is forbidden outright in
   `network_security_config.xml`; the app has no API keys because it calls no APIs.
-- **No audio is recorded.** Monitored sound is analysed in memory and discarded.
-  The soothing clips you record yourself are the one exception and stay in
-  app-private storage.
+- **Only the cry is recorded, and only for a week.** The night is analysed in
+  memory and discarded. When the detector declares a cry, the first 90 seconds
+  of *that episode* are written to app-private storage so you can hear what the
+  app heard -- and deleted after 7 days. Silence, conversation and everything
+  else in the room are never written anywhere. Recordings you make yourself as
+  soothing sounds live in the same private storage.
 - **Backup is disabled** in the manifest, so health documents cannot leave by a
   cloud transport.
 - **No account, no analytics.**
@@ -317,7 +349,8 @@ the file directly gives you.
 | `reason_forest.json` | Five-way cause | 7.6 MB | In the APK |
 | `ppocr_det/cls/rec` | Reading a medicine strip | 15.2 MB | In the APK |
 | `blaze_face_short_range` | Face presence | 230 KB | In the APK |
-| `knowledge.json` | 47 sourced entries | 45 KB | In the APK |
+| `pose_landmarker_full` | Coarse posture and movement | 9.0 MB | In the APK |
+| `knowledge.json` | 46 sourced entries + 5 cause entries | 47 KB | In the APK |
 | Qwen2.5-0.5B | Shortening answers | 547 MB | Optional, one tap |
 | FastVLM-0.5B | Describing the cot | 1.1 GB | Optional, one tap |
 
@@ -334,7 +367,7 @@ android/            The app
     audio/          Log-mel frontend, detector, hysteresis, features
     monitor/        Foreground service and the escalation ladder
     assistant/      Retrieval, routing, guardrails, OCR
-    vision/         Camera watch, demo footage, scene describer
+    vision/         Camera watch, pose, activity rules, safe zone, sensors
     ml/             TFLite runner, RandomForest evaluator
   app/src/test/     120 JVM tests
   app/src/androidTest/  62 instrumented tests
@@ -360,6 +393,19 @@ docs/               Technical record and build spec
   whenever a suitable bundle is available.
 - **Infrared and Wear OS are unverified on hardware.** Neither can be tested on
   an emulator.
+- **Posture needs the phone beside the cot, not at the end of it.** A camera
+  looking along the length of a cot sees a lying baby's trunk running down the
+  image, which is geometrically identical to a standing one. No single view can
+  separate those, so the watch screen says where to put the phone rather than
+  guessing.
+- **Distance is relative, not metric.** It is the baby's torso now against
+  their torso when the watch was armed. A figure in centimetres would need the
+  lens geometry and the baby's real size, and getting either wrong produces a
+  confident number that is simply false.
+- **Pose is used only for coarse posture.** Pose models are trained on adult
+  proportions and measurably fail on infants, which is why the fine-grained
+  claims are not made: every rule needs several consecutive frames, and face
+  presence is still the primary signal.
 
 ---
 

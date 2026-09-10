@@ -430,7 +430,8 @@ fun SettingsScreen(state: AppState) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(
                         "No network requests. No account. No analytics.",
-                        "Monitored audio is never recorded to disk.",
+                        "Only a cry is recorded: 90s per episode, kept for " +
+                            "7 days in this app's private storage.",
                         "Your log and documents are excluded from cloud backup.",
                         "An awareness aid, not a medical device. It does not " +
                             "monitor breathing or vital signs.",

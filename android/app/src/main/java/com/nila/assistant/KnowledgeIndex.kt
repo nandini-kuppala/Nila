@@ -70,6 +70,18 @@ class KnowledgeIndex private constructor(
         private const val K1 = 1.4
         private const val B = 0.72
 
+        /**
+         * Collections that answer a lookup, never a question.
+         *
+         * `causes` holds one entry per class the cry classifier can emit, and
+         * the monitor fetches them by id. They are written as answers to "the
+         * model said belly_pain" rather than to anything a person would type,
+         * so they are strong keyword matches for questions they are the wrong
+         * answer to -- which is exactly what happened when they were first
+         * added as ordinary guidance.
+         */
+        private val LOOKUP_ONLY = setOf("causes")
+
         const val GUIDANCE = "guidance"
 
         /**
@@ -289,6 +301,16 @@ class KnowledgeIndex private constructor(
     }
 
     /**
+     * One entry by id, for the paths that know exactly which one they want.
+     *
+     * BM25 is the right tool for a question typed by a person and the wrong one
+     * for "the entry that answers a `belly_pain` classification": that mapping
+     * is fixed, and resolving it by search would let a corpus edit silently
+     * change which advice a cause produces.
+     */
+    fun byId(id: String): KnowledgeDoc? = docs.firstOrNull { it.id == id }
+
+    /**
      * Retrieval filtered to who is asking and how old the baby is.
      *
      * Age gating is not a nicety. Asking "what should she eat" about a
@@ -319,6 +341,13 @@ class KnowledgeIndex private constructor(
             for ((idx, tf) in posting) {
                 val doc = docs[idx]
                 if (collection != null && doc.collection != collection) continue
+                // Lookup-only entries never win a typed question. They are
+                // reached by id, from a classifier label, and letting them
+                // compete here measurably made retrieval worse: "baby is very
+                // sleepy and not feeding" started returning the tiredness entry
+                // instead of the red-flags one, which is the wrong answer to a
+                // question that needed the right one.
+                if (collection == null && doc.collection in LOOKUP_ONLY) continue
                 if (audience != null && doc.collection == "guidance" &&
                     doc.audience != audience && doc.audience != "both"
                 ) continue
