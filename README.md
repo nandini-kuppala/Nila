@@ -100,8 +100,20 @@ optional local model shortens them and is never allowed to supply a fact.
 **Checks medicines.** PP-OCRv4 on device reads a strip — rotated, upside down or
 on foil — then five staged agents check it against your own health records.
 
-**Watches.** Face presence and motion energy from the camera. Not breathing, not
-vitals, not SIDS.
+**Watches, continuously.** The camera lane runs in its own foreground service,
+so it keeps analysing with the screen off — it used to live inside the screen
+and stop, silently, the moment the display dimmed. Pose landmarks give coarse
+posture and movement across the frame, so *rolled onto their front*, *crawling*,
+*standing up*, *outside the safe zone* and *out of view* are separate events
+with separate severities, instead of one "can't see the face". The
+accelerometer and the light sensor stop the camera making claims it is not
+entitled to: a knocked phone or a dark room suppresses the vision verdict
+rather than reporting the baby as missing. Not breathing, not vitals, not SIDS.
+
+**Runs both lanes at once.** Microphone and camera, two services, and the
+camera one subscribes to the audio one — because a baby who rolls over in their
+sleep is a notification, and a baby who rolls over *and starts crying* has
+probably fallen, which is a different phone call.
 
 **Keeps records.** Health documents for baby and mother, OCR'd at import,
 searchable, and usable by the assistant.
@@ -137,6 +149,10 @@ flowchart TB
 
         FACE["Face presence<br/>BlazeFace"]
         MOT["Motion energy<br/><i>frame difference</i>"]
+        POSE["Pose landmarks<br/><i>full · 9 MB task</i>"]
+        ACT{{"Activity rules<br/><i>prone · crawling · zone<br/>distance · out of view</i>"}}
+        SENS["Accelerometer + light<br/><i>is the view trustworthy</i>"]
+        ZONE[("Safe zone<br/>over the cot")]
 
         OCR["PP-OCRv4<br/><i>rotated boxes · angle · CTC</i>"]
         AGENTS["5 staged agents<br/><i>history → identify →<br/>interact → adjudicate</i>"]
@@ -151,7 +167,11 @@ flowchart TB
     MIC --> FE --> DET --> HYS --> LADDER
     HYS --> RF --> LADDER
     LADDER --> SOOTHE --> MEM --> LADDER
-    CAM --> FACE --> MOT
+    CAM --> FACE --> ACT
+    CAM --> MOT --> ACT
+    CAM --> POSE --> ACT
+    ZONE --> ACT
+    SENS --> ACT
     DOC --> OCR --> AGENTS
     TAP --> DB
     DB --> AGENTS
@@ -160,7 +180,8 @@ flowchart TB
 
     LADDER --> CLIP[("90 s clip<br/><i>app-private, 7 days</i>")]
     LADDER --> ALERT["🔔 Notification<br/>phone · watch · band"]
-    MOT --> ALERT
+    ACT --> ALERT
+    LADDER -.->|"crying now"| ACT
     AGENTS --> VERDICT["Safe / caution / avoid<br/><i>with its reasoning</i>"]
     LLM --> ANSWER["Answer + its source"]
 
@@ -171,7 +192,7 @@ flowchart TB
     classDef out fill:#FFF4E5,stroke:#8F5C0E,color:#101D1A
     classDef net fill:#FBEAE8,stroke:#A6231C,stroke-dasharray:4 3,color:#101D1A
     classDef store fill:#EDF1EE,stroke:#68746F,color:#101D1A
-    class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,OCR,AGENTS,ROUTE,BM25,LLM box
+    class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,POSE,ACT,SENS,OCR,AGENTS,ROUTE,BM25,LLM box
     class ALERT,VERDICT,ANSWER out
     class NET net
     class DB,MEM,CLIP store
@@ -328,6 +349,7 @@ the file directly gives you.
 | `reason_forest.json` | Five-way cause | 7.6 MB | In the APK |
 | `ppocr_det/cls/rec` | Reading a medicine strip | 15.2 MB | In the APK |
 | `blaze_face_short_range` | Face presence | 230 KB | In the APK |
+| `pose_landmarker_full` | Coarse posture and movement | 9.0 MB | In the APK |
 | `knowledge.json` | 46 sourced entries + 5 cause entries | 47 KB | In the APK |
 | Qwen2.5-0.5B | Shortening answers | 547 MB | Optional, one tap |
 | FastVLM-0.5B | Describing the cot | 1.1 GB | Optional, one tap |
@@ -345,7 +367,7 @@ android/            The app
     audio/          Log-mel frontend, detector, hysteresis, features
     monitor/        Foreground service and the escalation ladder
     assistant/      Retrieval, routing, guardrails, OCR
-    vision/         Camera watch, demo footage, scene describer
+    vision/         Camera watch, pose, activity rules, safe zone, sensors
     ml/             TFLite runner, RandomForest evaluator
   app/src/test/     120 JVM tests
   app/src/androidTest/  62 instrumented tests
@@ -371,6 +393,19 @@ docs/               Technical record and build spec
   whenever a suitable bundle is available.
 - **Infrared and Wear OS are unverified on hardware.** Neither can be tested on
   an emulator.
+- **Posture needs the phone beside the cot, not at the end of it.** A camera
+  looking along the length of a cot sees a lying baby's trunk running down the
+  image, which is geometrically identical to a standing one. No single view can
+  separate those, so the watch screen says where to put the phone rather than
+  guessing.
+- **Distance is relative, not metric.** It is the baby's torso now against
+  their torso when the watch was armed. A figure in centimetres would need the
+  lens geometry and the baby's real size, and getting either wrong produces a
+  confident number that is simply false.
+- **Pose is used only for coarse posture.** Pose models are trained on adult
+  proportions and measurably fail on infants, which is why the fine-grained
+  claims are not made: every rule needs several consecutive frames, and face
+  presence is still the primary signal.
 
 ---
 

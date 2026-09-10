@@ -104,6 +104,15 @@ private fun readable(event: EventRecord): String = when (event.kind) {
     "FACE_NOT_VISIBLE" -> "Couldn't see the face"
     "FACE_RETURNED" -> "Face visible again"
     "STILLNESS" -> "Unusually still"
+    "ROLLED_TO_FRONT" -> "Rolled onto her front"
+    "ROLLED_TO_SIDE" -> "Rolled onto her side"
+    "CRAWLING" -> "Crawling"
+    "SITTING_UP" -> "Sat up"
+    "STANDING_UP" -> "Stood up"
+    "LEFT_SAFE_ZONE" -> "Left the safe zone"
+    "MOVED_AWAY" -> "Moved away from the cot"
+    "OUT_OF_VIEW" -> "Out of view of the camera"
+    "CAMERA_MOVED" -> "The phone was moved"
     "GUARDIAN_FAULT" -> "Monitoring problem"
     else -> event.kind.lowercase().replace('_', ' ')
 }

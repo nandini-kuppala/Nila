@@ -483,6 +483,23 @@ class AppState(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // ---- the camera lane
+    //
+    // The safe zone lives in DataStore rather than in this ViewModel because
+    // the service reads it on every camera bind, including when no screen and
+    // therefore no ViewModel exists.
+    private val safeZones = com.nila.vision.SafeZoneStore(app)
+
+    val safeZone: StateFlow<com.nila.vision.SafeZone> = safeZones.zone
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.nila.vision.SafeZone.DEFAULT)
+
+    suspend fun saveSafeZone(zone: com.nila.vision.SafeZone) = safeZones.save(zone)
+
+    suspend fun resetSafeZone() = safeZones.reset()
+
+    fun startWatching() = com.nila.monitor.WatchService.start(getApplication())
+    fun stopWatching() = com.nila.monitor.WatchService.stop(getApplication())
+
     fun startMonitoring() = MonitorService.start(getApplication())
     fun stopMonitoring() = MonitorService.stop(getApplication())
 

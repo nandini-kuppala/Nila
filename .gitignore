@@ -47,6 +47,14 @@ ml/cache/
 *.pkl
 *.keras
 
+# ...with one exception. The optional language models are .task files fetched at
+# runtime into /sdcard, which is what the rule above is for. The pose landmarker
+# is a .task file too, and it is the opposite kind of thing: 9 MB that ships
+# inside the APK so the safety watch works offline from first launch, exactly
+# like the .tflite and .onnx assets beside it. Ignoring it silently produced an
+# APK whose camera lane fell back to face presence with no indication why.
+!android/app/src/main/assets/*.task
+
 # --------------------------------------------------------------------- misc
 .DS_Store
 Thumbs.db
