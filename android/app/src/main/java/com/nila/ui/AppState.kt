@@ -522,6 +522,14 @@ class AppState(app: Application) : AndroidViewModel(app) {
      */
     fun closeDemo() = MonitorService.closeDemo()
 
+    /**
+     * Put away the card for an episode that has closed.
+     *
+     * Not [closeDemo]: that resets the whole state holder, which is right after
+     * a demo and wrong here -- monitoring is still running underneath the card.
+     */
+    fun dismissEpisode() = MonitorService.dismissEpisode()
+
     fun logCare(kind: CareKind, detail: String? = null) {
         viewModelScope.launch {
             db.care().insert(

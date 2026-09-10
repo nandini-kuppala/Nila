@@ -20,6 +20,7 @@ import com.nila.actions.Soother
 import com.nila.audio.AudioCapture
 import com.nila.audio.CryEngine
 import com.nila.audio.CryEvidence
+import com.nila.audio.EpisodeRecorder
 import com.nila.audio.LogMelFrontend
 import com.nila.audio.WavReader
 import com.nila.data.EventKind
@@ -59,8 +60,15 @@ class MonitorService : LifecycleService() {
          */
         private const val SIMULATION_SPEED = 6L
 
-        /** Long enough to pass the hard escalation ceiling of 100 s. */
-        private const val SIMULATED_CRY_SECONDS = 115
+        /**
+         * Long enough to pass every rung, including the closing one at 180 s.
+         *
+         * It used to stop at 115, which cleared the old escalation ceiling and
+         * nothing else. The demo is the only place most people ever see the
+         * ladder run, so it has to reach the end of it -- the summary card with
+         * the clip is now part of what there is to demonstrate.
+         */
+        private const val SIMULATED_CRY_SECONDS = 190
 
         /**
          * Real milliseconds the demo pauses on each soothing sound.
@@ -125,6 +133,17 @@ class MonitorService : LifecycleService() {
         fun closeDemo() {
             _state.value = MonitorState()
         }
+
+        /**
+         * Dismiss the summary card for an episode that has closed.
+         *
+         * Unlike [closeDemo] this must not reset the state holder: monitoring
+         * is still running underneath the card, and wiping it would leave the
+         * screen claiming to be idle while the service listened on.
+         */
+        fun dismissEpisode() {
+            _state.value = _state.value.copy(lastEpisode = null)
+        }
     }
 
     private lateinit var notifier: Notifier
@@ -143,6 +162,33 @@ class MonitorService : LifecycleService() {
     private var pendingSoother: Soother? = null
     private var simulation: kotlinx.coroutines.Job? = null
     private var notedHypothesis = false
+    private lateinit var recorder: EpisodeRecorder
+
+    /**
+     * The corpus, for the advice attached to a verdict.
+     *
+     * Loaded on the first verdict rather than at startup: parsing 51 documents
+     * and building a BM25 index is work a night of silence should not pay for,
+     * and by ninety seconds into a cry there is time to spare.
+     */
+    private var knowledge: com.nila.assistant.KnowledgeIndex? = null
+
+    /**
+     * Which rungs have fired in this episode, and what they recorded.
+     *
+     * The ladder's progression is rebuilt from this on every window rather than
+     * accumulated in the state, so a rung cannot end up shown twice, shown out
+     * of order, or stuck ACTIVE because the transition meant to close it never
+     * arrived.
+     */
+    private val fired =
+        mutableMapOf<EpisodePipeline.Stage, EpisodePipeline.Fired>()
+
+    /** When the current episode started, for the summary. */
+    private var episodeStartedAtMs = 0L
+
+    /** Where this episode's clip is being written, if one is. */
+    private var episodeClip: java.io.File? = null
 
     /**
      * The cause estimate for the episode in progress, decided once.
@@ -182,6 +228,7 @@ class MonitorService : LifecycleService() {
         sootheMemory = SootheMemory(this)
         wear = com.nila.wearlink.WearSender(this)
         ir = com.nila.actions.IrActuator(this)
+        recorder = EpisodeRecorder(this)
         notifier.ensureChannels()
     }
 
@@ -277,9 +324,18 @@ class MonitorService : LifecycleService() {
             is CryEngine.Result.Started -> {
                 escalation.reset()
                 episodeHypothesis = null
+                fired.clear()
+                episodeStartedAtMs = System.currentTimeMillis()
+                episodeClip = recorder.start()
+                recorder.append(window)
                 val evidence = latched(result.evidence)
                 currentEventId = db.events().insert(
                     recordFor(evidence, EventKind.CRY_STARTED, Severity.NOTE)
+                )
+                mark(
+                    EpisodePipeline.Stage.HEARD,
+                    "Detector at ${(evidence.detectorConfidence * 100).toInt()}%",
+                    evidence.durationSeconds,
                 )
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.CryDetected(evidence.durationSeconds),
@@ -288,31 +344,24 @@ class MonitorService : LifecycleService() {
                     inputDbfs = window.dbfs,
                     silentWindows = 0,
                     actions = listOf("Heard crying"),
+                    advice = null,
+                    clipSeconds = recorder.seconds,
+                    pipeline = ladder(evidence.durationSeconds),
                 )
                 notedHypothesis = false
                 pushToWatch()
             }
 
             is CryEngine.Result.Ongoing -> {
+                recorder.append(window)
                 val evidence = latched(result.evidence)
                 _state.value = _state.value.copy(
                     currentEvidence = evidence,
                     inputDbfs = window.dbfs,
                     silentWindows = 0,
+                    clipSeconds = recorder.seconds,
+                    pipeline = ladder(evidence.durationSeconds),
                 )
-                // Said once, and said as a guess. The cause estimate is at
-                // chance on infants it has not heard, so the transcript has to
-                // carry that caveat next to the label rather than under it.
-                if (!notedHypothesis) {
-                    evidence.hypothesis?.let { h ->
-                        notedHypothesis = true
-                        note(
-                            "Classified the cry: probably ${plain(h.label)} " +
-                                "(${(h.confidence * 100).toInt()}%) - a guess from " +
-                                "the sound, not a diagnosis"
-                        )
-                    }
-                }
                 step(evidence)
                 pushToWatch()
             }
@@ -334,19 +383,93 @@ class MonitorService : LifecycleService() {
                 }
                 pendingSoother = null
                 currentEventId = null
-                escalation.reset()
                 soothePlayer.duckCry(false)
                 note("The crying stopped after ${evidence.durationSeconds}s")
                 if (_state.value.simulated) demoSummary = evidence
+
+                // A cry that got as far as a cause is worth a record; a
+                // four-second fuss is not. Without this line every hiccup left
+                // a summary card and a one-second clip on the screen.
+                val worthKeeping =
+                    evidence.durationSeconds >= Escalation.Config().reasonSeconds
+                val summary = if (worthKeeping) {
+                    summarise(evidence, closedByTimeout = false)
+                } else {
+                    recorder.abandon()
+                    null
+                }
+                escalation.reset()
+                fired.clear()
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Listening,
                     currentEvidence = null,
                     lastSoother = null,
                     nowPlaying = null,
                     nowPlayingIsVoice = false,
+                    advice = null,
+                    clipSeconds = 0f,
+                    pipeline = emptyList(),
+                    lastEpisode = summary ?: _state.value.lastEpisode,
                 )
             }
         }
+    }
+
+    /** Record that a rung fired, with what it did. */
+    private fun mark(
+        stage: EpisodePipeline.Stage,
+        detail: String,
+        atSeconds: Int,
+        severity: Severity = Severity.NOTE,
+    ) {
+        fired[stage] = EpisodePipeline.Fired(detail, atSeconds, severity)
+    }
+
+    /** The ladder as it stands, for an episode [seconds] old. */
+    private fun ladder(seconds: Int, closed: Boolean = false) =
+        EpisodePipeline.steps(seconds, fired.toMap(), closed)
+
+    /**
+     * What the corpus says to do about a cause.
+     *
+     * Returns null when the classifier produced nothing, which is the honest
+     * outcome for an episode too short or too quiet to have been classified --
+     * the alert then says how long the cry has run and nothing about why.
+     */
+    private fun adviceFor(evidence: CryEvidence): CryAdvice.Advice? {
+        val label = evidence.hypothesis?.label ?: return null
+        val index = knowledge ?: runCatching {
+            com.nila.assistant.KnowledgeIndex.load(this)
+        }.onFailure { Log.w(TAG, "corpus failed to load", it) }
+            .getOrNull()?.also { knowledge = it } ?: return null
+        return CryAdvice.forLabel(label) { index.byId(it) }
+    }
+
+    /**
+     * Freeze everything about the episode into one object.
+     *
+     * Built here, at the moment the episode ends, rather than assembled by the
+     * UI out of live fields -- those are cleared by the very next silent window,
+     * which is how the old demo summary used to lose its own evidence.
+     */
+    private fun summarise(
+        evidence: CryEvidence,
+        closedByTimeout: Boolean,
+    ): MonitorState.EpisodeSummary {
+        val clip = recorder.finish()
+        val current = _state.value
+        return MonitorState.EpisodeSummary(
+            startedAtMs = episodeStartedAtMs,
+            durationSeconds = evidence.durationSeconds,
+            evidence = evidence,
+            pipeline = ladder(evidence.durationSeconds, closed = true),
+            actions = current.actions,
+            advice = current.advice ?: adviceFor(evidence),
+            clipPath = clip?.absolutePath,
+            clipSeconds = recorder.seconds,
+            closedByTimeout = closedByTimeout,
+            simulated = current.simulated,
+        )
     }
 
     /** Hold the episode's first cause estimate across every later window. */
@@ -393,22 +516,96 @@ class MonitorService : LifecycleService() {
         val candidates = availableSoothers()
         when (val decision = escalation.next(evidence, candidates.isNotEmpty())) {
             Escalation.Decision.Wait -> {
-                _state.value = _state.value.copy(
-                    phase = if (soothePlayer.isPlaying) {
-                        MonitorState.Phase.Settling(
-                            soothePlayer.nowPlaying?.displayName ?: "a sound",
-                            evidence.durationSeconds,
-                        )
-                    } else {
-                        MonitorState.Phase.CryDetected(evidence.durationSeconds)
-                    }
-                )
+                // Not while a verdict or a close is on screen: those set a
+                // phase that says something, and overwriting it every 480 ms
+                // with "crying for 94s" throws the outcome away.
+                if (!escalation.hasEscalated && !escalation.hasClosed) {
+                    _state.value = _state.value.copy(
+                        phase = if (soothePlayer.isPlaying) {
+                            MonitorState.Phase.Settling(
+                                soothePlayer.nowPlaying?.displayName ?: "a sound",
+                                evidence.durationSeconds,
+                            )
+                        } else {
+                            MonitorState.Phase.CryDetected(evidence.durationSeconds)
+                        }
+                    )
+                }
             }
 
             Escalation.Decision.LogNote -> {
                 db.events().insert(
                     recordFor(evidence, EventKind.CRY_ONGOING, Severity.NOTE)
                 )
+                mark(
+                    EpisodePipeline.Stage.LOGGED,
+                    "Written to the timeline",
+                    evidence.durationSeconds,
+                )
+                note("Logged the episode")
+            }
+
+            Escalation.Decision.ReadReason -> {
+                // Said once, and said as a guess. The cause estimate is at
+                // chance on infants it has not heard, so the transcript has to
+                // carry that caveat next to the label rather than under it.
+                val h = evidence.hypothesis
+                if (h != null) {
+                    notedHypothesis = true
+                    val pct = (h.confidence * 100).toInt()
+                    mark(
+                        EpisodePipeline.Stage.CLASSIFIED,
+                        "Probably ${plain(h.label)} - ${pct}%, " +
+                            "${h.windowsAveraged} window" +
+                            (if (h.windowsAveraged == 1) "" else "s") + " averaged",
+                        evidence.durationSeconds,
+                    )
+                    note(
+                        "Classified the cry: probably ${plain(h.label)} " +
+                            "($pct%) - a guess from the sound, not a diagnosis"
+                    )
+                } else {
+                    // The rung fired and the classifier had nothing. Saying so
+                    // is better than an empty row: it is the difference between
+                    // "no reason yet" and "this step is broken".
+                    mark(
+                        EpisodePipeline.Stage.CLASSIFIED,
+                        "No usable estimate from this cry",
+                        evidence.durationSeconds,
+                    )
+                }
+            }
+
+            Escalation.Decision.CloseEpisode -> {
+                soothePlayer.stop()
+                soothePlayer.duckCry(false)
+                mark(
+                    EpisodePipeline.Stage.CLOSED,
+                    "Kept the clip, the steps and the reason",
+                    evidence.durationSeconds,
+                )
+                note("Closed the episode at ${evidence.durationSeconds}s")
+                val summary = summarise(evidence, closedByTimeout = true)
+                _state.value = _state.value.copy(
+                    phase = MonitorState.Phase.Closed(evidence.durationSeconds),
+                    currentEvidence = null,
+                    nowPlaying = null,
+                    nowPlayingIsVoice = false,
+                    clipSeconds = 0f,
+                    pipeline = emptyList(),
+                    lastEpisode = summary,
+                )
+                // The ladder is finished with this cry, so the detector should
+                // be too. Without the reset a baby still crying at three
+                // minutes stays inside an episode nothing is acting on any
+                // more; with it, a cry that continues becomes a new episode and
+                // climbs the ladder again -- which is the right answer for a
+                // parent who has not arrived.
+                pendingSoother = null
+                currentEventId = null
+                escalation.reset()
+                fired.clear()
+                engine?.reset()
             }
 
             is Escalation.Decision.PlaySoother -> {
@@ -461,6 +658,11 @@ class MonitorService : LifecycleService() {
                             else -> "Playing ${choice.displayName.lowercase()}"
                         }
                     )
+                    mark(
+                        EpisodePipeline.Stage.SOOTHED,
+                        "Attempt ${decision.attempt}: ${choice.displayName}",
+                        evidence.durationSeconds,
+                    )
                     if (simulating) {
                         // A recording of the caregiver is the sound this
                         // feature exists for, and an install that has none
@@ -506,11 +708,18 @@ class MonitorService : LifecycleService() {
                     if (settled) "Checked the loudness: $what is working"
                     else "Checked the loudness: $what did not help"
                 )
+                mark(
+                    EpisodePipeline.Stage.VERIFIED,
+                    if (settled) "$what is working" else "$what did not help",
+                    evidence.durationSeconds,
+                    if (settled) Severity.NOTE else Severity.ATTENTION,
+                )
             }
 
             is Escalation.Decision.Escalate -> {
                 soothePlayer.stop()
                 soothePlayer.duckCry(false)
+                val advice = adviceFor(evidence)
                 // The cause leads the alert, because it is the first thing
                 // anybody woken at 3 a.m. wants -- but it leads it as "probably".
                 // The estimate did not clear chance on infants it had not heard,
@@ -530,6 +739,10 @@ class MonitorService : LifecycleService() {
                             if (escalation.attemptCount > 1) append("s")
                             append(" first.")
                         }
+                        // One thing to try, in the notification itself. A
+                        // parent reading this on a lock screen at 3am should
+                        // not have to open the app to find out what to do.
+                        advice?.steps?.firstOrNull()?.let { append(" Try: ${it.lowercase()}.") }
                     },
                     severity = decision.severity,
                 )
@@ -537,16 +750,25 @@ class MonitorService : LifecycleService() {
                     recordFor(evidence, EventKind.ESCALATED_TO_PARENT, decision.severity)
                         .copy(note = decision.reason)
                 )
+                mark(
+                    EpisodePipeline.Stage.VERDICT,
+                    advice?.headline ?: decision.reason,
+                    evidence.durationSeconds,
+                    decision.severity,
+                )
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Escalated(decision.reason, decision.severity),
                     nowPlaying = null,
                     nowPlayingIsVoice = false,
+                    advice = advice,
+                    pipeline = ladder(evidence.durationSeconds),
                 )
                 note(
                     "Woke you: " +
                         evidence.hypothesis?.let { "probably ${plain(it.label)}, " }.orEmpty() +
                         decision.reason.lowercase()
                 )
+                advice?.let { note("Suggested: ${it.steps.firstOrNull() ?: it.title}") }
                 if (_state.value.simulated) demoHoldMs = DEMO_ALERT_HOLD_MS
                 // Belt and braces: the notification already reaches any watch
                 // that mirrors them. This adds the distinct vibration pattern
@@ -594,6 +816,7 @@ class MonitorService : LifecycleService() {
         engine = cryEngine
         escalation.reset()
         episodeHypothesis = null
+        fired.clear()
         demoSummary = null
         demoHoldMs = 0L
 
@@ -666,14 +889,20 @@ class MonitorService : LifecycleService() {
                 // Nila did off the screen at exactly the moment somebody wanted
                 // to read it. The service stops; the summary stays until it is
                 // dismissed.
+                val finished = demoSummary
                 _state.value = _state.value.copy(
                     running = false,
                     simulated = true,
                     demoComplete = true,
                     phase = MonitorState.Phase.DemoFinished,
-                    currentEvidence = demoSummary,
+                    currentEvidence = finished,
                     nowPlaying = null,
                     nowPlayingIsVoice = false,
+                    // The demo closes its own episode at the three-minute rung
+                    // like any other, so by here the summary is already built.
+                    // This only covers a demo stopped early by hand.
+                    lastEpisode = _state.value.lastEpisode
+                        ?: finished?.let { summarise(it, closedByTimeout = false) },
                 )
                 cryEngine.close()
                 if (engine === cryEngine) engine = null
@@ -773,6 +1002,8 @@ class MonitorService : LifecycleService() {
         engine = null
         soothePlayer.stop()
         soothePlayer.stopCry()
+        // A clip with no summary pointing at it is a file nobody can reach.
+        if (::recorder.isInitialized && recorder.recording) recorder.abandon()
         wakeLock?.runCatching { if (isHeld) release() }
         wakeLock = null
         notifier.clear()

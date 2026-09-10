@@ -82,9 +82,16 @@ guess from the sound, not a diagnosis."* Never as a fact.
 **Listens.** A log-mel frontend and a small quantised detector, running all night in a
 foreground service. In a quiet room almost no inference runs at all.
 
-**Acts before it wakes you.** Log at 12 s → play a sound at 20 s → judge it at
-35 s → alert. It plays your own recorded voice if you made one, learns which
-sound settles *this* baby, and can turn a fan down over infrared.
+**Acts before it wakes you.** Log at 12 s → read the cause and play a sound at
+20 s → judge that sound 35 s later → at 90 s wake you with the cause *and what
+to try* → close the episode at 3 minutes with the clip, the steps and the
+reason. It plays your own recorded voice if you made one, learns which sound
+settles *this* baby, and can turn a fan down over infrared.
+
+**Shows its work while it happens.** The ladder is drawn live on the monitor
+screen — including the rungs that have not fired yet, so it is visible that a
+verification step and a decision point are still coming rather than that the app
+has stopped.
 
 **Answers questions.** Retrieval over curated, sourced entries, for the baby *and*
 the mother. Answers are the retrieved text shown with where it came from; an
@@ -136,7 +143,7 @@ flowchart TB
         HYS["Hysteresis<br/><i>3 of 5 in · 6 out</i>"]
         RF["Cause classifier<br/><i>500-tree forest · a guess</i>"]
 
-        LADDER{{"Escalation ladder<br/>12s log → 20s play<br/>35s verify → alert"}}
+        LADDER{{"Escalation ladder<br/>12s log → 20s cause + play<br/>55s verify → 90s alert<br/>180s close"}}
         SOOTHE["Your voice · white noise<br/>heartbeat · IR blaster"]
         MEM[("Which sound<br/>works for<br/>this baby")]
 
@@ -171,6 +178,7 @@ flowchart TB
     DB --> ROUTE
     ROUTE --> BM25 --> LLM
 
+    LADDER --> CLIP[("90 s clip<br/><i>app-private, 7 days</i>")]
     LADDER --> ALERT["🔔 Notification<br/>phone · watch · band"]
     ACT --> ALERT
     LADDER -.->|"crying now"| ACT
@@ -187,7 +195,7 @@ flowchart TB
     class FE,DET,HYS,RF,LADDER,SOOTHE,FACE,MOT,POSE,ACT,SENS,OCR,AGENTS,ROUTE,BM25,LLM box
     class ALERT,VERDICT,ANSWER out
     class NET net
-    class DB,MEM,ZONE store
+    class DB,MEM,CLIP store
 ```
 
 **Three things to notice.**
@@ -211,9 +219,12 @@ discarded if it drifts.
 
 - **No network requests.** Cleartext is forbidden outright in
   `network_security_config.xml`; the app has no API keys because it calls no APIs.
-- **No audio is recorded.** Monitored sound is analysed in memory and discarded.
-  The soothing clips you record yourself are the one exception and stay in
-  app-private storage.
+- **Only the cry is recorded, and only for a week.** The night is analysed in
+  memory and discarded. When the detector declares a cry, the first 90 seconds
+  of *that episode* are written to app-private storage so you can hear what the
+  app heard -- and deleted after 7 days. Silence, conversation and everything
+  else in the room are never written anywhere. Recordings you make yourself as
+  soothing sounds live in the same private storage.
 - **Backup is disabled** in the manifest, so health documents cannot leave by a
   cloud transport.
 - **No account, no analytics.**
@@ -339,7 +350,7 @@ the file directly gives you.
 | `ppocr_det/cls/rec` | Reading a medicine strip | 15.2 MB | In the APK |
 | `blaze_face_short_range` | Face presence | 230 KB | In the APK |
 | `pose_landmarker_full` | Coarse posture and movement | 9.0 MB | In the APK |
-| `knowledge.json` | 46 sourced entries | 43 KB | In the APK |
+| `knowledge.json` | 46 sourced entries + 5 cause entries | 47 KB | In the APK |
 | Qwen2.5-0.5B | Shortening answers | 547 MB | Optional, one tap |
 | FastVLM-0.5B | Describing the cot | 1.1 GB | Optional, one tap |
 

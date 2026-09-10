@@ -286,9 +286,10 @@ footer a{color:var(--teal)}
   <ul class="claims">
     <li><span class="tick">—</span><span><b>No network requests.</b> Cleartext is forbidden
     outright in the manifest. The app holds no API keys because it calls no APIs.</span></li>
-    <li><span class="tick">—</span><span><b>No audio is recorded.</b> Monitored sound is
-    analysed in memory and discarded. The soothing clips you record yourself are the one
-    exception, and they stay in app-private storage.</span></li>
+    <li><span class="tick">—</span><span><b>Only the cry is recorded.</b> The night is
+    analysed in memory and discarded. When a cry is detected, 90 seconds of that episode are
+    written to app-private storage so you can hear what the app heard, and deleted after
+    7 days. The soothing clips you record yourself stay in the same private storage.</span></li>
     <li><span class="tick">—</span><span><b>Backup is disabled</b>, so health documents cannot
     leave by a cloud transport.</span></li>
     <li><span class="tick">—</span><span><b>No account, no analytics.</b> The only outbound

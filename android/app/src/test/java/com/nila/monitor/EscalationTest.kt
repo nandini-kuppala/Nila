@@ -34,32 +34,114 @@ class EscalationTest {
         assertEquals(0, e.attemptCount)
     }
 
+    /**
+     * Windows as the service delivers them: one every 480 ms, so a rung that
+     * fires on the same second as another still gets its own call. Tests that
+     * jumped straight from 5 s to 25 s in one call were fine until the ladder
+     * gained a rung, and then they were testing call ordering rather than
+     * timing.
+     */
+    private fun pump(
+        e: Escalation,
+        toSeconds: Int,
+        fromSeconds: Int = 0,
+        trend: Trend = Trend.STEADY,
+        sootherAvailable: Boolean = true,
+        onDecision: (Int, Escalation.Decision) -> Unit = { _, _ -> },
+    ) {
+        for (s in fromSeconds..toSeconds) {
+            onDecision(s, e.next(evidence(s, trend), sootherAvailable))
+        }
+    }
+
     @Test
     fun `a sustained cry triggers a soother before a parent is woken`() {
         val e = Escalation()
-        e.next(evidence(5), true)
-        val decision = e.next(evidence(25), true)
-        assertTrue("expected a soother at 25s, got $decision",
-                   decision is Escalation.Decision.PlaySoother)
+        var soothedAt = -1
+        pump(e, toSeconds = 25) { s, d ->
+            if (d is Escalation.Decision.PlaySoother && soothedAt < 0) soothedAt = s
+        }
+        assertTrue("expected a soother by 25s, got $soothedAt", soothedAt in 20..25)
         assertTrue(!e.hasEscalated)
+    }
+
+    @Test
+    fun `the reason is read at twenty seconds, not at four`() {
+        val e = Escalation()
+        var readAt = -1
+        pump(e, toSeconds = 40) { s, d ->
+            if (d is Escalation.Decision.ReadReason && readAt < 0) readAt = s
+        }
+        assertEquals("the cause rung is due at 20s", 20, readAt)
+    }
+
+    @Test
+    fun `the reason is read once per episode`() {
+        val e = Escalation()
+        var reads = 0
+        pump(e, toSeconds = 89) { _, d ->
+            if (d is Escalation.Decision.ReadReason) reads++
+        }
+        assertEquals(1, reads)
+    }
+
+    @Test
+    fun `the episode closes at three minutes and only once`() {
+        val e = Escalation()
+        var closes = 0
+        var closedAt = -1
+        pump(e, toSeconds = 240) { s, d ->
+            if (d is Escalation.Decision.CloseEpisode) {
+                closes++
+                if (closedAt < 0) closedAt = s
+            }
+        }
+        assertEquals("closed exactly once", 1, closes)
+        assertEquals("closed at the three-minute rung", 180, closedAt)
+        assertTrue(e.hasClosed)
+    }
+
+    /**
+     * The close rung has to outrank the "already escalated" short circuit. It
+     * did not, in the first version of this: an episode that woke somebody at
+     * ninety seconds returned Wait forever and never produced a summary, so
+     * the clip and the steps were written and then never shown to anyone.
+     */
+    @Test
+    fun `an episode that woke somebody still closes`() {
+        val e = Escalation()
+        var closed = false
+        pump(e, toSeconds = 200) { _, d ->
+            if (d is Escalation.Decision.CloseEpisode) closed = true
+        }
+        assertTrue("escalated first", e.hasEscalated)
+        assertTrue("an escalated episode must still close", closed)
+    }
+
+    @Test
+    fun `a parent is woken at ninety seconds, not a hundred`() {
+        val e = Escalation()
+        var escalatedAt = -1
+        pump(e, toSeconds = 120) { s, d ->
+            if (d is Escalation.Decision.Escalate && escalatedAt < 0) escalatedAt = s
+        }
+        assertEquals(90, escalatedAt)
     }
 
     @Test
     fun `the soother is verified rather than assumed to have worked`() {
         val e = Escalation()
-        e.next(evidence(5), true)
-        e.next(evidence(25), true)
-        val decision = e.next(evidence(62), true)
-        assertTrue("expected verification, got $decision",
-                   decision is Escalation.Decision.VerifySoother)
+        var verifiedAt = -1
+        pump(e, toSeconds = 62) { s, d ->
+            if (d is Escalation.Decision.VerifySoother && verifiedAt < 0) verifiedAt = s
+        }
+        assertTrue("expected verification by 62s, got $verifiedAt", verifiedAt > 0)
     }
 
     @Test
     fun `a rising cry after an attempt escalates`() {
         val e = Escalation()
-        e.next(evidence(5), true)
-        e.next(evidence(25), true)
-        e.next(evidence(62), true)                       // verify
+        pump(e, toSeconds = 62)                          // soothe, then verify
         val decision = e.next(evidence(70, Trend.RISING), true)
         assertTrue("expected escalation, got $decision",
                    decision is Escalation.Decision.Escalate)
