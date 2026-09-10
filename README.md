@@ -158,7 +158,7 @@ flowchart TB
         AGENTS["5 staged agents<br/><i>history → identify →<br/>interact → adjudicate</i>"]
 
         ROUTE{{"Router<br/><i>emergency · dose<br/>diagnosis · distress</i>"}}
-        BM25["BM25 retrieval<br/><i>46 sourced entries</i>"]
+        BM25["BM25 retrieval<br/><i>47 sourced entries</i>"]
         LLM["Qwen 0.5B<br/><i>shortens only</i>"]
 
         DB[("Room database<br/>log · records · outcomes")]
@@ -387,7 +387,7 @@ docs/               Technical record and build spec
 - **The cause classifier is at chance on unseen infants.** See above. Fixing it
   needs data collected properly, not a better architecture.
 - **English only.** The language plumbing exists; the corpus does not. Translating
-  46 clinical entries needs a human, not a model.
+  47 clinical entries needs a human, not a model.
 - **The vision model does not run yet.** It is fully wired, and blocked on a
   LiteRT-LM runtime that is not published. A MediaPipe backend is in place for
   whenever a suitable bundle is available.

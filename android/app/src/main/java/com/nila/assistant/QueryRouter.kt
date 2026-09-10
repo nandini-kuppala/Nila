@@ -139,6 +139,14 @@ object QueryRouter {
         "can i take", "can i eat", "can i drink", "should i take", "should i eat",
         "am i", "my diet", "my milk", "my supply", "my breast", "my nipple",
         "my mood", "my period", "my stitches", "my recovery", "my body",
+        // Idiomatic advice *to her*, phrased around the baby. "Nap while the
+        // baby sleeps" mentions the baby twice and is not a question about the
+        // baby at all -- and because the mother-facing corpus is audience
+        // filtered, routing it to BABY did not merely rank the right entry
+        // lower, it removed it from the results entirely.
+        "while the baby sleeps", "while baby sleeps", "when the baby sleeps",
+        "when baby sleeps", "while she sleeps", "while he sleeps",
+        "power nap", "power naps",
         "while breastfeeding", "when breastfeeding", "during breastfeeding",
         "while nursing", "breastfeeding mother", "for me", "i feel", "i am",
         "mastitis", "engorged", "latch", "postnatal", "postpartum", "lochia",

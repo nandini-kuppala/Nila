@@ -405,7 +405,7 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
 
   <div class="group-head">Assistant · questions and medicines</div>
   <div class="feature is-ok"><h4>Ask, for baby and mother</h4><span class="chip ok">working</span>
-    <p>Field-weighted BM25 with stemming over 46 curated documents — 18 baby-facing, 27 mother-facing, 1 both — filtered by audience and the baby's age, and gated by a relevance floor. Answers are retrieved text shown verbatim with their source; nothing is generated.</p></div>
+    <p>Field-weighted BM25 with stemming over 47 curated documents — 19 baby-facing, 27 mother-facing, 1 both — filtered by audience and the baby's age, and gated by a relevance floor. Answers are retrieved text shown verbatim with their source; nothing is generated.</p></div>
   <div class="feature is-ok"><h4>Query guardrails</h4><span class="chip ok">working</span>
     <p>Routed before retrieval: 30+ emergency phrasings, caregiver distress, greetings, too-vague, dose requests, diagnosis requests, out-of-scope — plus a relevance floor for everything the router cannot enumerate. Sections 08 and 09.</p></div>
   <div class="feature is-ok"><h4>Measured answer quality</h4><span class="chip ok">working</span>
@@ -560,7 +560,7 @@ hr{border:0; border-top:1px solid var(--rule); margin:44px 0 0}
   <h3>What actually answers the question</h3>
   <ol class="steps">
     <li><strong>Route.</strong> Before any retrieval, <code>QueryRouter</code> decides whether this is an emergency, a greeting, too vague, a dose request, a diagnosis request, out of scope, or answerable — and whether the subject is the baby or the mother.</li>
-    <li><strong>Retrieve.</strong> BM25 over 46 documents, filtered by audience and by the baby's age in months, so newborn guidance is never returned for a nine-month-old.</li>
+    <li><strong>Retrieve.</strong> BM25 over 47 documents, filtered by audience and by the baby's age in months, so newborn guidance is never returned for a nine-month-old.</li>
     <li><strong>Answer.</strong> The retrieved text is composed into an answer with its sources and shown <em>immediately</em>. This is the answer.</li>
     <li><strong>Show her own records, underneath.</strong> Matching documents from the health shelf are appended below the answer under their own heading — never above it. Anything quoted at the top of an answer reads as being the answer, and "what should I eat while breastfeeding" was opening with a prescription for iron and an inhaler, which mentions breastfeeding and answers nothing.</li>
   </ol>
@@ -1007,7 +1007,7 @@ adb logcat -s MonitorService:I CryEngine:I PaddleOcr:I SoothePlayer:I</code></pr
 <section id="gaps">
   <h2><span class="num">17</span>What is not built</h2>
   <div class="feature is-none"><h4>Multilingual answers</h4><span class="chip none">not built</span>
-    <p>The plumbing exists — a language field on the baby profile, passed through the router, retriever and prompt. What does not exist is a translated corpus. A 0.5B model translating clinical guidance into Hindi or Tamil is not something to ship. The honest fix is to translate the 46 documents with a human in the loop.</p></div>
+    <p>The plumbing exists — a language field on the baby profile, passed through the router, retriever and prompt. What does not exist is a translated corpus. A 0.5B model translating clinical guidance into Hindi or Tamil is not something to ship. The honest fix is to translate the 47 documents with a human in the loop.</p></div>
   <div class="feature is-none"><h4>Pre-roll clip export</h4><span class="chip none">not wired</span>
     <p><code>PreRoll.kt</code> buffers the seconds before an event but no screen exposes it. It also conflicts with "no recordings are written to disk", which would need re-stating if this shipped.</p></div>
   <div class="feature is-none"><h4>Sleep-cycle and growth tracking</h4><span class="chip none">not built</span>
@@ -1027,7 +1027,7 @@ adb logcat -s MonitorService:I CryEngine:I PaddleOcr:I SoothePlayer:I</code></pr
   <h3>The three highest-value next moves</h3>
   <ol class="steps">
     <li><strong>Personalise the detector.</strong> A few minutes of a specific baby's cry, fine-tuning only the final layer on-device, should push per-baby recall well past a general model — and it is a genuinely on-device learning story, which is exactly the kind of thing a phone-first hackathon rewards.</li>
-    <li><strong>Widen the corpus.</strong> 46 documents is thin, and the evaluation says exactly where: night weaning, stool changes, baby walkers and reflux all return "I don't know" because they genuinely are not there. Two hundred entries, translated with human review, would both fix that and unlock the multilingual claim honestly.</li>
+    <li><strong>Widen the corpus.</strong> 47 documents is thin, and the evaluation says exactly where: stool changes, baby walkers and reflux all return "I don't know" because they genuinely are not there. Night weaning was on that list and now has an entry, which is what closing one of these gaps looks like. Two hundred entries, translated with human review, would both fix that and unlock the multilingual claim honestly.</li>
     <li><strong>Real-photo OCR evaluation.</strong> Everything so far is synthetic. Fifty photographs of real strips and boxes — torn, foil, watermarked, angled — scored against ground truth would turn "it reads rotated text" into a number.</li>
   </ol>
 

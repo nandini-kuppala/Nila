@@ -109,3 +109,41 @@ data class ConversationRecord(
     val imagePath: String? = null,
     val language: String = "en",
 )
+
+/**
+ * One medicine that was checked, kept so it can be looked at again.
+ *
+ * Scans were not stored at all: the verdict lived in the view model and was
+ * gone the moment the screen was left. That is wrong for the thing this screen
+ * produces -- somebody who checked a strip at the pharmacy counter and wants to
+ * show a partner what it said an hour later had nothing to show them.
+ *
+ * The image path points into app-private storage, alongside the health
+ * documents and under the same `allowBackup=false`. The verdict is stored as
+ * its enum name rather than its label so a reworded label cannot change what a
+ * past scan appears to have said.
+ */
+@Entity(tableName = "medicine_scans", indices = [Index("atMs")])
+data class MedicineScanRecord(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val atMs: Long,
+    /** What it was identified as, or what was typed. */
+    val name: String,
+    /** [com.nila.assistant.agents.Verdict] name. */
+    val verdict: String,
+    val headline: String,
+    val summary: String,
+    /** App-private JPEG of the strip, when one was photographed. */
+    val imagePath: String? = null,
+    /** What OCR read, for the "what the camera read" panel. */
+    val scannedText: String? = null,
+    /** Newline-separated, so the history entry can cite what the live card did. */
+    val sources: String? = null,
+    val cautions: String? = null,
+) {
+    fun sourceList(): List<String> =
+        sources?.split('\n')?.filter { it.isNotBlank() } ?: emptyList()
+
+    fun cautionList(): List<String> =
+        cautions?.split('\n')?.filter { it.isNotBlank() } ?: emptyList()
+}

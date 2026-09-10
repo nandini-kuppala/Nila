@@ -348,5 +348,34 @@
    "attempts": 2,
    "successes": 1
   }
+ ],
+ "scans": [
+  {
+   "name": "paracetamol",
+   "verdict": "LIKELY_SAFE",
+   "hoursAgo": 30,
+   "headline": "Generally considered compatible with breastfeeding",
+   "summary": "Amounts in breast milk are far below the dose given to infants directly. Usually the first choice for pain or fever while breastfeeding.",
+   "sources": "NHS | LactMed",
+   "cautions": "Confirm with your doctor or pharmacist."
+  },
+  {
+   "name": "amoxicillin",
+   "verdict": "AVOID",
+   "hoursAgo": 96,
+   "headline": "Do not take this - it matches an allergy you listed",
+   "summary": "This appears to match an allergy you listed (penicillin allergy). The general guidance for amoxicillin is different, but your own history takes priority.",
+   "sources": "Your health record | LactMed",
+   "cautions": "Confirm with your doctor or pharmacist."
+  },
+  {
+   "name": "cetirizine",
+   "verdict": "CAUTION",
+   "hoursAgo": 150,
+   "headline": "Check with your doctor before taking this",
+   "summary": "Non-sedating antihistamines are generally preferred while breastfeeding, but this one is worth confirming for your own situation.",
+   "sources": "LactMed",
+   "cautions": "Confirm with your doctor or pharmacist."
+  }
  ]
 }

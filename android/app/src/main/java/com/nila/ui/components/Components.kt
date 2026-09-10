@@ -43,12 +43,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nila.data.Severity
-import com.nila.ui.theme.SeverityAttention
-import com.nila.ui.theme.SeverityAttentionBg
-import com.nila.ui.theme.SeverityCalm
-import com.nila.ui.theme.SeverityCalmBg
-import com.nila.ui.theme.SeverityUrgent
-import com.nila.ui.theme.SeverityUrgentBg
+import com.nila.ui.theme.calmColors
+import com.nila.ui.theme.severityColors
 
 /**
  * Severity as a chip.
@@ -59,16 +55,12 @@ import com.nila.ui.theme.SeverityUrgentBg
  */
 @Composable
 fun SeverityChip(severity: Severity, modifier: Modifier = Modifier) {
-    val (fg, bg) = when (severity) {
-        Severity.NOTE -> MaterialTheme.colorScheme.onSurfaceVariant to
-            MaterialTheme.colorScheme.surfaceContainer
-        Severity.ATTENTION -> SeverityAttention to SeverityAttentionBg
-        Severity.URGENT, Severity.CRITICAL -> SeverityUrgent to SeverityUrgentBg
-    }
-    Surface(color = bg, shape = RoundedCornerShape(4.dp), modifier = modifier) {
+    val colors = severityColors(severity)
+    Surface(color = colors.container, shape = RoundedCornerShape(4.dp),
+            modifier = modifier) {
         Text(
             text = severity.label.uppercase(),
-            color = fg,
+            color = colors.accent,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -78,10 +70,12 @@ fun SeverityChip(severity: Severity, modifier: Modifier = Modifier) {
 
 @Composable
 fun CalmChip(text: String, modifier: Modifier = Modifier) {
-    Surface(color = SeverityCalmBg, shape = RoundedCornerShape(4.dp), modifier = modifier) {
+    val colors = calmColors()
+    Surface(color = colors.container, shape = RoundedCornerShape(4.dp),
+            modifier = modifier) {
         Text(
             text = text,
-            color = SeverityCalm,
+            color = colors.accent,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -153,7 +147,10 @@ fun StatBlock(label: String, value: String, modifier: Modifier = Modifier) {
 /** The slow pulse that says the guardian is awake. */
 @Composable
 fun PulseDot(active: Boolean, size: Dp = 10.dp, modifier: Modifier = Modifier) {
-    val color = if (active) SeverityCalm else MaterialTheme.colorScheme.outline
+    // The dot sits on the app surface, not on a severity ground, so it takes
+    // the accent for the current theme rather than the light-only green.
+    val color = if (active) calmColors().accent
+                else MaterialTheme.colorScheme.outline
     Box(
         modifier = modifier
             .size(size)
@@ -259,22 +256,28 @@ fun InputLevelMeter(
 /** An amber caution box. Used where the app is working but something is wrong. */
 @Composable
 fun WarningBox(title: String, body: String, modifier: Modifier = Modifier) {
+    // The body used to be `onSurfaceVariant`, which is a near-white in the dark
+    // scheme, on a hardcoded pale amber ground. Every warning in the app was
+    // unreadable at night -- including the one that says the microphone has
+    // gone dead.
+    val colors = severityColors(Severity.ATTENTION)
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
-            .background(com.nila.ui.theme.SeverityAttentionBg)
+            .background(colors.container)
             .padding(14.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 title,
                 style = MaterialTheme.typography.titleSmall,
-                color = com.nila.ui.theme.SeverityAttention,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.accent,
             )
             Text(
                 body,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = colors.onContainer,
             )
         }
     }

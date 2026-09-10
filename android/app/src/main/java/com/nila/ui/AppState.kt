@@ -137,6 +137,11 @@ class AppState(app: Application) : AndroidViewModel(app) {
     private val _scannedText = MutableStateFlow<String?>(null)
     val scannedText: StateFlow<String?> = _scannedText.asStateFlow()
 
+    /** Previous medicine checks, newest first, for the collapsed history list. */
+    val scanHistory: StateFlow<List<com.nila.data.MedicineScanRecord>> =
+        db.medicineScans().recent()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /**
      * What is typed in the Ask box.
      *
@@ -776,6 +781,38 @@ class AppState(app: Application) : AndroidViewModel(app) {
             _review.value = result
             _thinking.value = false
 
+            // Kept, so it can be looked at again. Scans used to live only in
+            // this view model, which meant leaving the screen destroyed the
+            // verdict -- and somebody who checked a strip at the pharmacy
+            // counter had nothing to show a partner an hour later.
+            //
+            // Only a real identification is filed. A scan that read nothing
+            // usable is a photograph of a failure, and a history full of
+            // "Not enough information" rows is a history nobody scrolls.
+            if (result.verdict != com.nila.assistant.agents.Verdict.UNKNOWN) {
+                val image = bitmap ?: uri?.let { recordStore.decodeUri(it) }
+                withContext(Dispatchers.IO) {
+                    val path = image?.let {
+                        runCatching { recordStore.saveImage(it).absolutePath }.getOrNull()
+                    }
+                    db.medicineScans().insert(
+                        com.nila.data.MedicineScanRecord(
+                            atMs = System.currentTimeMillis(),
+                            name = result.medicine?.generic?.takeIf { it.isNotBlank() }
+                                ?: result.medicine?.title
+                                ?: typed?.trim().orEmpty().ifBlank { "Unnamed medicine" },
+                            verdict = result.verdict.name,
+                            headline = result.headline,
+                            summary = result.summary,
+                            imagePath = path,
+                            scannedText = text.take(400).ifBlank { null },
+                            sources = result.sources.joinToString("\n").ifBlank { null },
+                            cautions = result.cautions.joinToString("\n").ifBlank { null },
+                        )
+                    )
+                }
+            }
+
             // No language model in this path, deliberately and permanently.
             //
             // It was wired here and removed after watching it produce this, from
@@ -797,6 +834,18 @@ class AppState(app: Application) : AndroidViewModel(app) {
         _review.value = null
         _scannedText.value = null
         _scanStage.value = null
+    }
+
+    fun deleteScan(record: com.nila.data.MedicineScanRecord) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                // The image goes with the row. A JPEG in app-private storage
+                // that nothing points at is a file the user cannot reach and
+                // cannot delete.
+                record.imagePath?.let { runCatching { recordStore.delete(it) } }
+            }
+            db.medicineScans().delete(record.id)
+        }
     }
 
     override fun onCleared() {

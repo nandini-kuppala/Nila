@@ -83,6 +83,7 @@ object DemoSeed {
         db.events().deleteAll()
         db.care().deleteAll()
         db.healthRecords().deleteAll()
+        db.medicineScans().clear()
         context.seedStore.edit { it.remove(SEEDED) }
         applyIfEmpty(context, db)
     }
@@ -148,6 +149,32 @@ object DemoSeed {
                     recordedAtMs = now - TimeUnit.DAYS.toMillis(
                         record.optLong("daysAgo")
                     ),
+                )
+            )
+        }
+
+        // Three medicines already checked, so the history list on Scan opens
+        // with something in it. A collapsed list with no rows is indis-
+        // tinguishable from a list that is broken, and the three chosen cover
+        // one of each verdict -- including the AVOID that comes from her own
+        // penicillin allergy rather than from the general guidance, which is
+        // the whole argument for checking against a health record.
+        json.optJSONArray("scans")?.forEach { scan ->
+            db.medicineScans().insert(
+                MedicineScanRecord(
+                    atMs = now - scan.getLong("hoursAgo") * 3_600_000L,
+                    name = scan.getString("name"),
+                    verdict = scan.getString("verdict"),
+                    headline = scan.getString("headline"),
+                    summary = scan.getString("summary"),
+                    // No image: these were typed, not photographed. Shipping a
+                    // photograph of a real strip in the APK would be inventing
+                    // evidence for a demo.
+                    imagePath = null,
+                    sources = scan.optString("sources").split('|')
+                        .map { it.trim() }.filter { it.isNotEmpty() }
+                        .joinToString("\n").ifBlank { null },
+                    cautions = scan.optString("cautions").ifBlank { null },
                 )
             )
         }
