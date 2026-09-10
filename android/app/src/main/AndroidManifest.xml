@@ -60,6 +60,23 @@
             android:exported="false"
             android:foregroundServiceType="microphone|camera" />
 
+        <!--
+          The camera lane, as its own service.
+
+          Separate from MonitorService rather than folded into it, because the
+          two run at the same time: the audio lane holds the microphone all
+          night and this one holds the camera. One service declaring both types
+          would work, but stopping the watch would then have to either stop the
+          microphone too or leave a camera-typed service running with no camera.
+
+          FOREGROUND_SERVICE_TYPE_CAMERA is what lets the watch survive the
+          screen going off, which is the entire reason it exists.
+        -->
+        <service
+            android:name=".monitor.WatchService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
         <!-- Feeding and nappy reminders. Not exported: the only thing that
              should ever fire these is this app's own alarm. -->
         <receiver

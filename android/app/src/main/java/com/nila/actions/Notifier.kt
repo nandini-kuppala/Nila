@@ -36,6 +36,20 @@ class Notifier(private val context: Context) {
         const val ID_MONITOR = 1
         const val ID_ALERT = 2
 
+        /**
+         * The camera lane's own foreground notification.
+         *
+         * Distinct from [ID_MONITOR] because both services can run at once --
+         * the microphone lane and the camera lane -- and a shared id would mean
+         * whichever started second replaced the other's notification and then
+         * cancelled it on the way out, leaving a foreground service with no
+         * notification and Android about to kill it.
+         */
+        const val ID_WATCH = 3
+
+        /** Safety alerts, kept apart from cry alerts so neither replaces the other. */
+        const val ID_SAFETY = 4
+
         /** Long-short-long reads as urgent; a single pulse reads as informational. */
         private val PATTERN_ATTENTION = longArrayOf(0, 180)
         private val PATTERN_URGENT = longArrayOf(0, 400, 180, 400)

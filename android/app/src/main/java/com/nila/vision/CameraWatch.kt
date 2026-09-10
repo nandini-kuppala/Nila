@@ -24,21 +24,49 @@ import java.util.concurrent.atomic.AtomicLong
  */
 class CameraWatch(
     private val context: Context,
-    private val onState: (FaceWatcher.State, MotionEnergy.Reading) -> Unit,
+    private val onState: (Frame) -> Unit,
 ) {
+
+    /**
+     * Everything one analysed frame produced.
+     *
+     * One callback carrying all of it rather than three, because the rules
+     * combine them: "no face" means something different depending on whether
+     * there is a body in frame and whether it is flat, and a caller that
+     * receives those separately has to reassemble the frame they came from.
+     */
+    data class Frame(
+        val face: FaceWatcher.State,
+        val motion: MotionEnergy.Reading,
+        val pose: PoseReading,
+    )
     /** The last few seconds, kept in memory and only written when a rule fires. */
     val preRoll = PreRoll(context)
 
     companion object {
         private const val TAG = "CameraWatch"
         private const val TARGET_INTERVAL_MS = 200L      // ~5 fps
-        private const val ANALYSIS_WIDTH = 480           // enough for BlazeFace
+        /**
+         * Wide enough for both models.
+         *
+         * 480 was chosen for BlazeFace alone. The pose landmarker wants more of
+         * the body resolved than that -- a baby occupying a third of the frame
+         * has a torso about 60 px tall at 480, which is where landmark noise
+         * starts to swamp the trunk angle. 640 costs about a millisecond more
+         * per frame at 5 fps.
+         */
+        private const val ANALYSIS_WIDTH = 640
     }
 
     private val executor = Executors.newSingleThreadExecutor()
     private val lastAnalysedAt = AtomicLong(0)
     private var watcher: FaceWatcher? = null
+    private var pose: PoseWatcher? = null
     private var provider: ProcessCameraProvider? = null
+
+    /** Which delegate the pose model landed on, for the settings screen. */
+    val poseDelegate: String get() = pose?.delegateName ?: "-"
+    val poseAvailable: Boolean get() = pose?.isAvailable == true
 
     @Volatile var framesAnalysed: Long = 0; private set
     @Volatile var lastError: String? = null; private set
@@ -52,6 +80,7 @@ class CameraWatch(
                 val cameraProvider = future.get()
                 provider = cameraProvider
                 watcher = FaceWatcher(context)
+                pose = PoseWatcher(context)
 
                 val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -68,8 +97,13 @@ class CameraWatch(
             } catch (t: Throwable) {
                 lastError = t.message ?: t::class.java.simpleName
                 Log.e(TAG, "camera failed to start", t)
-                onState(FaceWatcher.State.Unavailable(lastError!!),
-                        MotionEnergy.Reading(0f, 0f, 1f))
+                onState(
+                    Frame(
+                        FaceWatcher.State.Unavailable(lastError!!),
+                        MotionEnergy.Reading(0f, 0f, 1f),
+                        PoseReading.ABSENT,
+                    )
+                )
             }
         }, ContextCompat.getMainExecutor(context))
     }
@@ -96,10 +130,11 @@ class CameraWatch(
     fun offerFrame(bitmap: Bitmap) {
         val w = watcher ?: return
         val state = w.analyse(bitmap)
+        val reading = pose?.analyse(bitmap) ?: PoseReading.ABSENT
         framesAnalysed++
         latestFrame?.recycle()
         latestFrame = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-        onState(state, w.lastMotion)
+        onState(Frame(state, w.lastMotion, reading))
     }
 
     /**
@@ -111,6 +146,7 @@ class CameraWatch(
      */
     fun startHeadless() {
         if (watcher == null) watcher = FaceWatcher(context)
+        if (pose == null) pose = PoseWatcher(context)
     }
 
     private fun analyse(proxy: ImageProxy) {
@@ -122,6 +158,11 @@ class CameraWatch(
             val watcher = watcher ?: return
             val bitmap = downscale(proxy.toBitmap(), proxy.imageInfo.rotationDegrees)
             val state = watcher.analyse(bitmap)
+            // Pose after face, on the same bitmap, on this same background
+            // executor. Two models per frame at 5 fps rather than one; both are
+            // small, and running them on the same frame is what lets "no face"
+            // and "flat torso" be combined into "rolled onto their front".
+            val reading = pose?.analyse(bitmap) ?: PoseReading.ABSENT
             framesAnalysed++
 
             // Buffered before the frame is released, so when a rule fires the
@@ -144,7 +185,7 @@ class CameraWatch(
                 lastDump = 0L
             }
 
-            onState(state, watcher.lastMotion)
+            onState(Frame(state, watcher.lastMotion, reading))
         } catch (t: Throwable) {
             lastError = t.message
             Log.w(TAG, "frame analysis failed", t)
@@ -169,7 +210,9 @@ class CameraWatch(
         preRoll.clear()
         runCatching { provider?.unbindAll() }
         runCatching { watcher?.close() }
+        runCatching { pose?.close() }
         watcher = null
+        pose = null
         provider = null
     }
 
