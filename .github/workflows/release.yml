@@ -39,41 +39,46 @@ jobs:
       # ---------------------------------------------------------------
       # The signing key, and why it is handled this way
       #
-      # `assembleRelease` is signed with the *debug* key on purpose -- it makes
-      # a demo build installable without a keystore ceremony. That is fine on
-      # one machine and broken in CI, because a runner generates a fresh debug
-      # keystore on every job. Android refuses an update signed with a
-      # different key, so every release would force an uninstall, and an
+      # `assembleRelease` is signed with the debug key on purpose -- it makes a
+      # demo build installable without a keystore ceremony. That is fine on one
+      # machine and was quietly wrong here, because a runner generates a fresh
+      # debug keystore on every job. Android refuses an update signed with a
+      # different key, so each release would force an uninstall, and an
       # uninstall takes the care log, the health documents and any optional
       # model with it.
       #
-      # So the key is carried in a secret. Put the *existing* one there and
-      # these builds stay installable over v1.0.2:
+      # The first attempt restored the key to `~/.android/debug.keystore` and
+      # trusted AGP to find it there. AGP resolves that path through
+      # ANDROID_USER_HOME, then ANDROID_SDK_HOME, then the JVM's user.home, and
+      # on this runner it is none of those -- so the build generated its own
+      # keystore elsewhere and signed v1.0.3 with a key nobody had. Nothing
+      # failed, because generating a debug keystore is normal behaviour.
       #
-      #   base64 -i ~/.android/debug.keystore | pbcopy
+      # So the file is now named explicitly, and the fingerprint of the result
+      # is asserted before anything is published.
       #
-      # then paste it into Settings -> Secrets and variables -> Actions as
-      # ANDROID_DEBUG_KEYSTORE_BASE64.
-      #
-      # Nothing in the repository needs to change: the file is written to the
-      # default debug-keystore path, which is where the Gradle config already
-      # looks. Without the secret the job still builds, and says loudly that
-      # the result cannot be installed as an update.
+      #   base64 -i ~/.android/debug.keystore | \
+      #     gh secret set ANDROID_DEBUG_KEYSTORE_BASE64
       # ---------------------------------------------------------------
       - name: Restore the signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         run: |
           if [ -z "$KEYSTORE" ]; then
-            echo "::warning title=No signing key::ANDROID_DEBUG_KEYSTORE_BASE64 is not set. \
-          This build will be signed with a throwaway key generated on this runner, so it \
-          CANNOT be installed as an update over an existing Nila -- users would have to \
-          uninstall first and would lose their data."
-            exit 0
+            echo "::error title=No signing key::ANDROID_DEBUG_KEYSTORE_BASE64 is not set."
+            echo "Without it this build is signed with a throwaway key and cannot be"
+            echo "installed as an update over an existing Nila -- users would have to"
+            echo "uninstall first, losing the care log and their health documents."
+            echo "Set it with:  base64 -i ~/.android/debug.keystore | \\"
+            echo "              gh secret set ANDROID_DEBUG_KEYSTORE_BASE64"
+            exit 1
           fi
-          mkdir -p ~/.android
-          echo "$KEYSTORE" | base64 --decode > ~/.android/debug.keystore
-          echo "Signing key restored."
+          echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          # A hash, not the key. Enough to tell a truncated secret from a good
+          # one without putting anything sensitive in a public log.
+          echo "restored $(stat -c%s "$RUNNER_TEMP/release.keystore") bytes, sha256 \
+          $(sha256sum "$RUNNER_TEMP/release.keystore" | cut -c1-16)..."
+          echo "NILA_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
 
       - name: Build
         working-directory: android
@@ -91,13 +96,32 @@ jobs:
              dist/Nila-watch.apk
           ls -lh dist/
 
-      # Printed into the job log so the key a release was signed with is a
-      # matter of record rather than something to work out later from an APK.
-      - name: Report what was signed
+      # The guard that makes the v1.0.3 mistake unshippable.
+      #
+      # Every APK has to carry the key that signed the releases before it, or
+      # nobody can upgrade. That was previously logged and not checked, so a
+      # wrong key published happily. A certificate fingerprint is public
+      # information -- derivable from any released APK -- so pinning it here
+      # costs nothing and is the whole point.
+      - name: Verify the signature before publishing
+        env:
+          EXPECTED: 628f29acd2f4a3683824ed7e466736dec28998009ab1a3995a907803345fe35d
         run: |
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -r | head -1)
-          "$APKSIGNER" verify --print-certs dist/Nila-phone-arm64.apk \
-            | grep -i "SHA-256 digest" || true
+          status=0
+          for apk in dist/*.apk; do
+            got=$("$APKSIGNER" verify --print-certs "$apk" \
+                  | grep -i "SHA-256 digest" | head -1 | awk '{print $NF}')
+            if [ "$got" = "$EXPECTED" ]; then
+              echo "ok   $(basename "$apk")  $got"
+            else
+              echo "::error title=Wrong signing key::$(basename "$apk") is signed with \
+          $got, expected $EXPECTED. Publishing this would force every existing user to \
+          uninstall before they could update."
+              status=1
+            fi
+          done
+          exit $status
 
       - name: Publish
         env:
