@@ -45,6 +45,14 @@ android {
         }
     }
 
+    signingConfigs {
+        // Only created when a key is actually supplied, so a local build keeps
+        // using AGP's debug config and needs no setup at all.
+        if (System.getenv("NILA_KEYSTORE_FILE") != null) {
+            create("release") { applyNilaReleaseKey(project) }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -52,8 +60,11 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
                           "proguard-rules.pro")
             // Signed with the debug key so `assembleRelease` produces something
-            // installable for a demo without a keystore ceremony.
-            signingConfig = signingConfigs.getByName("debug")
+            // installable for a demo without a keystore ceremony -- but from a
+            // *named* file when one is given, because the implicit location is
+            // not the same on a CI runner. See applyNilaReleaseKey.
+            signingConfig = signingConfigs.findByName("release")
+                ?: signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false
@@ -143,4 +154,43 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
+}
+
+/**
+ * The key the release APKs are signed with.
+ *
+ * `assembleRelease` is signed with the *debug* key on purpose, so a demo build
+ * is installable without a keystore ceremony. That worked on one machine and
+ * silently did the wrong thing in CI.
+ *
+ * The reason is that `signingConfigs.getByName("debug")` does not name a file,
+ * it names AGP's *implicit* debug keystore location -- resolved at build time
+ * through `ANDROID_USER_HOME`, then `ANDROID_SDK_HOME`, then the JVM's
+ * `user.home`. On a GitHub runner that is not `$HOME/.android/debug.keystore`,
+ * so a workflow that carefully restored the real key to that path built an APK
+ * signed with a throwaway keystore AGP generated somewhere else -- and said
+ * nothing, because generating one is normal behaviour. v1.0.3 shipped that way.
+ *
+ * So the path is stated instead of inferred. With `NILA_KEYSTORE_FILE` set,
+ * that file is the key and a missing file fails the build; without it, nothing
+ * changes for anyone building locally.
+ *
+ * The credentials are the Android debug-keystore constants, which are the same
+ * on every machine and documented by Google. They are not a secret and pasting
+ * them here costs nothing -- the keystore file is the only thing that has to be
+ * carried, and it is carried in a repository secret.
+ */
+fun com.android.build.api.dsl.ApkSigningConfig.applyNilaReleaseKey(
+    project: org.gradle.api.Project,
+): Boolean {
+    val path = System.getenv("NILA_KEYSTORE_FILE") ?: return false
+    val file = project.file(path)
+    require(file.isFile) {
+        "NILA_KEYSTORE_FILE points at ${file.absolutePath}, which is not a file"
+    }
+    storeFile = file
+    storePassword = "android"
+    keyAlias = "androiddebugkey"
+    keyPassword = "android"
+    return true
 }

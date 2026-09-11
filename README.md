@@ -262,20 +262,24 @@ download without an account.
 git tag v1.0.3 && git push origin v1.0.3
 ```
 
-One secret has to exist first, once, or the release will not be installable as
-an *update* — a runner generates a fresh debug keystore on every job, and
-Android refuses an update signed with a different key, which would force an
-uninstall and take the care log and the health documents with it. Put the key
-that signed the existing builds into the repository's Actions secrets as
-`ANDROID_DEBUG_KEYSTORE_BASE64`:
+One secret has to exist first, once, or the release fails — a runner generates
+a fresh debug keystore on every job, and Android refuses an update signed with
+a different key, which would force an uninstall and take the care log and the
+health documents with it:
 
 ```bash
-base64 -i ~/.android/debug.keystore | pbcopy
+base64 -i ~/.android/debug.keystore | gh secret set ANDROID_DEBUG_KEYSTORE_BASE64
 ```
 
-Without it the job still builds, and says loudly in the log that the result
-cannot be installed as an update. With it, every release installs cleanly over
-the last one.
+The workflow then writes that key to a named file, passes the path to Gradle as
+`NILA_KEYSTORE_FILE`, and **asserts the fingerprint of every APK before
+publishing anything**. v1.0.3 is why the assertion exists: the key was restored
+to `~/.android/debug.keystore` and AGP was trusted to find it there, which it
+does not do on a runner — it resolves that path through `ANDROID_USER_HOME`,
+then `ANDROID_SDK_HOME`, then the JVM's `user.home`. So the build generated its
+own keystore elsewhere, signed the release with a key nobody had, and reported
+success, because generating a debug keystore is normal behaviour. Nothing about
+that was visible until somebody compared two fingerprints by hand.
 
 > The debug key is what ships today, deliberately — it makes a demo build
 > installable without a keystore ceremony. It is not a key to publish a real
