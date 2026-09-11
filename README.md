@@ -26,7 +26,8 @@ the breastfeeding mother — without a single network request.
 <p align="center">
   <img alt="Android" src="https://img.shields.io/badge/Android-8.1%2B-3DDC84?logo=android&logoColor=white">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-187%20passing-2ea44f">
+  <a href="https://github.com/nandini-kuppala/Nila/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nandini-kuppala/Nila/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Tests" src="https://img.shields.io/badge/tests-278%20passing-2ea44f">
   <img alt="Network" src="https://img.shields.io/badge/network%20calls-0-0F6B60">
   <img alt="Licence" src="https://img.shields.io/badge/licence-MIT-blue">
 </p>
@@ -251,6 +252,38 @@ arm64-v8a only, `minSdk 26`, `targetSdk 35`. **Nothing needs downloading** —
 every model the app requires ships inside the APK and works offline from first
 launch.
 
+### Cutting a release
+
+Tagging is the whole of it. The workflow builds all three APKs, signs them and
+publishes them to a GitHub release, which is public: anybody with the link can
+download without an account.
+
+```bash
+git tag v1.0.3 && git push origin v1.0.3
+```
+
+One secret has to exist first, once, or the release will not be installable as
+an *update* — a runner generates a fresh debug keystore on every job, and
+Android refuses an update signed with a different key, which would force an
+uninstall and take the care log and the health documents with it. Put the key
+that signed the existing builds into the repository's Actions secrets as
+`ANDROID_DEBUG_KEYSTORE_BASE64`:
+
+```bash
+base64 -i ~/.android/debug.keystore | pbcopy
+```
+
+Without it the job still builds, and says loudly in the log that the result
+cannot be installed as an update. With it, every release installs cleanly over
+the last one.
+
+> The debug key is what ships today, deliberately — it makes a demo build
+> installable without a keystore ceremony. It is not a key to publish a real
+> product with: everybody's debug key is interchangeable, so anyone can sign an
+> update to `com.nila` with their own. Before this goes near Play, generate a
+> proper upload key, and know that doing so breaks upgrades from every build
+> released until then.
+
 ### Try it in a browser
 
 **[Run Nila now →](https://appetize.io/app/b_bsweclr2qfx2w4rdwjuwuptp5y)** — no install. It opens a real Android device with the
@@ -310,10 +343,15 @@ month.
 
 ```bash
 cd android
-./gradlew :app:testDebugUnitTest            # 125 tests, no device
+./gradlew :app:testDebugUnitTest            # 216 tests, no device
 ./gradlew :app:connectedDebugAndroidTest \
   -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true   # 62 tests
 ```
+
+The JVM suite, the instrumented compile and a release build run on every push
+and every pull request. A release build in particular: R8 and resource
+shrinking only run there, and this project has already shipped two bugs that
+existed nowhere else.
 
 That flag matters: without it Gradle uninstalls the app afterwards, which
 deletes `/sdcard/Android/data/com.nila/` and any optional model in it.
