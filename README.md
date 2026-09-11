@@ -259,7 +259,7 @@ publishes them to a GitHub release, which is public: anybody with the link can
 download without an account.
 
 ```bash
-git tag v1.0.3 && git push origin v1.0.3
+git tag v1.0.4 && git push origin v1.0.4
 ```
 
 One secret has to exist first, once, or the release fails — a runner generates
