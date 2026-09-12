@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.Hearing
@@ -27,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,6 +50,8 @@ import com.nila.ui.screens.ScanScreen
 import com.nila.ui.screens.SettingsScreen
 import com.nila.ui.screens.TimelineScreen
 import com.nila.ui.screens.WatchScreen
+import com.nila.ui.theme.Appearance
+import com.nila.ui.theme.LocalNilaDarkTheme
 
 /**
  * Five destinations, which is Material's ceiling for a bottom bar and also the
@@ -114,6 +119,12 @@ fun NilaRoot(
                     }
                 },
                 actions = {
+                    // The appearance switch is on every screen, including the
+                    // ones with a back arrow. It is the one control whose whole
+                    // value is being reachable at the moment the light is
+                    // wrong, and sending someone into Settings to find it at
+                    // three in the morning defeats it.
+                    ThemeToggle()
                     if (!onSettings && !onLearn && !onTimeline) {
                         IconButton(onClick = { navController.navigate(TIMELINE_ROUTE) }) {
                             Icon(Icons.Outlined.Timeline, contentDescription = "Timeline")
@@ -167,6 +178,27 @@ fun NilaRoot(
             composable(LEARN_ROUTE) { LearnScreen(state) }
             composable(SETTINGS_ROUTE) { SettingsScreen(state) }
         }
+    }
+}
+
+/**
+ * Light and dark, in one tap.
+ *
+ * The icon shows the destination rather than the current state -- a moon while
+ * the app is light, a sun while it is dark -- which is the convention every
+ * phone uses for this control and the only one that reads correctly at a
+ * glance: the button is a door, and a door is labelled with what is through it.
+ */
+@Composable
+private fun ThemeToggle() {
+    val context = LocalContext.current
+    val dark = LocalNilaDarkTheme.current
+    IconButton(onClick = { Appearance.toggle(context, dark) }) {
+        Icon(
+            imageVector = if (dark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+            contentDescription = if (dark) "Switch to the light theme"
+                                 else "Switch to the dark theme",
+        )
     }
 }
 

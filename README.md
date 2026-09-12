@@ -20,6 +20,8 @@ the breastfeeding mother — without a single network request.
   &nbsp;·&nbsp;
   <a href="docs/nila-demo.mp4">Two-minute demo</a>
   &nbsp;·&nbsp;
+  <a href="https://nandini-kuppala.github.io/Nila/deck.html">Deck</a>
+  &nbsp;·&nbsp;
   <a href="https://nandini-kuppala.github.io/Nila/technical-record.html">Technical record</a>
 </p>
 
@@ -93,6 +95,44 @@ settles *this* baby, and can turn a fan down over infrared.
 screen — including the rungs that have not fired yet, so it is visible that a
 verification step and a decision point are still coming rather than that the app
 has stopped.
+
+**Shows the week, the next morning.** Below the live monitor the same screen is
+a dashboard, for the reader who is no longer in the middle of a cry: crying
+day by day against the three-hour colic line, the hours of the day it clusters
+in, sleep as a curve you can touch for any day's figure, and the share of
+episodes the cause model named — including, as its own wedge, the share it
+would not name. Every figure is written out in words underneath its chart, and
+every one of them is derived from rows you can read yourself in the timeline.
+
+**Keeps one entry per cry.** A single cry writes six rows — heard it, played a
+sound, judged the sound, woke you, ended. The timeline folds them into one
+entry with the steps a tap underneath, so one difficult evening no longer
+pushes two days off the bottom of the screen.
+
+**Keeps the audio of the cries that mattered.** A cry that woke you, ran to the
+three-minute cap, or came back as pain keeps its recording, playable from the
+timeline for thirty days — the cry a parent wants to describe at a Monday
+appointment is one they cannot reproduce in the room. It is app-private, never
+uploaded, left out of every backup, and there is one switch in Settings that
+stops it being recorded at all.
+
+**Scores its own argument.** Insights is where every claim sits next to its
+measurement: a donut of how the week's cries ended (settled alone, settled by a
+sound, woke you), the detection and cause models drawn against the 0.50 chance
+line, and what the phone is actually doing — which accelerator accepted the
+graph, the detector's p50 and p95 on *this* device, and how little of a quiet
+night gets past the silence gate to reach it.
+
+**Tracks sleep rather than logging it.** The sleep button is a stopwatch: tap to
+start, tap to stop, and it shows the elapsed time on its face while it runs. It
+used to write a timestamp and no end, so "she slept" was a log from which no
+duration could be recovered and no chart could be drawn.
+
+**Follows the light.** Light and dark, switchable from a button in the top bar
+of every screen and settable to follow the phone. One theme file decides which
+scheme is on, and the severity and chart palettes both read it — so a medicine
+verdict cannot end up on a pale amber card in an app the reader just put into
+dark mode.
 
 **Answers questions.** Retrieval over curated, sourced entries, for the baby *and*
 the mother. Answers are the retrieved text shown with where it came from; an
@@ -220,12 +260,16 @@ discarded if it drifts.
 
 - **No network requests.** Cleartext is forbidden outright in
   `network_security_config.xml`; the app has no API keys because it calls no APIs.
-- **Only the cry is recorded, and only for a week.** The night is analysed in
-  memory and discarded. When the detector declares a cry, the first 90 seconds
-  of *that episode* are written to app-private storage so you can hear what the
-  app heard -- and deleted after 7 days. Silence, conversation and everything
-  else in the room are never written anywhere. Recordings you make yourself as
-  soothing sounds live in the same private storage.
+- **Only the cry is recorded, and you can turn even that off.** The night is
+  analysed in memory and discarded. When the detector declares a cry, the first
+  90 seconds of *that episode* are written to app-private storage so you can
+  hear what the app heard -- deleted after 7 days, or after 30 for the cries
+  that woke you, ran to the three-minute cap, or came back as pain, which are
+  the ones a doctor might want to hear. Silence, conversation and everything
+  else in the room are never written anywhere. **Settings → Recordings of
+  difficult cries** turns the recorder off entirely: off means the file is
+  never opened, not that it is written and then deleted. Recordings you make
+  yourself as soothing sounds live in the same private storage.
 - **Backup is disabled** in the manifest, so health documents cannot leave by a
   cloud transport.
 - **No account, no analytics.**
@@ -259,7 +303,7 @@ publishes them to a GitHub release, which is public: anybody with the link can
 download without an account.
 
 ```bash
-git tag v1.0.4 && git push origin v1.0.4
+git tag v2.0.0 && git push origin v2.0.0
 ```
 
 One secret has to exist first, once, or the release fails — a runner generates
@@ -311,20 +355,22 @@ the on-device corpus, and a medicine checked against a stored health record.
 Both are on the relevant screen, and both run the real pipeline:
 
 - **Monitor → Play a demo cry.** *Sound up.* A real recorded cry, played aloud
-  and fed to the real detector at 6× speed. You hear the cry, see it classified,
-  hear **white noise**, see the check that says it did not help, hear the
-  **caregiver's recording**, see the second check, then the alert — which names
-  the cause. About thirty-five seconds, and it waits for you to close it rather
-  than clearing itself.
+  and fed to the real detector **at its own speed**. You hear the cry, see it
+  classified, hear **white noise**, see the check that says it did not help,
+  hear the **caregiver's recording**, see the second check, then the alert —
+  which names the cause. It runs in real time, so the ladder takes the three
+  minutes a cry takes and every duration on screen is one you can check against
+  what you are hearing. It waits for you to close it rather than clearing
+  itself.
 - **Watch → Play demo footage.** A real clip of a baby crawling, through the
   real face detector and motion analysis, shown on screen as it is analysed.
 
 ### Demo data
 
 A fresh install seeds itself with one example family — a four-month-old, her
-mother's health record including a penicillin allergy, a day of feeds, and a
-week of crying with two days over the three-hour line. Without it every screen
-is an empty state and there is nothing to show.
+mother's health record including a penicillin allergy, a week of feeds, nappies
+and tracked sleep, and a week of crying with two days over the three-hour line.
+Without it every screen is an empty state and there is nothing to show.
 
 The data is authored in MongoDB (`Nila.demo`) and exported into the APK:
 
@@ -332,6 +378,7 @@ The data is authored in MongoDB (`Nila.demo`) and exported into the APK:
 cd ml
 ../.venv/bin/python src/demo_seed.py           # push to MongoDB, then export
 ../.venv/bin/python src/demo_seed.py --export  # MongoDB -> assets/demo_seed.json
+../.venv/bin/python src/demo_seed.py --offline # this file -> the asset, no MongoDB
 ```
 
 **The app never connects to MongoDB.** It reads the exported asset, so the demo
@@ -339,9 +386,15 @@ works offline, in a browser emulator, and on a plane — and there is no
 connection string in the APK to find. Settings → *Reset to demo data* lays it
 down again for a second run.
 
-Every time in the file is relative — "165 minutes ago", never a date — so an APK
-built today still shows a baby who fed two hours ago when it is installed next
-month.
+No time in the file is a date, so an APK built today still describes this week
+whenever it is installed. There are two ways of saying that, and the dashboard
+is why there are two. `minutesAgo` is an offset from install, which is what
+"she fed two hours ago" has to be. The daily routine instead carries a clock
+time on a past day (`daysAgo` with `atHour`), because the charts plot against
+the hour of the day: seeded purely as offsets, the family's night feeds land at
+lunchtime for anyone who installs the app in the morning. Anything dated later
+than the moment of install is dropped rather than written, so nothing is ever
+logged in the future.
 
 ### Tests
 

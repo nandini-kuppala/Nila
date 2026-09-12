@@ -8,8 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Intent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import com.nila.ui.NilaRoot
+import com.nila.ui.theme.Appearance
 import com.nila.ui.theme.NilaTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,8 +30,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Read before the first frame so a user who chose dark does not get a
+        // white flash on every cold start -- which, in the room this app is
+        // used in, is the difference between opening it and waking the baby.
+        Appearance.load(this)
+
         setContent {
-            NilaTheme {
+            val mode by Appearance.mode.collectAsState()
+            NilaTheme(mode) {
                 NilaRoot(
                     permissionsGranted = permissionsGranted.value,
                     onRequestPermissions = { askForPermissions() },

@@ -15,6 +15,22 @@ data class MonitorState(
     val faceVisible: Boolean = true,
     val fault: String? = null,
     val detectorLatencyMs: Double = 0.0,
+    /**
+     * The tail of the detector's latency, and how much of it was measured.
+     *
+     * A mean alone is the number a demo quotes and the number a monitor cannot
+     * be judged on: what decides whether this works overnight is the slow
+     * inference, not the average one. These are the same ring buffer the
+     * engine already keeps, surfaced so the app can show its own p95 rather
+     * than a figure from a datasheet.
+     */
+    val detectorP50Ms: Double = 0.0,
+    val detectorP95Ms: Double = 0.0,
+    val latencySamples: Int = 0,
+    /** Analysis windows handled since monitoring started. */
+    val windowsSeen: Long = 0L,
+    /** Of those, how many crossed the silence gate and reached the detector. */
+    val windowsInferred: Long = 0L,
     val accelerator: String = "-",
     val lastCryProbability: Float = 0f,
     /**

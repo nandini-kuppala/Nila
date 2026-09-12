@@ -28,6 +28,32 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!--
+      The phone-to-phone alert link.
+
+      ACCESS_WIFI_STATE and CHANGE_WIFI_MULTICAST_STATE are for the receiving
+      phone: it holds a Wi-Fi lock so Doze does not park the radio between
+      heartbeats, and a multicast lock so mDNS discovery still works with the
+      screen off. Several OEM builds, vivo's included, drop inbound multicast to
+      a sleeping app without one.
+
+      FOREGROUND_SERVICE_CONNECTED_DEVICE, and not FOREGROUND_SERVICE_DATA_SYNC:
+      since Android 15 a dataSync foreground service is capped at six hours per
+      day, which is shorter than a night. See ParentService.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
+    <!--
+      Level 4 only, and it is not granted at install on Android 14 and later:
+      the platform reserves that for calling and alarm-clock apps. Everything
+      else has to send the user to a Settings page to ask. Declared so the app
+      *can* ask; nothing depends on the answer, because AlertPlayer sounds on the
+      alarm stream either way.
+    -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="true" />
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
@@ -76,6 +102,36 @@
             android:name=".monitor.WatchService"
             android:exported="false"
             android:foregroundServiceType="camera" />
+
+        <!--
+          The receiving phone's half of the link.
+
+          connectedDevice rather than dataSync: dataSync is capped at six hours
+          in twenty-four from Android 15, and a monitor that stops receiving at
+          4am without saying so is the exact failure this feature exists to
+          prevent.
+        -->
+        <service
+            android:name=".phonelink.ParentService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!--
+          The full-screen level-4 alert.
+
+          excludeFromRecents and noHistory because this is an interruption, not
+          a place: it should not be something you can swipe back to in the task
+          switcher half an hour later and mistake for a live alarm.
+        -->
+        <activity
+            android:name=".phonelink.AlertActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:launchMode="singleTask"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.Nila" />
 
         <!-- Feeding and nappy reminders. Not exported: the only thing that
              should ever fire these is this app's own alarm. -->

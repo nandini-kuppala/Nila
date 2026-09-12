@@ -39,6 +39,124 @@ COLLECTION = "demo"
 DOC_ID = "demo-family-v1"
 
 
+# ------------------------------------------------------- the daily routine
+
+# One day, at the clock times it is kept. Post-midnight rows belong to the
+# calendar day they fall in, so the night sleep that starts at 23:30 is closed
+# by the SLEEP_END at 02:40 of the following day -- the app pairs the marks by
+# time, not by which line they were authored on.
+ROUTINE = [
+    (2, 40, "SLEEP_END", None),
+    (2, 45, "FEED", None),
+    (2, 55, "DIAPER", None),
+    (3, 5, "SLEEP_START", None),
+    (6, 20, "SLEEP_END", None),
+    (6, 30, "FEED", None),
+    (6, 45, "DIAPER", None),
+    (9, 15, "FEED", None),
+    (9, 40, "SLEEP_START", "Morning nap"),
+    (10, 50, "SLEEP_END", None),
+    (11, 5, "DIAPER", None),
+    (12, 0, "FEED", None),
+    (13, 20, "SLEEP_START", "Midday nap"),
+    (14, 40, "SLEEP_END", None),
+    (14, 50, "FEED", None),
+    (15, 0, "DIAPER", None),
+    (16, 40, "SLEEP_START", None),
+    (17, 25, "SLEEP_END", None),
+    (17, 35, "FEED", None),
+    (19, 0, "FEED", None),
+    (19, 20, "DIAPER", None),
+    (19, 45, "SLEEP_START", "Down for the night"),
+    (23, 10, "SLEEP_END", None),
+    (23, 15, "FEED", None),
+    (23, 30, "SLEEP_START", None),
+]
+
+DAYS = 7
+
+
+def care_week() -> list:
+    """The routine, repeated across the window, oldest day first."""
+    out = []
+    for days_ago in range(DAYS - 1, -1, -1):
+        for hour, minute, kind, detail in ROUTINE:
+            entry = {"kind": kind, "daysAgo": days_ago,
+                     "atHour": hour, "atMinute": minute}
+            if detail:
+                entry["detail"] = detail
+            out.append(entry)
+    return out
+
+
+# daysAgo, hour, minute, seconds, trend, cause, cause confidence, soother,
+# whether it settled, whether it woke somebody.
+CRIES = [
+    (0, 6, 40, 240, "SETTLING", "tired", 0.38, "Amma humming", True, False),
+    (0, 13, 10, 95, "SETTLING", None, 0, None, False, False),
+    (0, 18, 50, 410, "RISING", "discomfort", 0.34, "White noise", False, True),
+
+    (1, 7, 20, 180, "SETTLING", "hungry", 0.41, "Amma humming", True, False),
+    (1, 16, 5, 130, "STEADY", None, 0, None, False, False),
+    (1, 18, 30, 620, "RISING", "belly_pain", 0.31, "Heartbeat", False, True),
+    (1, 20, 15, 300, "SETTLING", "tired", 0.36, "Amma humming", True, False),
+
+    # The first heavy evening.
+    (2, 15, 40, 2400, "STEADY", "discomfort", 0.28, "Amma humming", True, False),
+    (2, 18, 10, 3300, "RISING", "belly_pain", 0.31, "Heartbeat", False, True),
+    (2, 21, 0, 2700, "RISING", "belly_pain", 0.33, "White noise", False, True),
+    # Ends at 23:28 rather than spilling past midnight. A cry that crosses
+    # midnight is split between the two days it occupied, which is correct
+    # and which quietly took this evening back under three hours -- and the
+    # two heavy days are the whole point of the week.
+    (2, 22, 40, 2900, "SETTLING", "discomfort", 0.29, "Amma humming", True, False),
+
+    # And the second.
+    (3, 5, 40, 2100, "SETTLING", "discomfort", 0.30, "Amma humming", True, False),
+    (3, 17, 50, 3100, "RISING", "belly_pain", 0.35, "Heartbeat", False, True),
+    (3, 19, 30, 3600, "RISING", "belly_pain", 0.34, "White noise", False, True),
+    (3, 22, 10, 2200, "SETTLING", "tired", 0.37, "Amma humming", True, False),
+
+    (4, 9, 30, 220, "SETTLING", "hungry", 0.39, None, False, False),
+    (4, 18, 40, 900, "STEADY", "discomfort", 0.32, "White noise", True, False),
+    (4, 20, 40, 600, "SETTLING", "tired", 0.36, "Amma humming", True, False),
+
+    (5, 7, 50, 200, "SETTLING", "hungry", 0.40, "Amma humming", True, False),
+    (5, 19, 10, 1500, "RISING", "belly_pain", 0.33, "Heartbeat", False, True),
+
+    (6, 18, 20, 1100, "SETTLING", "tired", 0.35, "Amma humming", True, False),
+    (6, 21, 40, 700, "STEADY", "discomfort", 0.29, None, False, False),
+]
+
+
+def cry_week() -> list:
+    out = []
+    for (d, h, m, secs, trend, cause, conf, soother, settled, esc) in CRIES:
+        entry = {
+            "daysAgo": d, "atHour": h, "atMinute": m, "seconds": secs,
+            "trend": trend,
+            "confidence": round(min(0.98, 0.86 + (secs % 13) / 100.0), 2),
+        }
+        if cause:
+            entry["cause"] = cause
+            entry["causeConfidence"] = conf
+        if soother:
+            entry["soothed"] = soother
+            entry["settled"] = settled
+        if esc:
+            entry["escalated"] = True
+        out.append(entry)
+    return out
+
+
+def days_over_three_hours() -> int:
+    """The assertion the cry list exists to satisfy. Two, and not three."""
+    totals = {}
+    for (d, _h, _m, secs, *_rest) in CRIES:
+        totals[d] = totals.get(d, 0) + secs
+    return sum(1 for seconds in totals.values() if seconds >= 3 * 3600)
+
+
 # --------------------------------------------------------------- the family
 
 def dataset() -> dict:
@@ -55,7 +173,9 @@ def dataset() -> dict:
     return {
         "_id": DOC_ID,
         "version": 1,
-        "note": "Demo data for Nila. Relative offsets, never absolute dates.",
+        "note": ("Demo data for Nila. Offsets from install for the recent "
+                 "past; clock times on a past day for the daily routine, "
+                 "so the dashboard's hour axis and the routine agree."),
 
         "baby": {
             "name": "Meera",
@@ -78,98 +198,31 @@ def dataset() -> dict:
             "notes": "Six-week check normal. Bleeding settled by week five.",
         },
 
-        # A day and a half of care, at the intervals a four-month-old actually
-        # keeps. The most recent feed is close enough that "when did she last
-        # feed" answers with something a demo audience recognises as now.
-        "care": [
-            {"kind": "FEED", "minutesAgo": 95},
-            {"kind": "DIAPER", "minutesAgo": 140},
-            {"kind": "SLEEP_START", "minutesAgo": 210},
-            {"kind": "FEED", "minutesAgo": 265},
-            {"kind": "DIAPER", "minutesAgo": 320},
-            {"kind": "FEED", "minutesAgo": 430},
-            {"kind": "SLEEP_START", "minutesAgo": 500, "detail": "Long nap"},
-            {"kind": "FEED", "minutesAgo": 605},
-            {"kind": "DIAPER", "minutesAgo": 640, "detail": "NFC tag"},
-            {"kind": "FEED", "minutesAgo": 760},
-            {"kind": "FEED", "minutesAgo": 915},
-            {"kind": "DIAPER", "minutesAgo": 950},
-            {"kind": "FEED", "minutesAgo": 1080},
-            {"kind": "SLEEP_START", "minutesAgo": 1140},
-            {"kind": "FEED", "minutesAgo": 1260},
-            {"kind": "DIAPER", "minutesAgo": 1310},
-            {"kind": "FEED", "minutesAgo": 1425},
-            {"kind": "FEED", "minutesAgo": 1580},
-            {"kind": "DIAPER", "minutesAgo": 1640},
-            {"kind": "FEED", "minutesAgo": 1755},
-        ],
+        # The routine, seven days of it, at the clock times a four-month-old
+        # actually keeps -- and anchored to the clock rather than to install
+        # time, which is the one thing that could not be expressed before.
+        #
+        # An offset-only seed rotates: export it and install at nine in the
+        # morning and the family's night feeds land at lunchtime, which is
+        # harmless for "when did she last feed" and nonsense for a dashboard
+        # that plots against the hour of the day. Entries dated `daysAgo` with
+        # `atHour` and `atMinute` stay where they were put; the app drops any
+        # of today's that have not happened yet, so nothing is ever logged in
+        # the future. See DemoSeed.momentOf.
+        "care": care_week(),
 
-        # A week of crying, shaped so the colic panel has something true to
-        # report: two of the seven days cross three hours, which is *below* the
-        # Wessel threshold of three such days. The panel therefore shows the
+        # A week of crying, clustered into the evenings the way an unsettled
+        # four-month-old's is, and shaped so the colic panel has something true
+        # to report: two of the seven days cross three hours, which is *below*
+        # the Wessel threshold of three such days. The panel therefore shows the
         # count and stays quiet -- a demo that tripped the criterion every time
         # would be showing a diagnosis, which is what this app refuses to do.
-        "cries": [
-            # today
-            {"hoursAgo": 2.1, "seconds": 240, "trend": "SETTLING",
-             "confidence": 0.94, "cause": "tired", "causeConfidence": 0.38,
-             "soothed": "Amma humming", "settled": True},
-            {"hoursAgo": 6.4, "seconds": 95, "trend": "SETTLING",
-             "confidence": 0.88, "cause": None},
-            {"hoursAgo": 9.8, "seconds": 410, "trend": "RISING",
-             "confidence": 0.96, "cause": "discomfort", "causeConfidence": 0.34,
-             "soothed": "White noise", "settled": False, "escalated": True},
-            # yesterday
-            {"hoursAgo": 26.0, "seconds": 180, "trend": "SETTLING",
-             "confidence": 0.91, "cause": "hungry", "causeConfidence": 0.41,
-             "soothed": "Amma humming", "settled": True},
-            {"hoursAgo": 31.5, "seconds": 620, "trend": "RISING",
-             "confidence": 0.97, "cause": "belly_pain", "causeConfidence": 0.31,
-             "soothed": "Heartbeat", "settled": False, "escalated": True},
-            {"hoursAgo": 35.2, "seconds": 130, "trend": "STEADY",
-             "confidence": 0.86, "cause": None},
-            {"hoursAgo": 40.0, "seconds": 300, "trend": "SETTLING",
-             "confidence": 0.93, "cause": "tired", "causeConfidence": 0.36,
-             "soothed": "Amma humming", "settled": True},
-            # Two evenings that cross the three-hour line. Built from several
-            # episodes each rather than one continuous cry, because a baby does
-            # not cry for three and a half hours without pausing, and a demo
-            # that says otherwise is describing something that does not happen.
-            {"hoursAgo": 50.0, "seconds": 2700, "trend": "RISING",
-             "confidence": 0.97, "cause": "belly_pain", "causeConfidence": 0.33,
-             "soothed": "White noise", "settled": False, "escalated": True},
-            {"hoursAgo": 52.5, "seconds": 3300, "trend": "RISING",
-             "confidence": 0.98, "cause": "belly_pain", "causeConfidence": 0.31,
-             "soothed": "Heartbeat", "settled": False, "escalated": True},
-            {"hoursAgo": 55.0, "seconds": 2400, "trend": "STEADY",
-             "confidence": 0.95, "cause": "discomfort", "causeConfidence": 0.28,
-             "soothed": "Amma humming", "settled": True},
-            {"hoursAgo": 58.0, "seconds": 2900, "trend": "SETTLING",
-             "confidence": 0.94, "cause": "discomfort", "causeConfidence": 0.29,
-             "soothed": "Amma humming", "settled": True},
-
-            {"hoursAgo": 73.0, "seconds": 3100, "trend": "RISING",
-             "confidence": 0.97, "cause": "belly_pain", "causeConfidence": 0.35,
-             "soothed": "Heartbeat", "settled": False, "escalated": True},
-            {"hoursAgo": 76.0, "seconds": 3600, "trend": "RISING",
-             "confidence": 0.98, "cause": "belly_pain", "causeConfidence": 0.34,
-             "soothed": "White noise", "settled": False, "escalated": True},
-            {"hoursAgo": 79.0, "seconds": 2200, "trend": "SETTLING",
-             "confidence": 0.93, "cause": "tired", "causeConfidence": 0.40,
-             "soothed": "Amma humming", "settled": True},
-            {"hoursAgo": 81.5, "seconds": 2100, "trend": "SETTLING",
-             "confidence": 0.92, "cause": "tired", "causeConfidence": 0.38,
-             "soothed": "Amma humming", "settled": True},
-
-            # tapering off
-            {"hoursAgo": 99.0, "seconds": 260, "trend": "SETTLING",
-             "confidence": 0.90, "cause": "hungry", "causeConfidence": 0.44},
-            {"hoursAgo": 121.0, "seconds": 175, "trend": "STEADY",
-             "confidence": 0.87, "cause": None},
-            {"hoursAgo": 147.0, "seconds": 340, "trend": "SETTLING",
-             "confidence": 0.93, "cause": "tired", "causeConfidence": 0.37,
-             "soothed": "Amma humming", "settled": True},
-        ],
+        #
+        # The two heavy evenings are several episodes each rather than one
+        # continuous cry, because a baby does not cry for three and a half hours
+        # without pausing, and a demo that says otherwise is describing
+        # something that does not happen.
+        "cries": cry_week(),
 
         # The shelf. Text is stored directly here rather than OCR'd from a
         # rendered image, because these exist to be *found* by the assistant and
@@ -228,6 +281,38 @@ def dataset() -> dict:
             {"id": "heartbeat", "attempts": 4, "successes": 1},
             {"id": "shush", "attempts": 2, "successes": 1},
         ],
+
+        # Three medicines already checked, so the history on the Scan tab opens
+        # with something in it -- one of each verdict, including the AVOID that
+        # comes from her own penicillin allergy rather than from the general
+        # guidance. No images: these were typed, not photographed, and shipping
+        # a photograph of a real strip would be inventing evidence for a demo.
+        #
+        # These lived only in the collection until now, which meant the offline
+        # export silently produced an APK whose Scan history was empty.
+        "scans": [
+            {"name": "paracetamol", "verdict": "LIKELY_SAFE", "hoursAgo": 30,
+             "headline": "Generally considered compatible with breastfeeding",
+             "summary": "Amounts in breast milk are far below the dose given to "
+                        "infants directly. Usually the first choice for pain or "
+                        "fever while breastfeeding.",
+             "sources": "NHS | LactMed",
+             "cautions": "Confirm with your doctor or pharmacist."},
+            {"name": "amoxicillin", "verdict": "AVOID", "hoursAgo": 96,
+             "headline": "Do not take this - it matches an allergy you listed",
+             "summary": "This appears to match an allergy you listed (penicillin "
+                        "allergy). The general guidance for amoxicillin is "
+                        "different, but your own history takes priority.",
+             "sources": "Your health record | LactMed",
+             "cautions": "Confirm with your doctor or pharmacist."},
+            {"name": "cetirizine", "verdict": "CAUTION", "hoursAgo": 150,
+             "headline": "Check with your doctor before taking this",
+             "summary": "Non-sedating antihistamines are generally preferred "
+                        "while breastfeeding, but this one is worth confirming "
+                        "for your own situation.",
+             "sources": "LactMed",
+             "cautions": "Confirm with your doctor or pharmacist."},
+        ],
     }
 
 
@@ -263,13 +348,31 @@ def collection():
     return client[DB_NAME][COLLECTION]
 
 
+def write_local() -> None:
+    """
+    Write the asset straight from `dataset()`, with no MongoDB in the way.
+
+    The round trip through the collection is the right default -- see
+    [export] -- but it cannot be the only path: editing this file on a machine
+    with no connection string, or in CI, must still be able to produce the
+    asset the APK ships.
+    """
+    data = dataset()
+    data.pop("_id", None)
+    ASSET.parent.mkdir(parents=True, exist_ok=True)
+    ASSET.write_text(json.dumps(data, indent=1, ensure_ascii=False))
+    print(f"  -> {ASSET.relative_to(ROOT.parent)}  "
+          f"{ASSET.stat().st_size / 1024:.1f} KB  (local, no MongoDB)")
+
+
 def push() -> None:
     data = dataset()
     col = collection()
     col.replace_one({"_id": DOC_ID}, data, upsert=True)
     print(f"pushed {DOC_ID} to {DB_NAME}.{COLLECTION}")
     print(f"  {len(data['care'])} care entries, {len(data['cries'])} cry episodes, "
-          f"{len(data['records'])} documents")
+          f"{len(data['records'])} documents, "
+          f"{days_over_three_hours()} days over three hours")
 
 
 def export() -> None:
@@ -295,7 +398,13 @@ def main() -> None:
                         help="write the local definition to MongoDB")
     parser.add_argument("--export", action="store_true",
                         help="read MongoDB and write the APK asset")
+    parser.add_argument("--offline", action="store_true",
+                        help="write the APK asset from this file, no MongoDB")
     args = parser.parse_args()
+
+    if args.offline:
+        write_local()
+        return
 
     both = not (args.push or args.export)
     if args.push or both:

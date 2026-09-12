@@ -1,5 +1,24 @@
 package com.nila.ui.theme
 
+/*
+ * The centre of the app's appearance.
+ *
+ * Four files, one system, and a fixed order of dependency:
+ *
+ *   Color.kt        every literal colour in the app, named and explained
+ *   Theme.kt        this file -- the two schemes, the type scale, and
+ *                   [LocalNilaDarkTheme], which decides which scheme is on
+ *   Severity.kt     note / attention / urgent, as matched fore-and-background
+ *                   trios, resolved against LocalNilaDarkTheme
+ *   ChartPalette.kt sleep / feed / cry / cause identity colours, same source
+ *
+ * Nothing outside this package declares a `Color`, and nothing anywhere calls
+ * `isSystemInDarkTheme()` except [NilaTheme]. Both rules exist because the same
+ * bug keeps coming back otherwise: a hardcoded pale background paired with a
+ * foreground the dark scheme flips to near-white, which renders correctly,
+ * screenshots correctly in the light theme, and is invisible at night.
+ */
+
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -7,6 +26,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -130,11 +151,38 @@ private val NilaTypography = Typography(
     ),
 )
 
+/**
+ * Whether the *app* is dark, as opposed to whether the phone is.
+ *
+ * Everything with a colour in it reads this, and nothing reads
+ * `isSystemInDarkTheme()` any more. That distinction is the whole reason this
+ * exists: the moment the app got a light/dark switch of its own, every palette
+ * that asked the system directly -- severity, the charts -- would have kept
+ * answering for the phone while the scheme around it answered for the switch.
+ * A medicine verdict on a pale amber card, in an app the user had just put into
+ * dark mode, with body text the dark scheme had turned white. Exactly the bug
+ * [SeverityColors] was built to make impossible, reintroduced by a feature.
+ *
+ * One source of truth, provided by [NilaTheme], read by [severityColors],
+ * [calmColors] and [chartPalette].
+ */
+val LocalNilaDarkTheme = staticCompositionLocalOf { false }
+
+/**
+ * The app's single theme, and the only place a colour scheme is chosen.
+ *
+ * @param mode what the user asked for; [ThemeMode.SYSTEM] defers to the phone.
+ */
 @Composable
 fun NilaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    mode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit,
 ) {
+    val darkTheme = when (mode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
     val colors = if (darkTheme) DarkColors else LightColors
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -144,5 +192,7 @@ fun NilaTheme(
                 .isAppearanceLightStatusBars = !darkTheme
         }
     }
-    MaterialTheme(colorScheme = colors, typography = NilaTypography, content = content)
+    CompositionLocalProvider(LocalNilaDarkTheme provides darkTheme) {
+        MaterialTheme(colorScheme = colors, typography = NilaTypography, content = content)
+    }
 }

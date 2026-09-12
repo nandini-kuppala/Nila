@@ -154,7 +154,26 @@ class CryEngine(
         data class Ended(val evidence: CryEvidence) : Result
     }
 
+    /** Analysis windows this engine has been handed since it was built. */
+    @Volatile
+    var windowsSeen: Long = 0L
+        private set
+
+    /**
+     * Of those, how many actually reached the detector.
+     *
+     * The ratio is the whole battery argument, measured rather than claimed: in
+     * a quiet nursery the silence gate turns most of the night into a dBFS
+     * comparison, and the NPU is woken for the small remainder. A number that
+     * can be read off the running app is worth more on a technical slide than
+     * any figure quoted from a datasheet.
+     */
+    @Volatile
+    var windowsInferred: Long = 0L
+        private set
+
     fun process(window: AudioCapture.Window): Result {
+        windowsSeen++
         // Below the gate the room is quiet. Skipping inference here is most of
         // the reason this can run all night on a battery.
         if (window.dbfs < config.silenceGateDbfs) {
@@ -166,6 +185,7 @@ class CryEngine(
             }
         }
 
+        windowsInferred++
         LogMelFrontend.logMel(window.samples, 0, window.samples.size, patch)
         detector.run(patch, detectOut)
         val cryProbability = detectOut[1]

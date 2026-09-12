@@ -52,13 +52,23 @@ class MonitorService : LifecycleService() {
         private const val HOP_MS = 480L
 
         /**
-         * How much faster than real time the demo runs.
+         * How much faster than real time the demo runs. It does not.
          *
-         * Six was chosen so the full ladder -- detect, log, play, verify,
-         * escalate -- completes inside twenty seconds, which is about as long
-         * as anyone will watch a demo before deciding it does not work.
+         * This was six, so the whole ladder finished inside twenty seconds.
+         * The cost was that the one thing in the demo a person can judge for
+         * themselves -- the recording coming out of the speaker -- played at
+         * its own, real pace while the timer beside it counted six seconds per
+         * second. Every duration on screen was then a number nobody could
+         * check against what they were hearing, which is the opposite of what
+         * the demo is for.
+         *
+         * At one the clock on screen is the clock in the room: the sound is
+         * played at twenty seconds, judged at fifty-five, and the parent is
+         * woken at ninety, and you can hear each of those happen when the
+         * screen says it did. The demo takes as long as a cry takes, which is
+         * the honest length for it.
          */
-        private const val SIMULATION_SPEED = 6L
+        private const val SIMULATION_SPEED = 1L
 
         /**
          * Long enough to pass every rung, including the closing one at 180 s.
@@ -71,18 +81,14 @@ class MonitorService : LifecycleService() {
         private const val SIMULATED_CRY_SECONDS = 190
 
         /**
-         * Real milliseconds the demo pauses on each soothing sound.
+         * Reason labels that make an episode worth keeping the audio of.
          *
-         * At six times speed a sound that plays for thirty-five seconds of
-         * episode is gone in under six seconds of wall clock, which is not long
-         * enough to register as an action somebody took -- it reads as a label
-         * flickering. The virtual clock is untouched; only the pace of the
-         * playback loop changes, so the ladder still sees the same episode.
+         * Only the one. "Discomfort" and "tired" between them cover most of
+         * what the head ever says, so treating them as flags would keep every
+         * clip and make the flag meaningless -- and the head scores below
+         * chance, so a wide net here is a wide net of guesses.
          */
-        private const val DEMO_SOOTHER_HOLD_MS = 5_000L
-
-        /** Same idea for the alert: let it land before the demo moves on. */
-        private const val DEMO_ALERT_HOLD_MS = 2_500L
+        private val PAIN_LABELS = setOf("belly_pain")
 
         const val ACTION_START = "com.nila.START"
         const val ACTION_STOP = "com.nila.STOP"
@@ -153,12 +159,33 @@ class MonitorService : LifecycleService() {
     private lateinit var wear: com.nila.wearlink.WearSender
     private lateinit var ir: com.nila.actions.IrActuator
 
+    /**
+     * The second phone, if there is one.
+     *
+     * Started alongside the microphone and stopped with it, so the link cannot
+     * outlive the thing it reports on. Every call into it is best-effort: the
+     * notification, the speaker and the log on *this* phone are the failsafe,
+     * and nothing on the escalation ladder waits for a socket.
+     */
+    private var phoneLink: com.nila.phonelink.GuardianLink? = null
+
     private var capture: AudioCapture? = null
     private var engine: CryEngine? = null
     private val escalation = Escalation()
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var currentEventId: Long? = null
+
+    /**
+     * Whether audio may be written at all, read once when monitoring starts.
+     *
+     * Read into a field rather than consulted per window: this is checked on
+     * every analysis hop, and a DataStore round trip in that path would be the
+     * most expensive thing in it. The service is restarted whenever the setting
+     * changes, which is the only moment it can change.
+     */
+    @Volatile
+    private var keepClips: Boolean = true
     private var pendingSoother: Soother? = null
     private var simulation: kotlinx.coroutines.Job? = null
     private var notedHypothesis = false
@@ -203,15 +230,6 @@ class MonitorService : LifecycleService() {
     private var episodeHypothesis: com.nila.audio.ReasonHypothesis? = null
 
     /**
-     * Real milliseconds the simulation should pause before its next window.
-     *
-     * Set from the ladder when something happens a person needs time to hear or
-     * read, consumed once by the playback loop.
-     */
-    @Volatile
-    private var demoHoldMs = 0L
-
-    /**
      * The last evidence of a demo episode, kept for the summary.
      *
      * The trailing silence that closes the episode runs through [updateIdle],
@@ -230,6 +248,12 @@ class MonitorService : LifecycleService() {
         ir = com.nila.actions.IrActuator(this)
         recorder = EpisodeRecorder(this)
         notifier.ensureChannels()
+
+        // Returns null unless this phone is a paired guardian, so an install
+        // that never paired behaves exactly as it did before this existed.
+        phoneLink = runCatching {
+            com.nila.phonelink.GuardianLink.acquire(this)
+        }.getOrNull()
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -304,6 +328,13 @@ class MonitorService : LifecycleService() {
 
         acquireWakeLock()
         escalation.reset()
+        // Read here, once per night, rather than per window. A service can be
+        // started from a notification action without any Activity having run,
+        // so it cannot rely on the application having hydrated this already.
+        lifecycleScope.launch {
+            keepClips = com.nila.data.ClipPolicy.current(this@MonitorService)
+            Log.i(TAG, "cry recordings ${if (keepClips) "on" else "off"}")
+        }
         _state.value = MonitorState(
             running = true,
             armedSinceMs = System.currentTimeMillis(),
@@ -326,12 +357,20 @@ class MonitorService : LifecycleService() {
                 episodeHypothesis = null
                 fired.clear()
                 episodeStartedAtMs = System.currentTimeMillis()
-                episodeClip = recorder.start()
-                recorder.append(window)
+                // Off means off: with recording disabled the file is never
+                // opened, so there is no audio to trust anybody with rather
+                // than audio that is written and then deleted.
+                episodeClip = if (keepClips) recorder.start() else null
+                if (keepClips) recorder.append(window)
                 val evidence = latched(result.evidence)
-                currentEventId = db.events().insert(
+                currentEventId = null
+                val openedId = db.events().insert(
                     recordFor(evidence, EventKind.CRY_STARTED, Severity.NOTE)
                 )
+                currentEventId = openedId
+                // The opening row points at itself, so "group by episodeId"
+                // needs no special case for the row that starts the group.
+                db.events().setEpisode(openedId, openedId)
                 mark(
                     EpisodePipeline.Stage.HEARD,
                     "Detector at ${(evidence.detectorConfidence * 100).toInt()}%",
@@ -353,7 +392,7 @@ class MonitorService : LifecycleService() {
             }
 
             is CryEngine.Result.Ongoing -> {
-                recorder.append(window)
+                if (keepClips) recorder.append(window)
                 val evidence = latched(result.evidence)
                 _state.value = _state.value.copy(
                     currentEvidence = evidence,
@@ -390,14 +429,15 @@ class MonitorService : LifecycleService() {
                 // A cry that got as far as a cause is worth a record; a
                 // four-second fuss is not. Without this line every hiccup left
                 // a summary card and a one-second clip on the screen.
-                val worthKeeping =
+                val bigEnoughToSummarise =
                     evidence.durationSeconds >= Escalation.Config().reasonSeconds
-                val summary = if (worthKeeping) {
+                val summary = if (bigEnoughToSummarise) {
                     summarise(evidence, closedByTimeout = false)
                 } else {
                     recorder.abandon()
                     null
                 }
+                summary?.let { retainClipFor(evidence, it) }
                 escalation.reset()
                 fired.clear()
                 _state.value = _state.value.copy(
@@ -472,12 +512,68 @@ class MonitorService : LifecycleService() {
         )
     }
 
+    /**
+     * Whether this cry is one worth keeping the audio of.
+     *
+     * Three ways in, and all three are things the app already decided for its
+     * own reasons rather than a new judgement invented for the recording:
+     *
+     * - it **woke somebody**, which is the ladder saying it ran out of things
+     *   to try;
+     * - it **ran to the three-minute cap**, which is a cry that outlasted the
+     *   whole ladder;
+     * - the reason head came back **pain**, which is the one label in the set
+     *   that a paediatrician would want to hear for themselves.
+     *
+     * Everything else is an evening grizzle. It still gets a clip for the night
+     * -- the summary card is unusable without one -- but it is not evidence and
+     * does not become a file somebody has to think about a month later.
+     */
+    private fun worthKeeping(
+        evidence: CryEvidence,
+        summary: MonitorState.EpisodeSummary,
+    ): Boolean =
+        summary.wokeSomebody ||
+            summary.closedByTimeout ||
+            evidence.hypothesis?.label in PAIN_LABELS
+
     /** Hold the episode's first cause estimate across every later window. */
     private fun latched(evidence: CryEvidence): CryEvidence {
         val current = evidence.hypothesis
         if (episodeHypothesis == null && current != null) episodeHypothesis = current
         val fixed = episodeHypothesis ?: return evidence
         return if (current === fixed) evidence else evidence.copy(hypothesis = fixed)
+    }
+
+    /**
+     * Move a flagged episode's clip into the store the timeline reads from.
+     *
+     * Runs after [summarise], which is what closes the file -- the path in the
+     * summary is the one the card is already playing, so promoting it has to
+     * update that too or the card ends up holding a `File` that has moved.
+     *
+     * Nothing is written for an episode that was not flagged. The clip stays
+     * where it is on the ordinary seven-day window, plays on the summary card
+     * for as long as that card is up, and is then somebody's disk space for a
+     * week and nobody's evidence.
+     */
+    private suspend fun retainClipFor(
+        evidence: CryEvidence,
+        summary: MonitorState.EpisodeSummary,
+    ) {
+        val id = currentEventId ?: return
+        val path = summary.clipPath ?: return
+        if (!worthKeeping(evidence, summary)) return
+        val moved = runCatching { recorder.keep(java.io.File(path)) }.getOrNull() ?: return
+        runCatching { db.events().setClip(id, moved.absolutePath) }
+        // The summary card is on screen with the old path in it.
+        _state.value = _state.value.copy(
+            lastEpisode = _state.value.lastEpisode
+                ?.takeIf { it.startedAtMs == summary.startedAtMs }
+                ?.copy(clipPath = moved.absolutePath)
+                ?: _state.value.lastEpisode,
+        )
+        Log.i(TAG, "kept the clip for episode $id")
     }
 
     /** `belly_pain` is a class name; "belly pain" is what a person reads. */
@@ -491,7 +587,12 @@ class MonitorService : LifecycleService() {
     }
 
     /** Mirror state to a paired watch. Rate-limited inside the sender. */
-    private fun pushToWatch() = runCatching { wear.sendState(_state.value) }
+    private fun pushToWatch() {
+        runCatching { wear.sendState(_state.value) }
+        // The other phone gets the same state, coalesced by its own heartbeat
+        // rather than sent on every hop.
+        runCatching { phoneLink?.sendState(_state.value) }
+    }
 
     private fun updateIdle(probability: Float, engine: CryEngine, dbfs: Float) {
         val latency = engine.detectorLatency
@@ -501,6 +602,11 @@ class MonitorService : LifecycleService() {
             currentEvidence = null,
             lastCryProbability = probability,
             detectorLatencyMs = latency.meanMs,
+            detectorP50Ms = latency.p50Ms,
+            detectorP95Ms = latency.p95Ms,
+            latencySamples = latency.samples,
+            windowsSeen = engine.windowsSeen,
+            windowsInferred = engine.windowsInferred,
             accelerator = latency.accelerator.name,
             inputDbfs = dbfs,
             // A microphone that is muted, revoked or emulated returns valid
@@ -586,6 +692,7 @@ class MonitorService : LifecycleService() {
                 )
                 note("Closed the episode at ${evidence.durationSeconds}s")
                 val summary = summarise(evidence, closedByTimeout = true)
+                retainClipFor(evidence, summary)
                 _state.value = _state.value.copy(
                     phase = MonitorState.Phase.Closed(evidence.durationSeconds),
                     currentEvidence = null,
@@ -670,7 +777,6 @@ class MonitorService : LifecycleService() {
                         if (decision.attempt >= 2 && choice !is Soother.Recorded) {
                             note("No recording of your voice yet - Settings, Your voice")
                         }
-                        demoHoldMs = DEMO_SOOTHER_HOLD_MS
                     }
                 }
             }
@@ -769,12 +875,28 @@ class MonitorService : LifecycleService() {
                         decision.reason.lowercase()
                 )
                 advice?.let { note("Suggested: ${it.steps.firstOrNull() ?: it.title}") }
-                if (_state.value.simulated) demoHoldMs = DEMO_ALERT_HOLD_MS
                 // Belt and braces: the notification already reaches any watch
                 // that mirrors them. This adds the distinct vibration pattern
                 // and the live timer on a watch running our own module.
                 wear.sendAlert(decision.reason, decision.severity,
                                evidence.durationSeconds)
+                // And the same alert to the other phone, which decides what to
+                // do with it from the severity -- see LinkProtocol.tierFor.
+                runCatching {
+                    phoneLink?.sendAlert(
+                        title = "Your baby needs you",
+                        body = buildString {
+                            append(guess)
+                            append(decision.reason)
+                            append(".")
+                            advice?.steps?.firstOrNull()?.let {
+                                append(" Try: ${it.lowercase()}.")
+                            }
+                        },
+                        severity = decision.severity,
+                        seconds = evidence.durationSeconds,
+                    )
+                }
             }
         }
     }
@@ -784,10 +906,10 @@ class MonitorService : LifecycleService() {
      * Feed a bundled cry recording through the pipeline instead of the mic.
      *
      * Windows carry synthetic timestamps advancing at the real analysis hop, so
-     * the state machine and the escalation ladder see a genuine hundred-second
-     * episode. The wall clock runs [SIMULATION_SPEED] times faster than that,
-     * which is the only concession -- and the UI says so on screen for as long
-     * as it lasts.
+     * the state machine and the escalation ladder see a genuine three-minute
+     * episode -- and since [SIMULATION_SPEED] is one, so does the room. There
+     * is no concession left to make: the clip plays at its own speed, the
+     * timer counts real seconds, and the rungs fire when the screen says.
      */
     private fun startSimulation() {
         if (simulation?.isActive == true) return
@@ -818,8 +940,10 @@ class MonitorService : LifecycleService() {
         episodeHypothesis = null
         fired.clear()
         demoSummary = null
-        demoHoldMs = 0L
 
+        lifecycleScope.launch {
+            keepClips = com.nila.data.ClipPolicy.current(this@MonitorService)
+        }
         _state.value = MonitorState(
             running = true,
             simulated = true,
@@ -854,15 +978,13 @@ class MonitorService : LifecycleService() {
                     )
                     runCatching { handleWindow(cryEngine, window) }
                         .onFailure { Log.e(TAG, "simulated window failed", it) }
+                    // The only thing keeping the virtual clock and the
+                    // speaker together. Every rung fires on the window it is
+                    // due on, and at real time that is the second a listener
+                    // hears it happen -- so nothing here may pause for effect:
+                    // a wall-clock hold would slide the recording out from
+                    // under the timings the screen is claiming.
                     kotlinx.coroutines.delay(HOP_MS / SIMULATION_SPEED)
-                    // Something just happened that a person needs time to hear
-                    // or read. The virtual clock has already advanced; only the
-                    // wall clock waits.
-                    val hold = demoHoldMs
-                    if (hold > 0L) {
-                        demoHoldMs = 0L
-                        kotlinx.coroutines.delay(hold)
-                    }
                 }
 
                 // A moment of room tone, so the detector has to actually cross
@@ -952,11 +1074,21 @@ class MonitorService : LifecycleService() {
         return recorded + Soother.builtIns
     }
 
+    /**
+     * One row of an episode's account, stamped with the episode it belongs to.
+     *
+     * The stamp is the whole reason the timeline can show one entry per cry
+     * instead of six. It cannot be inferred afterwards: every row recomputes
+     * its own start from a duration rounded to whole seconds, so rows of the
+     * same episode differ by up to a second and grouping on the timestamp is a
+     * guess that fails exactly when a cry is busiest.
+     */
     private fun recordFor(
         evidence: CryEvidence,
         kind: EventKind,
         severity: Severity,
     ) = EventRecord(
+        episodeId = currentEventId,
         kind = kind.name,
         severityLevel = severity.level,
         startedAtMs = System.currentTimeMillis() - evidence.durationSeconds * 1000L,
@@ -977,6 +1109,13 @@ class MonitorService : LifecycleService() {
         // A monitor that fails quietly is worse than no monitor, so the failure
         // is surfaced the same way an alert would be.
         notifier.alert("Nila stopped monitoring", message, Severity.URGENT)
+        // Sent as an alert, not a goodbye: this is a failure, and the other
+        // phone should sound rather than quietly show "stopped".
+        runCatching {
+            phoneLink?.sendAlert(
+                "The monitoring phone has stopped", message, Severity.URGENT, 0
+            )
+        }
         stopSelf()
     }
 
@@ -1007,6 +1146,18 @@ class MonitorService : LifecycleService() {
         wakeLock?.runCatching { if (isHeld) release() }
         wakeLock = null
         notifier.clear()
+        // Say goodbye before closing, so the other phone shows "stopped"
+        // instead of sounding its lost-contact alarm. A monitor somebody chose
+        // to stop is not a monitor that failed, and conflating the two is how
+        // the link-loss alarm becomes the one everybody learns to ignore.
+        if (phoneLink != null) {
+            runCatching {
+                com.nila.phonelink.GuardianLink.release(
+                    phoneLink, "Monitoring was stopped on the other phone."
+                )
+            }
+            phoneLink = null
+        }
         if (!preserveSummary) _state.value = MonitorState()
         Log.i(TAG, "monitoring stopped")
     }

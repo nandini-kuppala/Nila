@@ -22,8 +22,43 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE startedAtMs >= :sinceMs ORDER BY startedAtMs DESC")
     suspend fun since(sinceMs: Long): List<EventRecord>
 
+    /**
+     * The same window, as a flow.
+     *
+     * The dashboard needs every episode in the last week, which [recent] cannot
+     * promise: it is capped at a row count for the timeline, and one busy night
+     * writes five rows per cry. A chart that silently drops the oldest two days
+     * because a different screen wanted a shorter list is a chart that lies
+     * about the week.
+     */
+    @Query("SELECT * FROM events WHERE startedAtMs >= :sinceMs ORDER BY startedAtMs DESC")
+    fun observeSince(sinceMs: Long): Flow<List<EventRecord>>
+
     @Query("SELECT * FROM events WHERE id = :id")
     suspend fun byId(id: Long): EventRecord?
+
+    /** Stamp a row with the episode it belongs to. */
+    @Query("UPDATE events SET episodeId = :episodeId WHERE id = :id")
+    suspend fun setEpisode(id: Long, episodeId: Long)
+
+    /**
+     * Attach the kept recording to the row that opened the episode.
+     *
+     * Written at the end of the cry rather than at the start, because until the
+     * ladder has finished there is no way to know whether this was an episode
+     * worth keeping -- and a path written optimistically is a path pointing at
+     * a file the recorder has since deleted.
+     */
+    @Query("UPDATE events SET clipPath = :path WHERE id = :id")
+    suspend fun setClip(id: Long, path: String?)
+
+    /** Every row that still points at audio, for the settings figure. */
+    @Query("SELECT * FROM events WHERE clipPath IS NOT NULL ORDER BY startedAtMs DESC")
+    suspend fun withClips(): List<EventRecord>
+
+    /** Forget every kept recording. The files are deleted separately. */
+    @Query("UPDATE events SET clipPath = NULL")
+    suspend fun clearClips()
 
     /**
      * Total seconds of crying in a window.
@@ -66,6 +101,10 @@ interface CareDao {
 
     @Query("SELECT * FROM care_log WHERE atMs >= :sinceMs ORDER BY atMs DESC")
     suspend fun since(sinceMs: Long): List<CareRecord>
+
+    /** The same window as a flow, for the same reason as [EventDao.observeSince]. */
+    @Query("SELECT * FROM care_log WHERE atMs >= :sinceMs ORDER BY atMs DESC")
+    fun observeSince(sinceMs: Long): Flow<List<CareRecord>>
 
     @Query("DELETE FROM care_log WHERE id = :id")
     suspend fun delete(id: Long)

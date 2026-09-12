@@ -1,6 +1,5 @@
 package com.nila.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
@@ -73,16 +72,20 @@ object SeverityPalette {
 /**
  * Colours for [severity], for the theme currently in force.
  *
- * `isSystemInDarkTheme()` rather than reading the scheme, because the scheme
- * has no severity roles to read -- Material's `error` role is one colour pair
- * and there are four levels here, three of which are not errors.
+ * A palette of its own rather than the Material scheme, because the scheme has
+ * no severity roles to read -- Material's `error` role is one colour pair and
+ * there are four levels here, three of which are not errors.
+ *
+ * It reads [LocalNilaDarkTheme], never `isSystemInDarkTheme()`: with a light
+ * and dark switch in the top bar those two answers differ, and the one that
+ * matters is the one the rest of the screen is using.
  */
 @Composable
 @ReadOnlyComposable
 fun severityColors(severity: Severity): SeverityColors =
-    SeverityPalette.of(severity, isSystemInDarkTheme())
+    SeverityPalette.of(severity, LocalNilaDarkTheme.current)
 
 /** The all-clear pair, for the theme currently in force. */
 @Composable
 @ReadOnlyComposable
-fun calmColors(): SeverityColors = SeverityPalette.calm(isSystemInDarkTheme())
+fun calmColors(): SeverityColors = SeverityPalette.calm(LocalNilaDarkTheme.current)

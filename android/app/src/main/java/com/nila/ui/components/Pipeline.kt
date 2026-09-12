@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import com.nila.data.Severity
 import com.nila.monitor.EpisodePipeline
 import com.nila.ui.theme.SeverityAttention
 import com.nila.ui.theme.SeverityUrgent
+import com.nila.ui.theme.severityColors
 
 /**
  * The escalation ladder, drawn.
@@ -248,6 +250,24 @@ private fun PipelineRow(
  * it always contains "probably" -- the classifier scored 0.444 subject-wise
  * macro AUC, which is below chance, and the honesty about that is not a
  * disclaimer bolted on afterwards. It is why the sentence is phrased this way.
+ *
+ * ### Why it is not a block of colour any more
+ *
+ * This card used to be a filled `primaryContainer` panel: in the light theme a
+ * saturated mint rectangle, in the dark theme a solid teal one. It read as
+ * loud rather than as important, and it arrived on screen directly underneath
+ * an amber warning box and above a white caution strip -- three saturated
+ * grounds stacked, none of them agreeing, at the exact moment the reader is
+ * being asked to follow three numbered instructions. The card was hardest to
+ * read precisely when it mattered most.
+ *
+ * It is now the same white-on-outline card as everything else on the screen,
+ * and it earns its rank by *rule and eyebrow* instead: a heavier border in the
+ * accent, a coloured label above the headline, and numbered step badges. Small
+ * areas of colour, in the places the eye has to land, on a ground that stays
+ * legible in both themes. The caution inside it takes its colours from the
+ * severity palette rather than a hardcoded red, which is what made it a near
+ * black-on-black strip in the dark theme.
  */
 @Composable
 fun ReasonVerdict(
@@ -262,38 +282,68 @@ fun ReasonVerdict(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(scheme.primaryContainer)
+            .background(scheme.surfaceContainerLowest)
+            .border(1.5.dp, scheme.primary.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(scheme.primary)
+            )
+            Text(
+                "WHAT TO DO NOW",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = scheme.primary,
+            )
+        }
+
         Text(
             text = headline,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             lineHeight = 28.sp,
-            color = scheme.onPrimaryContainer,
+            color = scheme.onSurface,
         )
 
         if (steps.isNotEmpty()) {
-            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                Text(
-                    "WHAT TO TRY",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = scheme.onPrimaryContainer.copy(alpha = 0.7f),
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 steps.forEachIndexed { i, step ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text(
-                            "${i + 1}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = scheme.onPrimaryContainer.copy(alpha = 0.55f),
-                        )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(11.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        // The numeral carries the only filled colour in the
+                        // body. It is a badge rather than a bare digit because
+                        // the steps are an ordered list someone works through
+                        // one-handed, and losing your place in it is the whole
+                        // failure mode this card has.
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(scheme.primaryContainer),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                "${i + 1}",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = scheme.onPrimaryContainer,
+                            )
+                        }
                         Text(
                             step,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = scheme.onPrimaryContainer,
+                            color = scheme.onSurface,
+                            modifier = Modifier.padding(top = 1.dp),
                         )
                     }
                 }
@@ -301,20 +351,25 @@ fun ReasonVerdict(
         }
 
         if (caution.isNotBlank()) {
+            // Amber, from the severity palette, because that is what a caution
+            // is -- and taken as a matched trio so the body text cannot end up
+            // the theme's near-white on a pale ground.
+            val cautionColors = severityColors(Severity.ATTENTION)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(scheme.surface)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(cautionColors.container)
                     .padding(horizontal = 12.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(9.dp),
+                verticalAlignment = Alignment.Top,
             ) {
                 Text("!", style = MaterialTheme.typography.bodyLarge,
-                     fontWeight = FontWeight.Bold, color = SeverityUrgent)
+                     fontWeight = FontWeight.Bold, color = cautionColors.accent)
                 Text(
                     caution,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = scheme.onSurface,
+                    color = cautionColors.onContainer,
                 )
             }
         }
@@ -323,7 +378,7 @@ fun ReasonVerdict(
             "Guidance from $source, shown as it is written. " +
                 "The cause is a guess from the sound, not a diagnosis.",
             style = MaterialTheme.typography.labelMedium,
-            color = scheme.onPrimaryContainer.copy(alpha = 0.7f),
+            color = scheme.onSurfaceVariant,
         )
     }
 }

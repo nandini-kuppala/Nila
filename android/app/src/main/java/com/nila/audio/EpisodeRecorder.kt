@@ -51,10 +51,24 @@ class EpisodeRecorder(context: Context) {
          */
         const val CAP_SECONDS = 90
 
-        /** Long enough to show a doctor at a Monday appointment. */
+        /** How long an ordinary cry's clip stays on the phone. */
         const val RETAIN_DAYS = 7
 
+        /**
+         * How long a *flagged* cry's clip stays.
+         *
+         * A cry that woke somebody, ran to the three-minute cap, or came back
+         * as pain is the one a parent may want to play to a doctor, and the
+         * gap between noticing a pattern and getting an appointment is not
+         * seven days. Thirty covers a referral without turning the phone into
+         * an archive of a nursery.
+         */
+        const val KEEP_DAYS = 30
+
         private const val DIR = "cries"
+
+        /** Flagged clips, on their own retention window. */
+        private const val KEPT_DIR = "cries/kept"
         private const val BYTES_PER_SAMPLE = 2
         private const val HEADER_BYTES = 44
 
@@ -62,13 +76,26 @@ class EpisodeRecorder(context: Context) {
 
         /** Clips for the timeline and the summary card, newest first. */
         fun existing(context: Context): List<File> =
-            File(context.filesDir, DIR).listFiles()
-                ?.filter { it.extension == "wav" && it.length() > HEADER_BYTES }
-                ?.sortedByDescending { it.lastModified() }
-                .orEmpty()
+            (File(context.filesDir, DIR).listFiles()?.toList().orEmpty() +
+                File(context.filesDir, KEPT_DIR).listFiles()?.toList().orEmpty())
+                .filter { it.isFile && it.extension == "wav" && it.length() > HEADER_BYTES }
+                .sortedByDescending { it.lastModified() }
+
+        /** Where flagged clips live. Exposed so the store can be emptied. */
+        fun keptDir(context: Context): File =
+            File(context.filesDir, KEPT_DIR).apply { mkdirs() }
+
+        /** Total bytes of audio this app is holding, for the settings screen. */
+        fun bytesHeld(context: Context): Long =
+            existing(context).sumOf { it.length() }
+
+        /** Delete every clip, kept ones included. Offered in Settings. */
+        fun deleteAll(context: Context): Int =
+            existing(context).count { runCatching { it.delete() }.getOrDefault(false) }
     }
 
     private val dir = File(context.filesDir, DIR).apply { mkdirs() }
+    private val kept = File(context.filesDir, KEPT_DIR).apply { mkdirs() }
 
     private var stream: BufferedOutputStream? = null
     private var file: File? = null
@@ -175,6 +202,21 @@ class EpisodeRecorder(context: Context) {
         }
     }
 
+    /**
+     * Promote a finished clip to the flagged store.
+     *
+     * A move rather than a copy, and a rename inside the same directory tree so
+     * it cannot fail for space. If the rename fails the clip stays where it is
+     * -- still playable, just on the shorter window -- because losing the audio
+     * would be a worse outcome than keeping it for seven days instead of thirty.
+     *
+     * @return where the clip ended up.
+     */
+    fun keep(clip: File): File {
+        val target = File(kept, clip.name)
+        return if (runCatching { clip.renameTo(target) }.getOrDefault(false)) target else clip
+    }
+
     /** Drop the clip in progress without keeping it. */
     fun abandon() {
         closeStream()
@@ -188,11 +230,25 @@ class EpisodeRecorder(context: Context) {
         stream = null
     }
 
-    /** Delete clips past their retention window. */
+    /**
+     * Delete clips past their retention window -- two windows, two directories.
+     *
+     * The flagged store is walked with the longer cutoff rather than being
+     * skipped: "kept" means kept for a reason and for a while, not kept
+     * forever. An app that quietly accumulates every difficult night a baby
+     * ever had is not the promise this feature makes.
+     */
     fun purge(nowMs: Long = System.currentTimeMillis()) {
-        val cutoff = nowMs - RETAIN_DAYS * 24L * 60L * 60L * 1000L
+        val day = 24L * 60L * 60L * 1000L
         dir.listFiles()?.forEach { f ->
-            if (f.lastModified() < cutoff) runCatching { f.delete() }
+            if (f.isFile && f.lastModified() < nowMs - RETAIN_DAYS * day) {
+                runCatching { f.delete() }
+            }
+        }
+        kept.listFiles()?.forEach { f ->
+            if (f.isFile && f.lastModified() < nowMs - KEEP_DAYS * day) {
+                runCatching { f.delete() }
+            }
         }
     }
 
