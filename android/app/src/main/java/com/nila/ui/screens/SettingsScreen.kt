@@ -39,6 +39,9 @@ import com.nila.data.CareKind
 import com.nila.ui.AppState
 import com.nila.ui.components.OutlinedBox
 import com.nila.ui.components.SectionHeader
+import com.nila.ui.theme.Appearance
+import com.nila.ui.theme.ThemeMode
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SettingsScreen(state: AppState) {
@@ -47,6 +50,10 @@ fun SettingsScreen(state: AppState) {
     val thinking by state.thinking.collectAsState()
     val pendingTag by com.nila.ui.NfcInbox.pendingTag.collectAsState()
     val bridgeAddress by state.bridgeAddress.collectAsState()
+    val linkRole by state.linkRole.collectAsState()
+    val linkPaired by state.linkPaired.collectAsState()
+    val linkStatus by state.linkStatus.collectAsState()
+    val pairingCode by state.pairingCode.collectAsState()
     val reminderSettings by state.reminderSettings.collectAsState()
     val recordings by state.recordings.collectAsState()
     val recording by state.recording.collectAsState()
@@ -66,6 +73,10 @@ fun SettingsScreen(state: AppState) {
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium,
              fontWeight = FontWeight.SemiBold)
+
+        Appearance()
+
+        CryRecordings(state)
 
         // Shown the moment an unknown sticker is tapped, wherever the user is.
         if (pendingTag != null) {
@@ -354,6 +365,59 @@ fun SettingsScreen(state: AppState) {
             }
         }
 
+        // Next to the laptop view because they are the same kind of thing: both
+        // open a socket on the local network, and both are off until asked for.
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionHeader("A second phone")
+            OutlinedBox(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "One phone by the cot, one with you. Alerts go to " +
+                            "whichever phone you are carrying.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    Text("What does this phone do?",
+                         style = MaterialTheme.typography.titleSmall)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RoleChoice(
+                            label = "Watches the baby",
+                            selected = linkRole ==
+                                com.nila.phonelink.LinkStore.Role.GUARDIAN,
+                            onClick = {
+                                state.setLinkRole(
+                                    com.nila.phonelink.LinkStore.Role.GUARDIAN)
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        RoleChoice(
+                            label = "Receives alerts",
+                            selected = linkRole ==
+                                com.nila.phonelink.LinkStore.Role.PARENT,
+                            onClick = {
+                                state.setLinkRole(
+                                    com.nila.phonelink.LinkStore.Role.PARENT)
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+
+                    if (linkRole == com.nila.phonelink.LinkStore.Role.GUARDIAN) {
+                        GuardianPairing(state, linkPaired, pairingCode)
+                    } else {
+                        ParentPairing(state, linkPaired, linkStatus)
+                    }
+
+                    if (linkPaired) {
+                        TextButton(onClick = state::unpairPhones) {
+                            Text("Forget the other phone")
+                        }
+                    }
+                }
+            }
+        }
+
         // The one thing in this app designed to leave the phone, so it gets its
         // own section rather than being buried as an action on another screen.
         // Kept next to Privacy, and framed honestly: this opens a socket.
@@ -509,5 +573,281 @@ private fun Capability(label: String, value: String) {
         Text(label, style = MaterialTheme.typography.titleSmall)
         Text(value, style = MaterialTheme.typography.bodyMedium,
              color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun RoleChoice(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (selected) {
+        Button(onClick = onClick, modifier = modifier) { Text(label) }
+    } else {
+        OutlinedButton(onClick = onClick, modifier = modifier) { Text(label) }
+    }
+}
+
+/**
+ * The sending phone's half of pairing.
+ *
+ * It generates the code, because the code is only as good as its
+ * unpredictability and the phone has a better source of randomness than a
+ * person choosing six digits.
+ */
+@Composable
+private fun GuardianPairing(
+    state: AppState,
+    paired: Boolean,
+    code: String?,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (code != null) {
+            Text(code, style = MaterialTheme.typography.displaySmall,
+                 fontWeight = FontWeight.Bold)
+            Text(
+                "Type this into the other phone. It stays valid until you " +
+                    "pair, and is not stored anywhere.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            state.linkAddress?.let {
+                Text("If the other phone cannot find this one, point it at $it",
+                     style = MaterialTheme.typography.bodySmall,
+                     color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            TextButton(onClick = state::hidePairingCode) { Text("Done") }
+        } else {
+            Text(
+                if (paired) state.linkSummary
+                else "Not paired with another phone yet",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            OutlinedButton(
+                onClick = state::generatePairingCode,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(if (paired) "Show a new code" else "Pair a second phone")
+            }
+        }
+    }
+}
+
+/**
+ * The receiving phone's half.
+ *
+ * The link status is spelled out rather than shown as a dot, because the whole
+ * value of this phone is knowing whether it would still hear about a problem --
+ * and "connected" and "lost contact" have to be distinguishable at a glance,
+ * half asleep.
+ */
+@Composable
+private fun ParentPairing(
+    state: AppState,
+    paired: Boolean,
+    status: com.nila.phonelink.ParentLink.Status,
+) {
+    var typed by remember { mutableStateOf("") }
+    var rejected by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (!paired) {
+            OutlinedTextField(
+                value = typed,
+                onValueChange = { typed = it.filter(Char::isDigit).take(6)
+                                  rejected = false },
+                label = { Text("Six digits from the other phone") },
+                singleLine = true,
+                isError = rejected,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (rejected) {
+                Text("That is not a six-digit code.",
+                     style = MaterialTheme.typography.bodySmall,
+                     color = MaterialTheme.colorScheme.error)
+            }
+            Button(
+                onClick = { rejected = !state.pairWithCode(typed) },
+                enabled = typed.length == 6,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Connect") }
+        } else {
+            Text(
+                when (status) {
+                    is com.nila.phonelink.ParentLink.Status.Connected ->
+                        "Connected to the monitoring phone"
+                    is com.nila.phonelink.ParentLink.Status.Searching ->
+                        status.detail
+                    is com.nila.phonelink.ParentLink.Status.Lost ->
+                        "Lost contact with the monitoring phone"
+                    is com.nila.phonelink.ParentLink.Status.Stopped ->
+                        "The other phone stopped monitoring"
+                    com.nila.phonelink.ParentLink.Status.Unpaired ->
+                        "Not paired"
+                },
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                "Urgent alerts sound on the alarm volume, so this phone can " +
+                    "stay on silent.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            // Said plainly rather than discovered on the night it matters:
+            // Android 14 and later do not grant this at install.
+            if (!state.canUseFullScreenAlerts) {
+                Text(
+                    "The most serious alerts cannot turn this screen on yet. " +
+                        "Android asks for that separately.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(
+                    onClick = state::requestFullScreenAlerts,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Allow full-screen alerts") }
+            }
+        }
+    }
+}
+
+/**
+ * Light, dark, or whatever the phone says.
+ *
+ * The top bar has a one-tap switch between light and dark, which is the control
+ * people actually use. This is the other half of it: the way back to following
+ * the system, which a two-state button cannot express, and the only place all
+ * three states are named so somebody can tell which one they are in.
+ */
+@Composable
+private fun Appearance() {
+    val context = LocalContext.current
+    val mode by com.nila.ui.theme.Appearance.mode.collectAsState()
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader("Appearance")
+        OutlinedBox(modifier = Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemeMode.entries.forEach { option ->
+                        val selected = option == mode
+                        if (selected) {
+                            Button(
+                                onClick = { },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = androidx.compose.foundation.layout
+                                    .PaddingValues(horizontal = 4.dp, vertical = 10.dp),
+                            ) { Text(option.label, maxLines = 1) }
+                        } else {
+                            OutlinedButton(
+                                onClick = {
+                                    com.nila.ui.theme.Appearance.set(context, option)
+                                },
+                                modifier = Modifier.weight(1f),
+                                contentPadding = androidx.compose.foundation.layout
+                                    .PaddingValues(horizontal = 4.dp, vertical = 10.dp),
+                            ) { Text(option.label, maxLines = 1) }
+                        }
+                    }
+                }
+                Text(
+                    "System follows the phone's own light and dark setting. The " +
+                        "sun and moon button at the top of every screen switches " +
+                        "between the two without coming in here.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Whether Nila keeps the sound of a difficult cry, and what that means.
+ *
+ * Written out rather than reduced to a switch label, because this is the one
+ * setting in the app that decides whether a microphone in a nursery produces a
+ * file. A parent turning it off deserves to know exactly what stops, and a
+ * parent leaving it on deserves to know exactly what is kept, for how long, and
+ * where it can and cannot go.
+ */
+@Composable
+private fun CryRecordings(state: AppState) {
+    val enabled by com.nila.data.ClipPolicy.enabled.collectAsState()
+    val held by state.clipsHeld.collectAsState()
+    val context = LocalContext.current
+    val scheme = MaterialTheme.colorScheme
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader("Recordings of difficult cries")
+        OutlinedBox(modifier = Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Keep the audio", style = MaterialTheme.typography.titleSmall,
+                             fontWeight = FontWeight.SemiBold)
+                        Text(
+                            if (enabled) "On - cries that woke you, ran to three " +
+                                "minutes, or came back as pain are kept"
+                            else "Off - nothing is recorded",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { com.nila.data.ClipPolicy.set(context, it) },
+                    )
+                }
+
+                Text(
+                    "The clip is the only thing on the screen you can check for " +
+                        "yourself, and the only thing a doctor can be given that is " +
+                        "evidence rather than a recollection. It stays in this app's " +
+                        "private storage: no other app can read it, nothing uploads " +
+                        "it, and it is left out of every backup. Kept clips are " +
+                        "deleted after ${com.nila.audio.EpisodeRecorder.KEEP_DAYS} " +
+                        "days; ordinary ones after " +
+                        "${com.nila.audio.EpisodeRecorder.RETAIN_DAYS}.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = scheme.onSurfaceVariant,
+                )
+
+                if (held.count > 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "${held.count} " +
+                                (if (held.count == 1) "recording" else "recordings") +
+                                ", ${held.readableSize}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scheme.onSurface,
+                        )
+                        TextButton(onClick = state::deleteAllClips) {
+                            Text("Delete them all")
+                        }
+                    }
+                }
+
+                if (!enabled) {
+                    Text(
+                        "Turning this off changes nothing about detection, the " +
+                            "soothing sounds or the alerts. Only the audio.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = scheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }

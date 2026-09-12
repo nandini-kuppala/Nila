@@ -55,6 +55,33 @@ data class EventRecord(
     val hypothesisConfidence: Float = 0f,
     val hypothesisTrustworthy: Boolean = false,
     val note: String? = null,
+    /**
+     * The id of the `CRY_STARTED` row that opened this episode.
+     *
+     * One cry writes five or six rows -- heard, played a sound, judged it,
+     * woke you, ended -- and a timeline that lists all of them buries the cry
+     * itself under its own footnotes. Stamping every row with the episode it
+     * belongs to lets the timeline show one entry per cry and keep the steps
+     * underneath it, without inferring the grouping from timestamps that differ
+     * by a second because each row recomputes the start from a rounded
+     * duration.
+     *
+     * Null on the vision lane and on anything that is not part of a cry.
+     */
+    val episodeId: Long? = null,
+    /**
+     * App-private WAV of this cry, kept because the episode was flagged.
+     *
+     * Only set on the `CRY_STARTED` row, and only for episodes worth keeping --
+     * the ones that woke somebody, ran to the three-minute cap, or came back
+     * as pain. An ordinary evening grizzle is not evidence and does not become
+     * a file somebody has to think about.
+     *
+     * The path is inside [android.content.Context.getFilesDir]. There is no
+     * code in this app that uploads audio, and `allowBackup=false` keeps it off
+     * any cloud transport.
+     */
+    val clipPath: String? = null,
 ) {
     val severity: Severity get() = Severity.of(severityLevel)
     fun envelopePoints(): List<Int> =

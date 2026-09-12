@@ -1,6 +1,6 @@
 {
  "version": 1,
- "note": "Demo data for Nila. Relative offsets, never absolute dates.",
+ "note": "Demo data for Nila. Offsets from install for the recent past; clock times on a past day for the daily routine, so the dashboard's hour axis and the routine agree.",
  "baby": {
   "name": "Meera",
   "ageDays": 124,
@@ -18,111 +18,1105 @@
  },
  "care": [
   {
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
    "kind": "FEED",
-   "minutesAgo": 95
+   "daysAgo": 6,
+   "atHour": 2,
+   "atMinute": 45
   },
   {
    "kind": "DIAPER",
-   "minutesAgo": 140
+   "daysAgo": 6,
+   "atHour": 2,
+   "atMinute": 55
   },
   {
    "kind": "SLEEP_START",
-   "minutesAgo": 210
+   "daysAgo": 6,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 6,
+   "atMinute": 20
   },
   {
    "kind": "FEED",
-   "minutesAgo": 265
+   "daysAgo": 6,
+   "atHour": 6,
+   "atMinute": 30
   },
   {
    "kind": "DIAPER",
-   "minutesAgo": 320
+   "daysAgo": 6,
+   "atHour": 6,
+   "atMinute": 45
   },
   {
    "kind": "FEED",
-   "minutesAgo": 430
+   "daysAgo": 6,
+   "atHour": 9,
+   "atMinute": 15
   },
   {
    "kind": "SLEEP_START",
-   "minutesAgo": 500,
-   "detail": "Long nap"
+   "daysAgo": 6,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
   },
   {
-   "kind": "FEED",
-   "minutesAgo": 605
-  },
-  {
-   "kind": "DIAPER",
-   "minutesAgo": 640,
-   "detail": "NFC tag"
-  },
-  {
-   "kind": "FEED",
-   "minutesAgo": 760
-  },
-  {
-   "kind": "FEED",
-   "minutesAgo": 915
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 10,
+   "atMinute": 50
   },
   {
    "kind": "DIAPER",
-   "minutesAgo": 950
+   "daysAgo": 6,
+   "atHour": 11,
+   "atMinute": 5
   },
   {
    "kind": "FEED",
-   "minutesAgo": 1080
+   "daysAgo": 6,
+   "atHour": 12,
+   "atMinute": 0
   },
   {
    "kind": "SLEEP_START",
-   "minutesAgo": 1140
+   "daysAgo": 6,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 14,
+   "atMinute": 40
   },
   {
    "kind": "FEED",
-   "minutesAgo": 1260
+   "daysAgo": 6,
+   "atHour": 14,
+   "atMinute": 50
   },
   {
    "kind": "DIAPER",
-   "minutesAgo": 1310
+   "daysAgo": 6,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 6,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 17,
+   "atMinute": 25
   },
   {
    "kind": "FEED",
-   "minutesAgo": 1425
+   "daysAgo": 6,
+   "atHour": 17,
+   "atMinute": 35
   },
   {
    "kind": "FEED",
-   "minutesAgo": 1580
+   "daysAgo": 6,
+   "atHour": 19,
+   "atMinute": 0
   },
   {
    "kind": "DIAPER",
-   "minutesAgo": 1640
+   "daysAgo": 6,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 6,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 6,
+   "atHour": 23,
+   "atMinute": 10
   },
   {
    "kind": "FEED",
-   "minutesAgo": 1755
+   "daysAgo": 6,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 6,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 5,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 5,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 5,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 5,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 5,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 5,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 5,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 5,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 4,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 4,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 4,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 4,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 4,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 4,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 4,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 4,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 3,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 3,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 3,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 3,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 3,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 3,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 3,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 3,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 2,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 2,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 2,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 2,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 2,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 2,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 2,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 2,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 1,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 1,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 1,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 1,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 1,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 1,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 1,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 1,
+   "atHour": 23,
+   "atMinute": 30
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 2,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 2,
+   "atMinute": 45
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 0,
+   "atHour": 2,
+   "atMinute": 55
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 3,
+   "atMinute": 5
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 6,
+   "atMinute": 20
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 6,
+   "atMinute": 30
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 0,
+   "atHour": 6,
+   "atMinute": 45
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 9,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 9,
+   "atMinute": 40,
+   "detail": "Morning nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 10,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 0,
+   "atHour": 11,
+   "atMinute": 5
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 12,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 13,
+   "atMinute": 20,
+   "detail": "Midday nap"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 14,
+   "atMinute": 40
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 14,
+   "atMinute": 50
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 0,
+   "atHour": 15,
+   "atMinute": 0
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 16,
+   "atMinute": 40
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 17,
+   "atMinute": 25
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 17,
+   "atMinute": 35
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 19,
+   "atMinute": 0
+  },
+  {
+   "kind": "DIAPER",
+   "daysAgo": 0,
+   "atHour": 19,
+   "atMinute": 20
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 19,
+   "atMinute": 45,
+   "detail": "Down for the night"
+  },
+  {
+   "kind": "SLEEP_END",
+   "daysAgo": 0,
+   "atHour": 23,
+   "atMinute": 10
+  },
+  {
+   "kind": "FEED",
+   "daysAgo": 0,
+   "atHour": 23,
+   "atMinute": 15
+  },
+  {
+   "kind": "SLEEP_START",
+   "daysAgo": 0,
+   "atHour": 23,
+   "atMinute": 30
   }
  ],
  "cries": [
   {
-   "hoursAgo": 2.1,
+   "daysAgo": 0,
+   "atHour": 6,
+   "atMinute": 40,
    "seconds": 240,
    "trend": "SETTLING",
-   "confidence": 0.94,
+   "confidence": 0.92,
    "cause": "tired",
    "causeConfidence": 0.38,
    "soothed": "Amma humming",
    "settled": true
   },
   {
-   "hoursAgo": 6.4,
+   "daysAgo": 0,
+   "atHour": 13,
+   "atMinute": 10,
    "seconds": 95,
    "trend": "SETTLING",
-   "confidence": 0.88,
-   "cause": null
+   "confidence": 0.9
   },
   {
-   "hoursAgo": 9.8,
+   "daysAgo": 0,
+   "atHour": 18,
+   "atMinute": 50,
    "seconds": 410,
    "trend": "RISING",
-   "confidence": 0.96,
+   "confidence": 0.93,
    "cause": "discomfort",
    "causeConfidence": 0.34,
    "soothed": "White noise",
@@ -130,18 +1124,67 @@
    "escalated": true
   },
   {
-   "hoursAgo": 26.0,
+   "daysAgo": 1,
+   "atHour": 7,
+   "atMinute": 20,
    "seconds": 180,
    "trend": "SETTLING",
-   "confidence": 0.91,
+   "confidence": 0.97,
    "cause": "hungry",
    "causeConfidence": 0.41,
    "soothed": "Amma humming",
    "settled": true
   },
   {
-   "hoursAgo": 31.5,
+   "daysAgo": 1,
+   "atHour": 16,
+   "atMinute": 5,
+   "seconds": 130,
+   "trend": "STEADY",
+   "confidence": 0.86
+  },
+  {
+   "daysAgo": 1,
+   "atHour": 18,
+   "atMinute": 30,
    "seconds": 620,
+   "trend": "RISING",
+   "confidence": 0.95,
+   "cause": "belly_pain",
+   "causeConfidence": 0.31,
+   "soothed": "Heartbeat",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "daysAgo": 1,
+   "atHour": 20,
+   "atMinute": 15,
+   "seconds": 300,
+   "trend": "SETTLING",
+   "confidence": 0.87,
+   "cause": "tired",
+   "causeConfidence": 0.36,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "daysAgo": 2,
+   "atHour": 15,
+   "atMinute": 40,
+   "seconds": 2400,
+   "trend": "STEADY",
+   "confidence": 0.94,
+   "cause": "discomfort",
+   "causeConfidence": 0.28,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "daysAgo": 2,
+   "atHour": 18,
+   "atMinute": 10,
+   "seconds": 3300,
    "trend": "RISING",
    "confidence": 0.97,
    "cause": "belly_pain",
@@ -151,27 +1194,12 @@
    "escalated": true
   },
   {
-   "hoursAgo": 35.2,
-   "seconds": 130,
-   "trend": "STEADY",
-   "confidence": 0.86,
-   "cause": null
-  },
-  {
-   "hoursAgo": 40.0,
-   "seconds": 300,
-   "trend": "SETTLING",
-   "confidence": 0.93,
-   "cause": "tired",
-   "causeConfidence": 0.36,
-   "soothed": "Amma humming",
-   "settled": true
-  },
-  {
-   "hoursAgo": 50.0,
+   "daysAgo": 2,
+   "atHour": 21,
+   "atMinute": 0,
    "seconds": 2700,
    "trend": "RISING",
-   "confidence": 0.97,
+   "confidence": 0.95,
    "cause": "belly_pain",
    "causeConfidence": 0.33,
    "soothed": "White noise",
@@ -179,41 +1207,36 @@
    "escalated": true
   },
   {
-   "hoursAgo": 52.5,
-   "seconds": 3300,
-   "trend": "RISING",
-   "confidence": 0.98,
-   "cause": "belly_pain",
-   "causeConfidence": 0.31,
-   "soothed": "Heartbeat",
-   "settled": false,
-   "escalated": true
-  },
-  {
-   "hoursAgo": 55.0,
-   "seconds": 2400,
-   "trend": "STEADY",
-   "confidence": 0.95,
-   "cause": "discomfort",
-   "causeConfidence": 0.28,
-   "soothed": "Amma humming",
-   "settled": true
-  },
-  {
-   "hoursAgo": 58.0,
+   "daysAgo": 2,
+   "atHour": 22,
+   "atMinute": 40,
    "seconds": 2900,
    "trend": "SETTLING",
-   "confidence": 0.94,
+   "confidence": 0.87,
    "cause": "discomfort",
    "causeConfidence": 0.29,
    "soothed": "Amma humming",
    "settled": true
   },
   {
-   "hoursAgo": 73.0,
+   "daysAgo": 3,
+   "atHour": 5,
+   "atMinute": 40,
+   "seconds": 2100,
+   "trend": "SETTLING",
+   "confidence": 0.93,
+   "cause": "discomfort",
+   "causeConfidence": 0.3,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "daysAgo": 3,
+   "atHour": 17,
+   "atMinute": 50,
    "seconds": 3100,
    "trend": "RISING",
-   "confidence": 0.97,
+   "confidence": 0.92,
    "cause": "belly_pain",
    "causeConfidence": 0.35,
    "soothed": "Heartbeat",
@@ -221,7 +1244,9 @@
    "escalated": true
   },
   {
-   "hoursAgo": 76.0,
+   "daysAgo": 3,
+   "atHour": 19,
+   "atMinute": 30,
    "seconds": 3600,
    "trend": "RISING",
    "confidence": 0.98,
@@ -232,49 +1257,97 @@
    "escalated": true
   },
   {
-   "hoursAgo": 79.0,
+   "daysAgo": 3,
+   "atHour": 22,
+   "atMinute": 10,
    "seconds": 2200,
    "trend": "SETTLING",
-   "confidence": 0.93,
+   "confidence": 0.89,
    "cause": "tired",
+   "causeConfidence": 0.37,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "daysAgo": 4,
+   "atHour": 9,
+   "atMinute": 30,
+   "seconds": 220,
+   "trend": "SETTLING",
+   "confidence": 0.98,
+   "cause": "hungry",
+   "causeConfidence": 0.39
+  },
+  {
+   "daysAgo": 4,
+   "atHour": 18,
+   "atMinute": 40,
+   "seconds": 900,
+   "trend": "STEADY",
+   "confidence": 0.89,
+   "cause": "discomfort",
+   "causeConfidence": 0.32,
+   "soothed": "White noise",
+   "settled": true
+  },
+  {
+   "daysAgo": 4,
+   "atHour": 20,
+   "atMinute": 40,
+   "seconds": 600,
+   "trend": "SETTLING",
+   "confidence": 0.88,
+   "cause": "tired",
+   "causeConfidence": 0.36,
+   "soothed": "Amma humming",
+   "settled": true
+  },
+  {
+   "daysAgo": 5,
+   "atHour": 7,
+   "atMinute": 50,
+   "seconds": 200,
+   "trend": "SETTLING",
+   "confidence": 0.91,
+   "cause": "hungry",
    "causeConfidence": 0.4,
    "soothed": "Amma humming",
    "settled": true
   },
   {
-   "hoursAgo": 81.5,
-   "seconds": 2100,
+   "daysAgo": 5,
+   "atHour": 19,
+   "atMinute": 10,
+   "seconds": 1500,
+   "trend": "RISING",
+   "confidence": 0.91,
+   "cause": "belly_pain",
+   "causeConfidence": 0.33,
+   "soothed": "Heartbeat",
+   "settled": false,
+   "escalated": true
+  },
+  {
+   "daysAgo": 6,
+   "atHour": 18,
+   "atMinute": 20,
+   "seconds": 1100,
    "trend": "SETTLING",
-   "confidence": 0.92,
+   "confidence": 0.94,
    "cause": "tired",
-   "causeConfidence": 0.38,
+   "causeConfidence": 0.35,
    "soothed": "Amma humming",
    "settled": true
   },
   {
-   "hoursAgo": 99.0,
-   "seconds": 260,
-   "trend": "SETTLING",
-   "confidence": 0.9,
-   "cause": "hungry",
-   "causeConfidence": 0.44
-  },
-  {
-   "hoursAgo": 121.0,
-   "seconds": 175,
+   "daysAgo": 6,
+   "atHour": 21,
+   "atMinute": 40,
+   "seconds": 700,
    "trend": "STEADY",
-   "confidence": 0.87,
-   "cause": null
-  },
-  {
-   "hoursAgo": 147.0,
-   "seconds": 340,
-   "trend": "SETTLING",
-   "confidence": 0.93,
-   "cause": "tired",
-   "causeConfidence": 0.37,
-   "soothed": "Amma humming",
-   "settled": true
+   "confidence": 0.97,
+   "cause": "discomfort",
+   "causeConfidence": 0.29
   }
  ],
  "records": [

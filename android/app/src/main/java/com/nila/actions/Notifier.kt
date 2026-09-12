@@ -50,6 +50,29 @@ class Notifier(private val context: Context) {
         /** Safety alerts, kept apart from cry alerts so neither replaces the other. */
         const val ID_SAFETY = 4
 
+        /**
+         * The ongoing notification for the receiving phone.
+         *
+         * A fifth id rather than reusing [ID_MONITOR], for the reason given
+         * above it: one phone can in principle be both, and a shared id would
+         * mean one foreground service cancelling the other's notification on the
+         * way out and leaving the survivor about to be killed.
+         */
+        const val ID_PARENT_SERVICE = 5
+
+        /** An alert relayed from the monitoring phone. */
+        const val ID_PARENT = 6
+
+        /**
+         * The monitoring phone has gone quiet.
+         *
+         * Its own id so it cannot be replaced by -- or replace -- a relayed
+         * alert. These two say opposite things and both need to be readable:
+         * "your baby needs you" and "I can no longer tell you whether your baby
+         * needs you" must not overwrite each other.
+         */
+        const val ID_LINK = 7
+
         /** Long-short-long reads as urgent; a single pulse reads as informational. */
         private val PATTERN_ATTENTION = longArrayOf(0, 180)
         private val PATTERN_URGENT = longArrayOf(0, 400, 180, 400)
@@ -122,7 +145,20 @@ class Notifier(private val context: Context) {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
 
-    fun alert(title: String, body: String, severity: Severity, id: Int = ID_ALERT) {
+    /**
+     * @param fullScreen when set, Android may show this alert as a full-screen
+     * activity over the lock screen instead of a banner. Only supplied for
+     * level 4 -- see [com.nila.phonelink.AlertActivity] for why the bar is that
+     * high, and for the Android 14 permission that can silently downgrade it
+     * back to a banner. Callers must not depend on the screen coming on.
+     */
+    fun alert(
+        title: String,
+        body: String,
+        severity: Severity,
+        id: Int = ID_ALERT,
+        fullScreen: PendingIntent? = null,
+    ) {
         val channel = if (severity.level >= Severity.CRITICAL.level)
             CHANNEL_CRITICAL else CHANNEL_ALERTS
 
@@ -145,10 +181,31 @@ class Notifier(private val context: Context) {
             // Keeps the alert on the wrist rather than forcing the phone screen
             // on, which would light up the room.
             .setLocalOnly(false)
+            .apply { fullScreen?.let { setFullScreenIntent(it, true) } }
             .build()
 
         runCatching { manager.notify(id, notification) }
     }
+
+    /** Replace a notification already on screen, keeping its id and position. */
+    fun update(id: Int, notification: Notification) =
+        runCatching { manager.notify(id, notification) }
+
+    /**
+     * Whether a level-4 alert can actually take the screen.
+     *
+     * False is the normal state on Android 14 and later: the permission is
+     * granted at install only to calling and alarm-clock apps, and everything
+     * else has to be sent to a Settings page to ask for it. Surfaced so the app
+     * can say so plainly rather than letting the user discover the downgrade on
+     * the night it matters.
+     */
+    val canUseFullScreenAlerts: Boolean
+        get() = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) true
+        else runCatching {
+            (context.getSystemService(NotificationManager::class.java))
+                ?.canUseFullScreenIntent() == true
+        }.getOrDefault(false)
 
     fun clear(id: Int = ID_ALERT) = runCatching { manager.cancel(id) }
 

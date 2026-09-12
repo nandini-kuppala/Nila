@@ -119,6 +119,15 @@ class WatchService : LifecycleService() {
     private val rules = ActivityRules()
     private var wakeLock: PowerManager.WakeLock? = null
 
+    /**
+     * The other phone, shared with the microphone lane.
+     *
+     * This lane is the one that produces level 4 -- climbing, out of the safe
+     * zone, face-down and not recovering -- so it is the lane whose alerts can
+     * take the other phone's screen. See [com.nila.phonelink.LinkProtocol.tierFor].
+     */
+    private var phoneLink: com.nila.phonelink.GuardianLink? = null
+
     /** Last time each event alerted, so the same one does not repeat all night. */
     private val alertedAt = mutableMapOf<ActivityRules.Event, Long>()
 
@@ -129,6 +138,9 @@ class WatchService : LifecycleService() {
         zones = SafeZoneStore(this)
         sensors = RoomSensors(this)
         notifier.ensureChannels()
+        phoneLink = runCatching {
+            com.nila.phonelink.GuardianLink.acquire(this)
+        }.getOrNull()
 
         // The audio lane, folded in as it changes. Collected for the life of
         // the service so a cry that starts after a posture event still promotes
@@ -263,6 +275,11 @@ class WatchService : LifecycleService() {
         alertedAt[decision.event] = System.currentTimeMillis()
         notifier.alert(decision.title, decision.body, decision.severity,
                        id = Notifier.ID_SAFETY)
+        runCatching {
+            phoneLink?.sendAlert(
+                decision.title, decision.body, decision.severity, seconds = 0
+            )
+        }
         _state.value = _state.value.copy(lastAlert = decision.body)
 
         val kind = kindOf(decision.event) ?: return
@@ -339,6 +356,13 @@ class WatchService : LifecycleService() {
         wakeLock?.runCatching { if (isHeld) release() }
         wakeLock = null
         pendingPreview = null
+        // No goodbye: the microphone lane may still be running, and from the
+        // other phone's point of view nothing has stopped. release() only tears
+        // the socket down once both lanes have let go.
+        if (phoneLink != null) {
+            runCatching { com.nila.phonelink.GuardianLink.release(phoneLink) }
+            phoneLink = null
+        }
         _state.value = WatchState(zone = zones.current)
         Log.i(TAG, "watch stopped")
     }

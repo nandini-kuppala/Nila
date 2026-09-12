@@ -29,6 +29,9 @@ import com.nila.data.EventRecord
 import com.nila.monitor.MonitorService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,6 +85,105 @@ class AppState(app: Application) : AndroidViewModel(app) {
 
     private val _colic = MutableStateFlow(ColicSummary())
     val colic: StateFlow<ColicSummary> = _colic.asStateFlow()
+
+    // --------------------------------------------------------- the dashboard
+
+    /**
+     * How far back the charts read, fixed when the screen is first built.
+     *
+     * Eight days rather than seven: the window is a *query* bound, and a query
+     * bound that is exactly the display window loses the first day the moment
+     * the app is left open past midnight. The extra day costs a handful of rows
+     * and means [Insights] always has a full week to arrange.
+     */
+    private val insightWindowStartMs =
+        System.currentTimeMillis() - TimeUnit.DAYS.toMillis(Insights.DAYS + 1L)
+
+    /**
+     * The week, arranged.
+     *
+     * Derived from the rows rather than stored: there is no dashboard state to
+     * keep in sync, and a cry logged by the service or a feed tapped on the
+     * watch redraws every chart without anything having to remember to ask.
+     * The arranging itself is off the main thread because it walks a week of
+     * episodes into twenty-four hourly buckets, which is cheap but not free.
+     */
+    val insights: StateFlow<Insights.Summary> = combine(
+        db.events().observeSince(insightWindowStartMs),
+        db.care().observeSince(insightWindowStartMs),
+    ) { events, care ->
+        Insights.build(System.currentTimeMillis(), events, care)
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), Insights.Summary())
+
+    /**
+     * When the sleep in progress started, or null when the baby is awake.
+     *
+     * The sleep log used to be write-only -- every tap wrote `SLEEP_START` and
+     * nothing ever wrote an end, so "she slept" was a timestamp with no
+     * duration attached and there was no honest way to chart a night. The
+     * button alternates now, which costs the person using it at 3am nothing
+     * extra and is the whole reason a sleep chart can exist at all.
+     *
+     * The tracker's running clock ticks from this in the UI rather than being
+     * pushed from here on a timer: a view model that emits a new value every
+     * second to redraw one line of text is a wake-up a monitor app running all
+     * night cannot justify.
+     */
+    val asleepSinceMs: StateFlow<Long?> = care.map {
+        Insights.openSleepSince(it, System.currentTimeMillis())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /**
+     * How much cry audio this phone is holding, for the settings screen.
+     *
+     * A count and a size rather than a list. The point of showing it is that a
+     * parent can see the feature has a footprint and can end it in one tap;
+     * browsing thirty recordings of their own baby crying is not something
+     * anybody wants from a settings screen.
+     */
+    data class ClipsHeld(val count: Int = 0, val bytes: Long = 0L) {
+        val readableSize: String
+            get() = when {
+                bytes >= 1_000_000 -> "%.1f MB".format(bytes / 1_000_000.0)
+                bytes > 0 -> "${bytes / 1000} kB"
+                else -> "0 kB"
+            }
+    }
+
+    private val _clipsHeld = MutableStateFlow(ClipsHeld())
+    val clipsHeld: StateFlow<ClipsHeld> = _clipsHeld.asStateFlow()
+
+    /**
+     * Delete every kept recording, and forget the paths that pointed at them.
+     *
+     * Both halves, in that order. Deleting the files alone would leave the
+     * timeline offering a play button for audio that is gone, which reads as a
+     * broken app rather than as a setting that worked.
+     */
+    fun deleteAllClips() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                com.nila.audio.EpisodeRecorder.deleteAll(getApplication())
+            }
+            db.events().clearClips()
+            refresh()
+        }
+    }
+
+    /**
+     * Log the other end of whichever sleep state we are in.
+     *
+     * Read from the care rows rather than from [asleepSinceMs], so the tap
+     * cannot act on a cached value: the flow is `WhileSubscribed`, and a
+     * stopwatch that starts a second sleep because its own state had gone cold
+     * writes a log that no longer describes a night.
+     */
+    fun toggleSleep() {
+        val open = Insights.openSleepSince(care.value, System.currentTimeMillis()) != null
+        logCare(if (open) CareKind.SLEEP_END else CareKind.SLEEP_START)
+    }
 
     private val _sootheStats = MutableStateFlow<List<SootheMemory.Stats>>(emptyList())
     val sootheStats: StateFlow<List<SootheMemory.Stats>> = _sootheStats.asStateFlow()
@@ -203,6 +305,31 @@ class AppState(app: Application) : AndroidViewModel(app) {
     private val _bridgeAddress = MutableStateFlow<String?>(null)
     val bridgeAddress: StateFlow<String?> = _bridgeAddress.asStateFlow()
 
+    // --- the second phone -----------------------------------------------------
+
+    private val linkStore = com.nila.phonelink.LinkStore(app)
+
+    val linkRole: StateFlow<com.nila.phonelink.LinkStore.Role> = linkStore.role
+        .stateIn(viewModelScope, SharingStarted.Eagerly,
+                 com.nila.phonelink.LinkStore.Role.GUARDIAN)
+
+    val linkPaired: StateFlow<Boolean> = linkStore.paired
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    /** Live on the receiving phone only; the sending phone reads [linkSummary]. */
+    val linkStatus: StateFlow<com.nila.phonelink.ParentLink.Status> =
+        com.nila.phonelink.ParentService.status
+
+    /**
+     * The six digits, while they are on screen.
+     *
+     * Held in memory and never written anywhere. It exists for as long as it
+     * takes somebody to read it off one phone and type it into the other; the
+     * key derived from it is what persists.
+     */
+    private val _pairingCode = MutableStateFlow<String?>(null)
+    val pairingCode: StateFlow<String?> = _pairingCode.asStateFlow()
+
     private val _exportedReport = MutableStateFlow<java.io.File?>(null)
     val exportedReport: StateFlow<java.io.File?> = _exportedReport.asStateFlow()
 
@@ -296,6 +423,10 @@ class AppState(app: Application) : AndroidViewModel(app) {
                 recorded.map { it.nameWithoutExtension } + Soother.builtIns.map { it.id }
             )
             _colic.value = computeColic()
+            _clipsHeld.value = withContext(Dispatchers.IO) {
+                val files = com.nila.audio.EpisodeRecorder.existing(getApplication())
+                ClipsHeld(files.size, files.sumOf { it.length() })
+            }
             _reminders.value = reminders.settings()
             _irRemote.value = irActuator.remote()
             _modelState.value = modelInstaller.state()
@@ -507,6 +638,110 @@ class AppState(app: Application) : AndroidViewModel(app) {
 
     fun startMonitoring() = MonitorService.start(getApplication())
     fun stopMonitoring() = MonitorService.stop(getApplication())
+
+    // --- the second phone -----------------------------------------------------
+
+    /**
+     * Switch this phone between watching and receiving.
+     *
+     * Stops whichever service belongs to the old role before starting the new
+     * one. A phone left holding the microphone *and* listening for another
+     * phone's alerts would sound its own alarm at its own cry.
+     */
+    fun setLinkRole(role: com.nila.phonelink.LinkStore.Role) {
+        viewModelScope.launch {
+            linkStore.setRole(role)
+            when (role) {
+                com.nila.phonelink.LinkStore.Role.GUARDIAN -> {
+                    com.nila.phonelink.ParentService.stop(getApplication())
+                }
+                com.nila.phonelink.LinkStore.Role.PARENT -> {
+                    MonitorService.stop(getApplication())
+                    if (linkStore.key != null) {
+                        com.nila.phonelink.ParentService.start(getApplication())
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Show a code on this phone, and key this phone to it at the same time.
+     *
+     * SecureRandom rather than Random: a predictable code is a code somebody on
+     * the same Wi-Fi can guess without watching the screen, which removes the
+     * one thing making six digits acceptable.
+     */
+    fun generatePairingCode() {
+        val code = com.nila.phonelink.LinkProtocol.formatCode(
+            java.security.SecureRandom().nextInt(1_000_000)
+        )
+        viewModelScope.launch {
+            linkStore.pair(code)
+            _pairingCode.value = code
+        }
+    }
+
+    fun hidePairingCode() { _pairingCode.value = null }
+
+    /** Type the code shown on the other phone. Returns false if it is malformed. */
+    fun pairWithCode(code: String): Boolean {
+        val trimmed = code.trim()
+        if (trimmed.length != 6 || !trimmed.all(Char::isDigit)) return false
+        viewModelScope.launch {
+            linkStore.pair(trimmed)
+            if (linkStore.currentRole == com.nila.phonelink.LinkStore.Role.PARENT) {
+                com.nila.phonelink.ParentService.start(getApplication())
+            }
+        }
+        return true
+    }
+
+    fun unpairPhones() {
+        viewModelScope.launch {
+            com.nila.phonelink.ParentService.stop(getApplication())
+            linkStore.unpair()
+            _pairingCode.value = null
+        }
+    }
+
+    /** What the sending phone can say about the link, read straight off it. */
+    val linkSummary: String
+        get() = com.nila.phonelink.GuardianLink.peek()?.describe()
+            ?: "Alerts will be shared once monitoring starts"
+
+    /** The address to type on the other phone if discovery does not find us. */
+    val linkAddress: String?
+        get() = com.nila.phonelink.GuardianLink.peek()?.localAddress()
+
+    /**
+     * Whether a level-4 alert can actually take this phone's screen.
+     *
+     * False is the normal state on Android 14 and later. Surfaced so the app
+     * says so, rather than letting it be discovered on the night it matters.
+     */
+    val canUseFullScreenAlerts: Boolean
+        get() = com.nila.actions.Notifier(getApplication()).canUseFullScreenAlerts
+
+    /** Open the Settings page where the user can grant it. */
+    fun requestFullScreenAlerts() {
+        val app = getApplication<Application>()
+        val intent = if (android.os.Build.VERSION.SDK_INT >=
+            android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        ) {
+            android.content.Intent(
+                android.provider.Settings
+                    .ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                android.net.Uri.parse("package:${app.packageName}"),
+            )
+        } else {
+            android.content.Intent(
+                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.parse("package:${app.packageName}"),
+            )
+        }.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { app.startActivity(intent) }
+    }
 
     /**
      * Replay a recorded cry through the live pipeline.

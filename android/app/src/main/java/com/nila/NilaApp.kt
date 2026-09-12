@@ -10,5 +10,11 @@ class NilaApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Notifier(this).ensureChannels()
+        // Both are read by things that run above the view model -- the theme by
+        // the Activity, the recording policy by a foreground service that a
+        // notification action can start with no Activity at all -- so they are
+        // hydrated here, once, where every entry point has already run.
+        com.nila.ui.theme.Appearance.load(this)
+        com.nila.data.ClipPolicy.load(this)
     }
 }

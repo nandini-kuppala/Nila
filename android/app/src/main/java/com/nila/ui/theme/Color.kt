@@ -97,3 +97,52 @@ val OnSeverityDark = Color(0xFFE8EAE9)
 val ErrorRed40 = Color(0xFFB3261E)
 val ErrorRed90 = Color(0xFFF9DEDC)
 val ErrorRed10 = Color(0xFF410E0B)
+
+// ---- chart hues. Also not part of the severity system. -------------------
+//
+// The dashboard plots three things at once -- sleep, feeds and crying -- and a
+// reader has to tell them apart at a glance in both themes. None of them may
+// borrow amber or red: crying is the *subject* of this app, not an alarm, and
+// the moment a chart draws six hours of ordinary crying in the same red as a
+// safety event, the red stops meaning safety event. So the plum below is
+// deliberately a colour the app uses nowhere else, and nothing in the severity
+// ladder can ever be mistaken for it.
+//
+// Each pair is chosen so a 3dp bar of it is distinguishable from the other two
+// for the common forms of colour blindness -- they differ in lightness as well
+// as hue -- and every one of them clears 3:1 against its own theme's surface.
+val ChartSleepLight = Color(0xFF3F607C)   // indigo, the night lane
+val ChartSleepDark = Color(0xFFA8C8E8)
+val ChartFeedLight = Color(0xFF0F6B60)    // the brand teal
+val ChartFeedDark = Color(0xFF6FDBC9)
+val ChartCryLight = Color(0xFF7B4B86)     // plum: crying, never a warning
+val ChartCryDark = Color(0xFFD9AEE4)
+
+/** A fourth, for nappies on the rhythm track when it is asked for. */
+val ChartDiaperLight = Color(0xFF8A6A3B)
+val ChartDiaperDark = Color(0xFFDDBE8F)
+
+/**
+ * The wedges of the cause donut, in the order the causes are ranked.
+ *
+ * Five reason classes and an "unclear" bucket, so six. They walk around the
+ * hue circle rather than down one ramp because these are categories with no
+ * order -- a sequential ramp would imply belly pain is more of something than
+ * tiredness is.
+ */
+val CauseWheelLight = listOf(
+    Color(0xFF7B4B86), // plum
+    Color(0xFF0F6B60), // teal
+    Color(0xFF3F607C), // indigo
+    Color(0xFF8A6A3B), // ochre
+    Color(0xFF5E7C4A), // moss
+    Color(0xFF8A8F8D), // the unclear bucket, deliberately grey
+)
+val CauseWheelDark = listOf(
+    Color(0xFFD9AEE4),
+    Color(0xFF6FDBC9),
+    Color(0xFFA8C8E8),
+    Color(0xFFDDBE8F),
+    Color(0xFFB2CE9C),
+    Color(0xFF8A8F8D),
+)

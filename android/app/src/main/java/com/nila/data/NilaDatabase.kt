@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase
     entities = [EventRecord::class, CareRecord::class, BabyProfile::class,
                 ConversationRecord::class, HealthRecord::class, MotherProfile::class,
                 MedicineScanRecord::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class NilaDatabase : RoomDatabase() {
